@@ -48,7 +48,7 @@ export default {
     }
   },
   methods: {
-    ...mapActions(['login']),
+    // ...mapActions(['login']),
     handleLogin () {
       if (!this.username || !this.password) {
         return this.$message.warning('用户名和密码不能为空')
@@ -60,12 +60,10 @@ export default {
       this.$post('loginPT',params).then(res => {
     		if(res.code==0){
           this.isLoging = true;
-          console.log(1111111,res.data[0].tokenId)
           setToken(res.data[0].tokenId)
-          login({
-            username: this.username,
-            password: this.password
-          }).then(res => {
+          console.log(res)
+          // this.$store.dispatch('SET_LOGIN_TOKEN', res.data[0].tokenId)
+          this.$store.dispatch('saveUserInfo', res.data[0]).then(res => {
             this.$message.success('登录成功')
             this.isLoging = false
            this.$router.push({name: 'home'})

@@ -152,7 +152,7 @@
 					title: 'test7mkaiemlaoapuemske93osksks',
 					author: 'web'
 				}],
-				activeTab: 'second',
+				activeTab: 'first',
 				recommendRadio: 1,
 				dialogVisible: false,
 				dialogVisible1: false,

@@ -7,7 +7,10 @@ const state = {
 }
 
 const actions = {
-  async login ({commit}, user,token) {
+  saveUserInfo(context,res){
+    context.commit("SAVEUSERINFO",res);
+  },
+   login ({commit}, user,tokenId) {
     console.log(111)
     commit('SET_DOING_LOGIN', true)
     // 模拟登陆
@@ -21,7 +24,7 @@ const actions = {
     }) */
     commit('SET_LOGIN_USER', user)
    // commit('SET_LOGIN_TOKEN', '4eea90fd-2752-481d-ae67-c75f8641a94a')
-   // commit('SET_LOGIN_TOKEN', token)
+   commit('SET_LOGIN_TOKEN', tokenId)
     return res
   },
   async getLoginUser ({commit}) {
@@ -49,6 +52,13 @@ const actions = {
 }
 
 const mutations = {
+  SAVEUSERINFO(state,res){
+    // state.token
+    console.log('SAVEUSERINFO',res.tokenId)
+    //console.log('save:'+res.token)
+    state.tokenId = res.tokenId
+    console.log(11111,state.tokenId)
+  },
   SET_DOING_LOGIN (state, isLogin) {
     state.isLogin = isLogin
   },

@@ -4,23 +4,23 @@
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
 				<el-breadcrumb-item>行业信息</el-breadcrumb-item>
-				<el-breadcrumb-item>发布新闻资讯</el-breadcrumb-item>
+				<el-breadcrumb-item>添加行情</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		<div class="box">
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn">预览</el-button>
-				<el-button size="small" class="light_btn">仅保存</el-button>
-				<el-button size="small" class="light_btn">保存并提交审核</el-button>
+				<el-button size="small" class="light_btn" @click="toAudit('form2',1)">仅保存</el-button>
+				<el-button size="small" class="light_btn" @click="toAudit('form2',2)">保存并提交审核</el-button>
 			</div>
-			<el-form ref="form"  label-width="80px" :rules="rules" class="up_form" >
+			<el-form ref="form2" :model="form2" label-width="80px" :rules="rules2" class="up_form" >
 				<div style="width: 35%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
-					<el-form-item label="文章标题" prop="name" >
-						<el-input v-model="form.title" placeholder="请输入标题"></el-input>
+					<el-form-item label="文章标题" prop="title" >
+						<el-input v-model="form2.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
-					<el-form-item label="正文内容">
-						<quill-editor v-model="content"
+					<el-form-item label="正文内容" prop="content">
+						<quill-editor v-model="form2.content"
 							ref="myQuillEditor"
 							:options="editorOption"
 							@blur="onEditorBlur($event)"
@@ -29,9 +29,9 @@
 						</quill-editor>
 					</el-form-item>
 				</div>
-				<div style="width: 35%;float:left;padding:15px;">
+				<div style="width: 35%;float:left;padding:15px;" prop="classifyType">
 					<el-form-item label="发布到:">
-						<el-input :disabled="true" v-model="form.column"></el-input>
+						<el-input :disabled="true" v-model="form2.classifyType"></el-input>
 					</el-form-item>
 					<!--<el-form-item label="来源:">
 						<el-radio-group v-model="form.resource" required @change="test()">
@@ -46,16 +46,16 @@
 					<!--<el-form-item label="作者:" :required="true">
 						<el-input v-model="form.author"></el-input>
 					</el-form-item>-->
-					<el-form-item label="发布账号:">
-						<el-select v-model="form.region" placeholder="请选择发布账号">
-							<el-option label="小号1" value="shanghai"></el-option>
-							<el-option label="小号2" value="beijing"></el-option>
+					<el-form-item label="发布账号:" prop="userId" label-width="82">
+						<el-select v-model="form2.userId" placeholder="请选择发布账号">
+							<el-option label="小号1" value="1"></el-option>
+							<el-option label="小号2" value="2"></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="附加选项:">
-							<el-radio-group v-model="form.img">
-								<el-radio label="上传缩略图"></el-radio>
-								<el-radio label="提取第一个图为缩略图"></el-radio>
+					<el-form-item label="附加选项:" prop="imgType" label-width="82">
+							<el-radio-group v-model="form2.imgType">
+								<el-radio label="1">上传缩略图</el-radio>
+								<el-radio label="2">提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
 					<el-form-item>
@@ -72,7 +72,7 @@
 						</el-dialog>
 					</el-form-item>
 					<el-form-item label="Tag标签:">
-						<el-input placeholder="用逗号隔开，单个标签少于12字节"></el-input>
+						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form2.tagLabel"></el-input>
 					</el-form-item>
 					<!--<el-form-item label="关键词:">
 						<el-input placeholder="用英文 “ , ” 隔开"></el-input>
@@ -88,40 +88,39 @@
 	export default{
 		data(){
 			return{
-				content:'111',
 				editorOption:{},
 				dialogImageUrl: '',
         dialogVisible: false,
-				form: {
+				form2: {
 					title: '',
 					content:'',
-					column:'新闻资讯',
+					classifyType:'行情',
+					userId:'1',
+					imgType:'1',
+					tagLabel:'',
           resource: '',
-          date1: '',
-          date2: '',
-          delivery: false,
           type: [],
           resource: '',
 					desc: '',
 					author:'',
 					img:''
 				},
-				rules: {
-          name: [
-            { required: true, message: '请输入活动名称', trigger: 'blur' },
-            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+				rules2: {
+          title: [
+            { required: true, message: '请输入标题aaa', trigger: 'blur' },
+            { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
           ],
-          region: [
-            { required: true, message: '请选择活动区域', trigger: 'change' }
+          content: [
+            { required: true, message: '请输入内容', trigger: 'change' }
           ],
-          date1: [
-            { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
+          classifyType: [
+            { required: true, message: '请输入内容', trigger: 'change'}
           ],
-          date2: [
-            { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
+          userId: [
+            {required: true, message: '请选择发布账号', trigger: 'change' }
           ],
-          type: [
-            { type: 'array', required: true, message: '请至少选择一个活动性质', trigger: 'change' }
+          imgType: [
+            {required: true, message: '请选择图片', trigger: 'change' }
           ],
           resource: [
             { required: true, message: '请选择活动资源', trigger: 'change' }
@@ -133,12 +132,36 @@
 			}
 		},
 		methods:{
-			test(){
-				console.log(this.form.resource);
+			toAudit(formName,status){
+				this.$refs[formName].validate((valid) => {
+					console.log(this.$store.state.user.tokenId)
+          if (valid) {
+            var params={
+						tokenId:this.$store.state.user.tokenId,
+						status:status,
+						title: this.form2.title,
+						content: this.form2.content,
+						classifyType:this.form2.classifyType,
+						userId:this.form2.userId,
+						imgType:this.form2.imgType,
+						tagLabel:this.form2.tagLabel
+					}
+					// console.log(params)
+					this.$post('industry/save',params).then(res =>{
+						if(res.code == 0){
+							console.log(1111111,res)
+						}
+					})
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+				
 			},
 			onEditorBlur(quill) {
 				console.log('editor blur!', quill)
-				console.log(this.content)
+				console.log(this.form2.content) // important
       },
       onEditorFocus(quill) {
         console.log('editor focus!', quill)
