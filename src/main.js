@@ -66,7 +66,7 @@ var whiteList=['login'];
 router.beforeEach((to, from, next) => {
   NProgress.start()
   var token = sessionStorage.getItem('tokenId')
-  console.log(token)
+  //console.log(token)
   if (!token && whiteList.indexOf(to.name) === -1) {
    // console.log(ElementUI);
     if(sessionStorage.getItem('isFirst')=='undefined'){

@@ -7,20 +7,21 @@
 				<el-breadcrumb-item>发布新闻资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
+		
 		<div class="box">
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn">预览</el-button>
-				<el-button size="small" class="light_btn">仅保存</el-button>
-				<el-button size="small" class="light_btn">保存并提交审核</el-button>
+				<el-button size="small" class="light_btn"  @click="toAudit('form1',0)">仅保存</el-button>
+				<el-button size="small" class="light_btn"  @click="toAudit('form1',1)">保存并提交审核</el-button>
 			</div>
-			<el-form ref="form"  label-width="80px" :rules="rules" class="up_form">
-				<div style="width: 35%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
-					<el-form-item label="文章标题" prop="name" >
-						<el-input v-model="form.title" placeholder="请输入标题"></el-input>
+			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form">
+				<div style="width: 40%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
+					<el-form-item label="文章标题" prop="title" >
+						<el-input v-model="form1.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
-					<el-form-item>
-						<quill-editor v-model="content"
+					<el-form-item label="文章内容" prop="content">
+						<quill-editor v-model="form1.content"
 							ref="myQuillEditor"
 							:options="editorOption"
 							@blur="onEditorBlur($event)"
@@ -32,36 +33,37 @@
 				</div>
 				<div style="width: 35%;float:left;padding:15px;">
 					<el-form-item label="发布到:">
-						<el-input :disabled="true" v-model="form.column"></el-input>
+						<el-input :disabled="true" v-model="form1.column"></el-input>
 					</el-form-item>
-					<el-form-item label="来源:">
-						<el-radio-group v-model="form.resource" required @change="test()">
-							<el-radio label="2" >原创</el-radio>
-							<el-radio label="1" >转载</el-radio>
+					<el-form-item label="来源:" prop="sourceType">
+						<el-radio-group v-model="form1.sourceType" @change="test()">
+							<el-radio label="1" >原创</el-radio>
+							<el-radio label="2" >转载</el-radio>
 						</el-radio-group>
-						<el-select v-model="form.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
-							<el-option label="第一网站" value="shanghai"></el-option>
-							<el-option label="第二网站" value="beijing"></el-option>
+						<el-select v-if="form1.sourceType == 2" v-model="form1.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
+							<el-option label="第一网站" value="1"></el-option>
+							<el-option label="第二网站" value="2"></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="作者:" :required="true">
-						<el-input v-model="form.author"></el-input>
+					<el-form-item label="作者:">
+						<el-input v-model="form1.author"></el-input>
 					</el-form-item>
-					<el-form-item label="发布账号:">
-						<el-select v-model="form.region" placeholder="请选择发布账号">
+					<el-form-item label="发布账号:" prop="userId" label-width="82">
+						<el-select v-model="form1.userId" placeholder="请选择发布账号">
 							<el-option label="小号1" value="shanghai"></el-option>
 							<el-option label="小号2" value="beijing"></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="附加选项:">
-							<el-radio-group v-model="form.img">
-								<el-radio label="上传缩略图"></el-radio>
-								<el-radio label="提取第一个图为缩略图"></el-radio>
+					<el-form-item label="附加选项:" prop="imgType" label-width="82">
+							<el-radio-group v-model="form1.imgType">
+								<el-radio label="1">上传缩略图</el-radio>
+								<el-radio label="2">提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
 					<el-form-item>
 						<el-upload
-							action="#"
+							:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
+							ref="upload" name="newsFile"
 							list-type="picture-card"
 							:auto-upload="false"
 							:on-preview="handlePictureCardPreview"
@@ -73,10 +75,10 @@
 						</el-dialog>
 					</el-form-item>
 					<el-form-item label="Tag标签:">
-						<el-input placeholder="用逗号隔开，单个标签少于12字节"></el-input>
+						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form1.tagLabels"></el-input>
 					</el-form-item>
 					<el-form-item label="关键词:">
-						<el-input placeholder="用英文 “ , ” 隔开"></el-input>
+						<el-input placeholder="用英文 “ , ” 隔开" v-model="form1.keyWords"></el-input>
 					</el-form-item>
 				</div>
 			</el-form>
@@ -86,45 +88,47 @@
 	</div>
 </template>
 <script>
+import { getBaceUrl } from '@/utils/auth'
 	export default{
 		data(){
 			return{
-				content:'111',
+				uploadData:{},
+				baceUrl:'',
+				// content:'111',
 				editorOption:{},
 				dialogImageUrl: '',
         dialogVisible: false,
-				form: {
+				form1: {
 					title: '',
 					content:'',
 					column:'新闻资讯',
-          resource: '',
-          date1: '',
-          date2: '',
-          delivery: false,
-          type: [],
-          resource: '',
-					desc: '',
+					sourceType:'1',
+					source:'',
 					author:'',
-					img:''
+					userId:'1',
+					imgType:'1',
+					newsFile:'',
+					tagLabels:'',
+					keyWords:''
 				},
-				rules: {
-          name: [
-            { required: true, message: '请输入活动名称', trigger: 'blur' },
-            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+				rules1: {
+          title: [
+            { required: true, message: '请输入标题', trigger: 'blur' },
+            { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
           ],
-          region: [
-            { required: true, message: '请选择活动区域', trigger: 'change' }
+          content: [
+            { required: true, message: '请输入内容', trigger: 'change' }
           ],
-          date1: [
-            { type: 'date', required: true, message: '请选择日期', trigger: 'change' }
+          sourceType: [
+            { required: true, message: '请选择来源', trigger: 'change'}
           ],
-          date2: [
-            { type: 'date', required: true, message: '请选择时间', trigger: 'change' }
+          userId: [
+            {required: true, message: '请选择发布账号', trigger: 'change' }
           ],
-          type: [
-            { type: 'array', required: true, message: '请至少选择一个活动性质', trigger: 'change' }
+          imgType: [
+            {required: true, message: '请选择图片', trigger: 'change' }
           ],
-          resource: [
+          source: [
             { required: true, message: '请选择活动资源', trigger: 'change' }
           ],
           desc: [
@@ -133,13 +137,58 @@
         }
 			}
 		},
+		created(){
+			this.baceUrl = getBaceUrl();
+			// console.log(this.baceUrl)
+		},
 		methods:{
+			getFullUrl(){
+				console.log(this.baceUrl+'/news/add')
+				return (this.baceUrl+'/news/add')
+			},
+			toAudit(formName,status){
+				this.$refs[formName].validate((valid) => {
+          if (valid) {
+						console.log(valid)
+            this.uploadData={
+							tokenId:this.$store.state.user.tokenId,
+							// newsFile:this.form1.newsFile,
+									status:status,
+									title: this.form1.title,
+									content: this.form1.content,
+									sourceType:this.form1.sourceType,
+									source:this.form1.source,
+									author:this.form1.author,
+									userId:this.form1.userId,
+									imgType:this.form1.imgType,
+									tagLabel:this.form1.tagLabel,
+									keyWords:this.form1.keyWords,
+									publishSource:"1"
+						}
+						// this.uploadData = params;
+						console.log(this.uploadData)
+						setTimeout(() => {
+							this.$refs.upload.submit();
+						}, 0);
+					// console.log(params)
+					/* this.$post('news/add',params).then(res =>{
+						if(res.code == 0){
+							console.log(1111111,res)
+						}
+					}) */
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+				
+			},
 			test(){
-				console.log(this.form.resource);
+				console.log(this.form1.source);
 			},
 			onEditorBlur(quill) {
 				console.log('editor blur!', quill)
-				console.log(this.content)
+				console.log(this.form1.content)
       },
       onEditorFocus(quill) {
         console.log('editor focus!', quill)

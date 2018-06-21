@@ -172,7 +172,8 @@
 						title: '4测试一下是否会出现省略号测试一下是否会出现省略号测试一下是否会出现省略号'
 					}
 				],
-				tableData: [{
+				tableData: [
+					/* {
 						num: '1',
 						title: '王小虎在北京开演唱会哈哈哈坎坎坷坷扩扩扩扩扩扩哈或或或',
 						author: '管理员1',
@@ -197,7 +198,7 @@
 						status: '待上线',
 						source: 'app端',
 						id: '120937866534'
-					}
+					} */
 				],
 				options: [{
 					value: '选项1',
@@ -243,8 +244,11 @@
 				dataList: [],
 			}
 		},
+		created(){
+			this.newsList()
+		},
 		mounted() {
-			this.db();
+			// this.db();
 		},
 		computed: {
 			upDataLength: function() {
@@ -252,15 +256,18 @@
 			}
 		},
 		methods: {
-			db() {
-//				axios.get('http://localhost:8080/static/data.json', {  
-//					  
-//					}).then(function(response){  
-//					    console.log(response);//请求正确时执行的代码  
-//					}).catch(function(response){  
-//					    console.log(response);//发生错误时执行的代码  
-//					}) 
-					
+			newsList(){
+				var params={
+					tokenId:this.$store.state.user.tokenId,
+					limit:2,
+					offset:1,
+					simpleParameter:123456
+				}
+				// console.log(params)
+				this.$post('/news/list',params).then(res => {
+    		console.log(res.data[0].rows)
+    		this.tableData = res.data[0].rows
+    	})
 			},
 			handleSelectionChange(val) {
 				this.multipleSelection = val;

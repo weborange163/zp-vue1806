@@ -20,7 +20,7 @@
       <i class="iconfont icon-lock1" style="font-size: 20px;vertical-align: middle;"></i>&nbsp;<span>修改密码</span>
     </m-nav-item>
      <m-nav-item padding="0">
-      <i class="iconfont icon-logout" style="font-size: 18px;vertical-align: middle;"></i>&nbsp;<span>退出</span>
+      <div @click="logout()"><i class="iconfont icon-logout" style="font-size: 18px;vertical-align: middle;"></i>&nbsp;<span>退出</span></div>
     </m-nav-item>
     <!-- <m-nav-item padding="0">
       <m-dropdown align="right" v-if="user" padding="0 10px">
@@ -107,6 +107,26 @@ export default {
   },
   methods: {
     ...mapActions(['getLoginUser', 'logout']),
+    logout(){
+      this.$confirm('此操作将退出登录, 是否继续?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning',
+        }).then(() => {
+          localStorage.setItem('active_index', 1)
+          sessionStorage.removeItem('tokenId');
+          this.$router.replace('/login')
+          this.$message({
+            type: 'success',
+            message: '已登出!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消登出'
+          });
+        });
+    },
     handleSwitchSide () {
       this.mini = !this.mini
       this.$emit('switch', this.mini)

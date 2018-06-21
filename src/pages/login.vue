@@ -60,9 +60,8 @@ export default {
       this.$post('loginPT',params).then(res => {
     		if(res.code==0){
           this.isLoging = true;
-          setToken(res.data[0].tokenId)
+          setToken(res.data[0].tokenId) //token存入sessionStorage里
           console.log(res)
-          // this.$store.dispatch('SET_LOGIN_TOKEN', res.data[0].tokenId)
           this.$store.dispatch('saveUserInfo', res.data[0]).then(res => {
             this.$message.success('登录成功')
             this.isLoging = false

@@ -1,9 +1,9 @@
 // import Vue from 'vue'
-
+import { getToken } from '@/utils/auth'
 const state = {
   user: null,
   isLogin: false,
-  tokenId:''
+  tokenId:getToken()
 }
 
 const actions = {
@@ -54,10 +54,9 @@ const actions = {
 const mutations = {
   SAVEUSERINFO(state,res){
     // state.token
-    console.log('SAVEUSERINFO',res.tokenId)
-    //console.log('save:'+res.token)
+    //console.log('SAVEUSERINFO',res.tokenId)
     state.tokenId = res.tokenId
-    console.log(11111,state.tokenId)
+    console.log(12221111,state.tokenId)
   },
   SET_DOING_LOGIN (state, isLogin) {
     state.isLogin = isLogin

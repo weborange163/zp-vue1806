@@ -63,7 +63,11 @@
             </div>
             <el-table :data="tableData" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
               <!--<el-table-column label="#" type="index"></el-table-column>-->
-              <el-table-column label="序号" prop="num" width='50'></el-table-column>
+              <!--<el-table-column label="序号" prop="user_id" width='50'></el-table-column>-->
+              <el-table-column
+      type="index"
+      width="50">
+    </el-table-column>
               <el-table-column label="标题" prop="title">
                 <template slot-scope="scope">
                   <i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.isUping"></i>
@@ -76,6 +80,7 @@
                   <p style="display:inline-block;">{{ scope.row.title }}</p>
                 </template>
               </el-table-column>
+              
               <el-table-column label="所属分类" prop="classification" width="80"></el-table-column>
               <el-table-column label="创建人" prop="author" width="80"></el-table-column>
               <el-table-column label="发布状态" prop="status" width="80">
@@ -223,7 +228,7 @@
         <el-pagination class="text-center"
           background
           @current-change="handleCurrentChange"
-          :current-page="currentPage_bidding"
+          :current-page="current_page"
           :page-sizes="[10, 20, 30, 40]"
           :page-size="this.per_page"
           layout="prev, pager, next"
@@ -235,8 +240,9 @@
 </template>
 <script type="text/javascript">
 import { formatTime,parseTime } from '@/utils/index' //@ === src
+import { getToken } from '@/utils/auth' //@ === src
 export default {
-  name: 'home',
+  name: 'market',
     data() {
       return {
         multipleSelection: [],
@@ -253,9 +259,9 @@ export default {
         dialogVisible: false,
         dialogVisible1: false,
         apps:false,
-        per_page:10,
-        total_pages:100,
-        currentPage_bidding:7, // 页面默认展示的当前页码
+        per_page:10,      //每页显示几条
+        total_pages:100,  // 总页数
+        current_page:1, // 页面默认展示的当前页码
         upData:[
           {
             title:'1马上就要过端午节了,公司发了粽子给大家,'
@@ -355,10 +361,11 @@ export default {
       }
     },
     created() {
-//  	this.$get('/industry/list').then(res => {
-//  		console.log(res)
-//  		this.tableData = res.data
-//  	})
+    	console.log(1111111111,getToken())
+    	this.$get('/industry/list',{tokenId:this.$store.state.user.tokenId,offset:this.current_page,limit:this.per_page}).then(res => {
+    		console.log(res.data[0].rows)
+    		this.tableData = res.data[0].rows
+    	})
     },
     methods:{
     	miniTable(row){
@@ -427,6 +434,7 @@ export default {
         })
       },
       handleCurrentChange(val) {
+      	
         console.log(`当前页: ${val}`);
       },
       deleteRow(index, rows) {
