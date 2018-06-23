@@ -36,12 +36,12 @@
 							<router-link :to="{name:'news-add'}">
 								<el-button class="light_btn">添加新闻</el-button>
 							</router-link>
-							<el-button class="light_btn" @click="dialogVisible = true">置顶排序</el-button>
-							<el-button class="light_btn">刷新</el-button>
+							<el-button class="light_btn" @click="publishWaitTop">置顶排序</el-button>
+							<el-button class="light_btn" @click="newsList()">刷新</el-button>
 						</div>
 						<el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
 							<!--<el-table-column label="#" type="index"></el-table-column>-->
-							<el-table-column label="序号" prop="num" width='50'></el-table-column>
+							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.isUping"></i>
@@ -55,27 +55,39 @@
 								</template>
 							</el-table-column>
 							<el-table-column label="创建人" prop="author" width="80"></el-table-column>
-							<el-table-column label="发布状态" prop="status" width="80">
+							<el-table-column label="发布状态" width="80">
 								<template slot-scope="scope">
-									<p v-if="scope.row.status=='已上线'" class="yshx">{{scope.row.status}}</p>
-									<p v-if="scope.row.status=='待上线'" class="dshx">{{scope.row.status}}</p>
-									<p v-if="scope.row.status=='已下线'" class="yxx">{{scope.row.status}}</p>
+									<p v-if="scope.row.status=='0'" >新建</p>
+									<p v-if="scope.row.status=='4'" class="yshx">已上线</p>
+									<p v-if="scope.row.status=='1'" class="dshx">待审核</p>
+									<p v-if="scope.row.status=='5'" class="yxx">已下线</p>
+									<p v-if="scope.row.status=='3'" class="yxx">已审核</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="发布来源" prop="source" width="120"></el-table-column>
+							<el-table-column label="发布来源"  width="120">
+								<template slot-scope="scope">
+									<p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">移动端</p>
+									<p v-if="scope.row.publish_source=='3'">数据爬取</p>
+								</template>
+							</el-table-column>
 							<el-table-column label="文章ID" prop="id"></el-table-column>
 							<el-table-column label="操作" width="300" fixed="right">
 								<template slot-scope="scope">
 									<el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.isUping" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
-									<el-button type="text" v-if="scope.row.status =='已上线'" style="margin-right:8px;vertical-align:middle;">下线</el-button>
-									<el-button type="text"><i class="iconfont icon-see"></i></el-button>
-									<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>
+									<el-button type="text" v-if="scope.row.status =='4'" style="margin-right:8px;vertical-align:middle;">下线</el-button>
+									<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
+									<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>
 									<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
-									<el-button type="text" v-if="scope.row.status !='已上线'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
 							</el-table-column>
 						</el-table>
+					</div>
+					<div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="prev, pager, next" :total="this.total_pages1">
+						</el-pagination>
 					</div>
 				</el-tab-pane>
 				<el-tab-pane label="新建" name="second">
@@ -87,20 +99,45 @@
 						<el-table :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="newArticle" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55">
 							</el-table-column>
-							<el-table-column prop="num" label="序号" width="120">
+							<el-table-column type="index" label="序号" width="120">
 							</el-table-column>
 							<el-table-column prop="title" label="标题">
 							</el-table-column>
 							<el-table-column prop="author" label="创建人" show-overflow-tooltip>
 							</el-table-column>
+							<el-table-column label="状态" show-overflow-tooltip>
+								<template slot-scope="scope">
+									<p v-if="scope.row.status=='0'">新建</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="发布来源"  width="120">
+								<template slot-scope="scope">
+									<p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">移动端</p>
+									<p v-if="scope.row.publish_source=='3'">数据爬取</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="文章ID" prop="id"></el-table-column>
+							<el-table-column label="操作" width="300" fixed="right">
+								<template slot-scope="scope">
+									<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
+									<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
+									<el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" @click="toAudit(scope.row)">提交审核</el-button>
+								</template>
+							</el-table-column>
 						</el-table>
 					</div>
+					<div style="margin-top:20px;">
+				<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
+				</el-pagination>
+			</div>
 				</el-tab-pane>
 
 			</el-tabs>
 
 			<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
-				<el-table :data="upData" border style="width: 100%">
+				<el-table :data="upData" border style="width: 100%" :row-class-name="miniTable" :header-row-class-name="miniTable">
 					<el-table-column prop="title" label="标题"></el-table-column>
 					<el-table-column prop="name" label="操作" width="70" class="text-center">
 						<template slot-scope="scope">
@@ -133,10 +170,7 @@
         </span>
 			</el-dialog>
 			<!-- 分页 -->
-			<div style="margin-top:20px;">
-				<el-pagination class="text-center" background @current-change="handleCurrentChange" :current-page="currentPage_bidding" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages * this.per_page">
-				</el-pagination>
-			</div>
+			
 		</div>
 	</div>
 </template>
@@ -156,50 +190,15 @@
 				recommendRadio: 1,
 				dialogVisible: false,
 				dialogVisible1: false,
-				per_page: 10,
-				total_pages: 100,
-				currentPage_bidding: 7, // 页面默认展示的当前页码
-				upData: [{
-						title: '1马上就要过端午节了,公司发了粽子给大家,'
-					},
-					{
-						title: '2测试一下是否会出现省略号测试一下是否会出现省略号测试一下是否会出现省略号'
-					},
-					{
-						title: '3测试一下是否会出现省略号测试一下是否会出现省略号测试一下是否会出现省略号'
-					},
-					{
-						title: '4测试一下是否会出现省略号测试一下是否会出现省略号测试一下是否会出现省略号'
-					}
-				],
-				tableData: [
-					/* {
-						num: '1',
-						title: '王小虎在北京开演唱会哈哈哈坎坎坷坷扩扩扩扩扩扩哈或或或',
-						author: '管理员1',
-						status: '已上线',
-						source: 'pc后台',
-						isUping: true,
-						id: '13823',
-						link: 'www.baidu.com'
-					},
-					{
-						num: '2',
-						title: '北京今日高温41度',
-						author: '用户1号',
-						status: '已下线',
-						source: 'app端',
-						id: '1234'
-					},
-					{
-						num: '3',
-						title: '北京交通运输座谈会今日召开',
-						author: '运营1号',
-						status: '待上线',
-						source: 'app端',
-						id: '120937866534'
-					} */
-				],
+				per_page1: 5,
+				per_page2:10,
+				total_pages1: 0,
+				total_pages2:0,
+				currentPage1: 1, // 页面默认展示的当前页码
+				currentPage2: 1,
+				params:{},
+				upData: [],
+				tableData: [],
 				options: [{
 					value: '选项1',
 					label: '全部'
@@ -245,7 +244,8 @@
 			}
 		},
 		created(){
-			this.newsList()
+			this.initParams();
+			this.newsList(this.params);
 		},
 		mounted() {
 			// this.db();
@@ -256,25 +256,113 @@
 			}
 		},
 		methods: {
-			newsList(){
-				var params={
+			// 置顶排序
+			publishWaitTop(){
+				this.dialogVisible = true;
+				this.$get('news/publishWaitTop',{tokenId:this.$store.state.user.tokenId}).then(res =>{
+					this.upData = res.data;
+				})
+			},
+			//提交审核&批量提交审核
+			toAudit(row){
+				this.$confirm('是否提交到审核列表?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+					var params={
+						tokenId:this.$store.state.user.tokenId,
+						ids:row.id
+					}
+					this.$post('news/batchWaitCheck',params).then(res => {
+						console.log(res)
+					})
+          this.$message({
+            type: 'success',
+            message: '删除成功!'
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+				
+			},
+			//新闻预览
+			newsShow(row){
+				console.log(row.id);
+				var params = {
 					tokenId:this.$store.state.user.tokenId,
-					limit:2,
-					offset:1,
-					simpleParameter:123456
+					id:row.id
+				}
+				this.$get('news/show',params).then(res =>{
+					console.log(res)
+				})
+			},
+			initParams(){
+				this.params = {
+					tokenId:this.$store.state.user.tokenId,
+					queryType:'LineAndCreate',
+					limit:this.per_page1,
+					offset:this.currentPage1
+				}
+			},
+			//新闻列表
+			newsList(params){
+				if(!params){
+					//console.log(params)
+					var params={
+						tokenId:this.$store.state.user.tokenId,
+						queryType:'LineAndCreate',
+						limit:this.per_page1,
+						offset:this.currentPage1
+					}
 				}
 				// console.log(params)
 				this.$post('/news/list',params).then(res => {
-    		console.log(res.data[0].rows)
-    		this.tableData = res.data[0].rows
-    	})
+					// console.log(res.data[0].rows)
+					this.tableData = res.data[0].rows;
+					this.total_pages1 = res.data[0].total;
+				})
+			},
+			//新建的新闻列表
+			creatList(){
+
+			},
+			//tab1 分页
+			handleCurrentChange1(val) {
+				this.currentPage1 = val;
+				this.initParams()
+				console.log(this.params)
+				this.newsList(this.params);
+			},
+			//tab2 分页
+			handleCurrentChange2(val) {
+				this.currentPage2 = val;
+
 			},
 			handleSelectionChange(val) {
 				this.multipleSelection = val;
 				console.log(this.multipleSelection)
 			},
 			handleClick(tab, event) {
-				console.log(tab, event);
+				console.log(tab.name, event);
+				if(tab.name == 'second'){ 	// 待提取为createList
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						queryType:'create',
+						limit:this.per_page2,
+						offset:this.currentPage2
+					}
+					console.log(params)
+					this.$post('/news/list',params).then(res => {
+						this.newArticle = res.data[0].rows;
+						this.total_pages2 = res.data[0].total;
+					})
+					
+				}
+				//this.newsList(params);
 			},
 			//推荐到
 			recommend(row) {
@@ -327,9 +415,8 @@
 					return item.id === id
 				})
 			},
-			handleCurrentChange(val) {
-				console.log(`当前页: ${val}`);
-			},
+			
+			//删除新闻
 			deleteRow(index, rows) {
 				// rows.splice(index, 1);
 				this.$confirm('此操作将永久删除该新闻, 是否继续?', '提示', {
@@ -337,10 +424,18 @@
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					this.$message({
-						type: 'success',
-						message: '删除成功!'
-					});
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						id:rows.id
+					}
+					this.$post('news/delete',params).then(res => {
+						// console.log(res)
+						this.$message({
+							type: 'success',
+							message: '删除成功!'
+						});
+						this.newsList();
+					})
 				}).catch(() => {
 					this.$message({
 						type: 'info',

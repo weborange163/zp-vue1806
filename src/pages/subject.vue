@@ -36,14 +36,54 @@
         <el-button class="light_btn" @click="dialogVisible = true">置顶排序</el-button>
         <el-button class="light_btn">刷新</el-button>
       </div>
-      专题表格在此....
+      <el-table :data="subjectList" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
+        <el-table-column label="序号" type="index" width='50'></el-table-column>
+        <el-table-column label="专题标题" prop="title"></el-table-column>
+        <el-table-column label="专题封面" prop="cover_img_id"></el-table-column>
+        <el-table-column label="发布状态" width="80">
+          <template slot-scope="scope">
+              <p v-if="scope.row.status=='0'" >新建</p>
+              <p v-if="scope.row.status=='3'" >待上线</p>
+              <p v-if="scope.row.status=='4'" >已上线</p>
+              <p v-if="scope.row.status=='5'" >已下线</p>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建人" prop="update_user_id" width="80"></el-table-column>
+        <el-table-column label="发布来源" prop="publish_source" width="100">
+          <template slot-scope="scope">
+              <p v-if="scope.row.status=='1'" >PC后台</p>
+              <p v-if="scope.row.status=='2'" >APP</p>
+              <p v-if="scope.row.status=='3'" >数据爬取</p>
+          </template>
+        </el-table-column>
+        <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
+        <el-table-column label="操作" width="220" fixed="right">
+          <template slot-scope="scope">
+            <el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
+            <el-button type="text"><i class="iconfont icon-edit"></i></el-button>
+            <el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div style="margin-top:20px;">
+      <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" 
+          :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
+      </el-pagination>
+      </div>
     </div>
   </div>
 </template>
 <script>
+import {btnTable} from '@/utils/table-style.js'
 export default {
   data(){
     return{
+      subjectList:[],
+      per_page:10,
+      currentPage:1,
+      total_pages:0,
+      currentPage:1,
+      btnTable:btnTable,
       timeVal:'',
       subjectSearch:'',
       subjectSelect:'',
@@ -61,6 +101,27 @@ export default {
         }
       ]
     }
+  },
+  created(){
+    this.getSubjectList();
+  },
+  methods:{
+    //专题列表
+    getSubjectList(){
+      var params = {
+        tokenId:this.$store.state.user.tokenId,
+        limit:this.per_page,
+        offset:this.currentPage
+      }
+      this.$post('specialInfo/list',params).then(res => {
+        console.log(res.data[0].rows);
+        this.subjectList = res.data[0].rows;
+        this.total_pages = res.data[0].total;
+      })
+    },
+    handleCurrentChange(val) {
+      console.log(`当前页: ${val}`);
+    },
   }
 }
 </script>

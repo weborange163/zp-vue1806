@@ -14,7 +14,7 @@
   </m-nav>
   <m-nav align="right">
     <m-nav-item padding="0 20px 0 0">
-      <i class="iconfont icon-personal" style="font-size: 20px;vertical-align: middle;"></i>&nbsp;<span v-if="user">{{user.username}}</span>
+      <i class="iconfont icon-personal" style="font-size: 20px;vertical-align: middle;"></i>&nbsp;<span v-if="nickname">{{nickname}}</span>
     </m-nav-item>
     <m-nav-item padding="0 20px 0 0">
       <i class="iconfont icon-lock1" style="font-size: 20px;vertical-align: middle;"></i>&nbsp;<span>修改密码</span>
@@ -85,6 +85,7 @@ export default {
   name: 'app-header',
   data () {
     return {
+      nickname:this.$store.state.user.nickname,
       mini: false,
       isFullScreen: false,
       themes,
@@ -94,9 +95,12 @@ export default {
     }
   },
   computed: {
-    ...mapState({
-      user: ({user}) => user.user
-    })
+    // user(){this.$store.state.user.user}
+    /* ...mapState({
+      user: ({
+        
+      }) => user.name
+    }) */
   },
   watch: {
     themeType (val) {

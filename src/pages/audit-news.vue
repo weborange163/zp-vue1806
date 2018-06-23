@@ -33,19 +33,41 @@
         <el-tab-pane label="全部" name="first">
             <div>
             <el-table :data="audit_all" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
-              <el-table-column label="序号" prop="num" width='50'></el-table-column>
+              <el-table-column label="序号" type="index" width='50'></el-table-column>
               <el-table-column label="标题" prop="title"></el-table-column>
-              <el-table-column label="发布到" prop="type" width="80"></el-table-column>
-              <el-table-column label="创建人" prop="author" width="80"></el-table-column>
-              <el-table-column label="发布状态" prop="status" width="80"></el-table-column>
-              <el-table-column label="发布来源" prop="source" width="100"></el-table-column>
-              <el-table-column label="创建时间" prop="createTime" width="120"></el-table-column>
-              <el-table-column label="操作" width="50" fixed="right">
+              <el-table-column label="发布到"  width="80">
                 <template slot-scope="scope">
-                    <el-button type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button>
+                  新闻
+                </template>
+              </el-table-column>
+              <el-table-column label="创建人" prop="author" width="80"></el-table-column>
+              <el-table-column label="发布状态" width="80">
+                <template slot-scope="scope">
+                    <p v-if="scope.row.status=='1'" >待审核</p>
+                    <p v-if="scope.row.status=='2'" >审核中</p>
+                    <p v-if="scope.row.status=='3'" >审核不通过</p>
+                </template>
+              </el-table-column>
+              <el-table-column label="发布来源" prop="publish_source" width="100">
+                <template slot-scope="scope">
+                    <p v-if="scope.row.status=='1'" >PC后台</p>
+                    <p v-if="scope.row.status=='2'" >APP</p>
+                    <p v-if="scope.row.status=='3'" >数据爬取</p>
+                </template>
+              </el-table-column>
+              <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
+              <el-table-column label="操作" width="80" fixed="right">
+                <template slot-scope="scope">
+                    <el-button type="text" v-if="scope.row.status=='1'" @click="toAudit(scope.row)">审核</el-button>
+                    <el-button v-else type="text">查看</el-button>
                 </template>
               </el-table-column>
             </el-table>
+            <div style="margin-top:20px;">
+            <el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1" :page-sizes="[10, 20, 30, 40]" 
+                :page-size="this.per_page1" layout="prev, pager, next" :total="this.total_pages1">
+            </el-pagination>
+            </div>
           </div>
         </el-tab-pane>
         <el-tab-pane label="待审核" name="second">
@@ -56,8 +78,14 @@
               <el-table-column label="标题" prop="title"></el-table-column>
               <el-table-column label="发布到" prop="type" width="80"></el-table-column>
               <el-table-column label="创建人" prop="author" width="80"></el-table-column>
-              <el-table-column label="发布状态" prop="status" width="80"></el-table-column>
-              <el-table-column label="发布来源" prop="source" width="100"></el-table-column>
+              <el-table-column label="发布状态" width="80">
+                <template slot-scope="scope">
+                    <p v-if="scope.row.status=='1'" >待审核</p>
+                    <p v-if="scope.row.status=='2'" >审核中</p>
+                    <p v-if="scope.row.status=='3'" >审核不通过</p>
+                </template>
+              </el-table-column>
+              <el-table-column label="发布来源" prop="publishSource" width="100"></el-table-column>
               <el-table-column label="创建时间" prop="createTime" width="120"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
                 <template slot-scope="scope">
@@ -79,6 +107,10 @@ import {btnTable} from '@/utils/table-style.js'
 export default {
   data(){
     return{
+      per_page1:10,
+      currentPage1:1,
+      total_pages1:0,
+      currentPage1:1,
       btnTable:btnTable,
       options: [{
       value: '选项1',
@@ -117,21 +149,57 @@ export default {
     ],
     value: '',
     timeVal:'',
-    activeName: 'second',
+    activeName: 'first',
     search_pra:''
     }
   },
+  created(){
+    this.getAuditAll();
+  },
   methods: {
-      handleClick(tab, event) {
-        console.log(tab, event);
+    //去审核,模拟实现
+    toAudit(row){
+      // console.log(row.id);
+      var params = {
+        tokenId:this.$store.state.user.tokenId,
+        id:row.id,
+        status:'2',
       }
-    }
+      this.$post('checkStatus',params).then(res =>{
+        console.log(res)
+      })
+    },
+    //获取所有审核相关的新闻
+    getAuditAll(){
+      var params = {
+        tokenId:this.$store.state.user.tokenId,
+        queryType:'audit',
+        limit:this.per_page1,
+        offset:this.currentPage1
+      }
+      this.$post('news/list',params).then(res =>{
+        console.log(res.data[0].rows)
+        this.audit_all = res.data[0].rows;
+        this.total_pages1 = res.data[0].total;
+      })
+    },
+    handleClick(tab, event) {
+      console.log(tab, event);
+    },
+    handleCurrentChange1(val) {
+      console.log(`当前页: ${val}`);
+    },
+  }
 }
 </script>
 <style>
 .audit-news .el-date-editor .el-range__icon,
 .audit-news .el-date-editor .el-range-separator{
     line-height: 22px;
+}
+.el-date-editor .el-range__icon, .el-date-editor .el-range-separator {
+    line-height: 28px;
+    height: 28px;
 }
 </style>
 

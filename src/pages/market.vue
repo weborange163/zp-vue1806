@@ -64,10 +64,10 @@
             <el-table :data="tableData" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
               <!--<el-table-column label="#" type="index"></el-table-column>-->
               <!--<el-table-column label="序号" prop="user_id" width='50'></el-table-column>-->
-              <el-table-column
-      type="index"
-      width="50">
-    </el-table-column>
+              <el-table-column align="center"
+                type="index"
+                width="50">
+              </el-table-column>
               <el-table-column label="标题" prop="title">
                 <template slot-scope="scope">
                   <i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.isUping"></i>
@@ -81,26 +81,36 @@
                 </template>
               </el-table-column>
               
-              <el-table-column label="所属分类" prop="classification" width="80"></el-table-column>
-              <el-table-column label="创建人" prop="author" width="80"></el-table-column>
-              <el-table-column label="发布状态" prop="status" width="80">
+              <el-table-column label="所属分类" prop="classify_type_name" width="180"></el-table-column>
+              <el-table-column label="创建人" prop="create_user_id" width="80"></el-table-column>
+              <el-table-column label="发布状态" prop="onlineTime" width="80">
                 <template  slot-scope="scope">
-                  <p v-if="scope.row.status=='已上线'" class="yshx">{{scope.row.status}}</p>
-                  <p v-if="scope.row.status=='待上线'" class="dshx">{{scope.row.status}}</p>
-                  <p v-if="scope.row.status=='已下线'" class="yxx">{{scope.row.status}}</p>
+                  <p v-if="scope.row.status=='2'" class="dshx">待审核</p>
+                  <p v-if="scope.row.status=='4'" class="yxx">审核失败</p>
+                  <p v-if="scope.row.status=='5'" class="yshx">已上线</p>
+                  <p v-if="scope.row.status=='6'" class="yxx">下线</p>
                 </template>
               </el-table-column>
-              <el-table-column label="上线时间" prop="createDataTime" width="120"></el-table-column>
-              <el-table-column label="发布来源" prop="source" width="120"></el-table-column>
-              <el-table-column label="文章ID" prop="id" ></el-table-column>
+              <el-table-column label="上线时间" prop="online_time" width="120"></el-table-column>
+              <el-table-column label="发布来源" prop="publish_source" width="120">
+              	<template  slot-scope="scope">
+                  <p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">移动端</p>
+									<p v-if="scope.row.publish_source=='3'">数据爬取</p>
+                </template>
+              	
+              </el-table-column>
+              <el-table-column label="文章ID" prop="article_id" ></el-table-column>
               <el-table-column label="操作" width="300" fixed="right">
                 <template slot-scope="scope">
                   <el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.isUping" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
                   <el-button type="text" v-if="scope.row.status =='已上线'" style="margin-right:8px;vertical-align:middle;">下线</el-button>
                   
-                  <el-button type="text" @click.native.prevent="recommend1(scope.row)"><i class="iconfont icon-see" ></i></el-button>
+                  <el-button type="text" @click="marketShow(scope.row)"><i class="iconfont icon-see" ></i></el-button>
                   
                   <el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>
+                  
+                  
                  <router-link :to="{name:'market-edit'}" ><el-button type="text"><i class="iconfont icon-edit" ></i></el-button> </router-link> 
                 
                   <el-button type="text" v-if="scope.row.status !='已上线'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete" ></i></el-button>
@@ -223,8 +233,13 @@
           <el-button type="primary" @click="apps = false">确 定</el-button>
         </span>
       </el-dialog>
-      <!-- 分页 -->
       <div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage1" :page-sizes="[10, 20, 30, 40]" 
+							:page-size="this.per_page1" layout="prev, pager, next" :total="this.total_pages1">
+						</el-pagination>
+					</div>
+      <!-- 分页 -->
+      <!--<div style="margin-top:20px;">
         <el-pagination class="text-center"
           background
           @current-change="handleCurrentChange"
@@ -234,7 +249,7 @@
           layout="prev, pager, next"
           :total="this.total_pages * this.per_page">
         </el-pagination>
-      </div>
+      </div>-->
     </div>
   </div>
 </template>
@@ -262,6 +277,11 @@ export default {
         per_page:10,      //每页显示几条
         total_pages:100,  // 总页数
         current_page:1, // 页面默认展示的当前页码
+          currentPage1: 1, // 页面默认展示的当前页码
+				currentPage2: 1,
+				per_page1: 1,
+				per_page2:5,
+				total_pages1:0,
         upData:[
           {
             title:'1马上就要过端午节了,公司发了粽子给大家,'
@@ -277,7 +297,6 @@ export default {
           }
         ],
         tableData: [{
-            num: '1',
             title: '王小虎在北京开演唱会哈哈哈坎坎坷坷扩扩扩扩扩扩哈或或或',
             author: '管理员1',
             status:'已上线',
@@ -288,29 +307,8 @@ export default {
             go:'app',
             gotimes:'2018',
             classification:'11111'
-          },
-          {
-            num: '2',
-            title: '北京今日高温41度',
-            author: '用户1号',
-            status:'已下线',
-            source:'app端',
-            id:'1234',
-             go:'app',
-            gotimes:'2018',
-             classification:'11111'
-          },
-          {
-            num: '3',
-            title: '北京交通运输座谈会今日召开',
-            author: '运营1号',
-            status:'待上线',
-            source:'app端',
-            id:'120937866534',
-             go:'app',
-            gotimes:'2018',
-             classification:'11111'
-          }],
+          }
+          ],
         options: [{
           value: '选项1',
           label: '全部'
@@ -353,6 +351,7 @@ export default {
         value1:'',
         value2:'',
         dataList:[],
+      
       }
     },
     computed:{
@@ -362,12 +361,26 @@ export default {
     },
     created() {
     	console.log(1111111111,getToken())
-    	this.$get('/industry/list',{tokenId:this.$store.state.user.tokenId,offset:this.current_page,limit:this.per_page}).then(res => {
-    		console.log(res.data[0].rows)
-    		this.tableData = res.data[0].rows
-    	})
+    	this.getMarket()
     },
     methods:{
+    	getMarket(){
+    		this.$get('industry/list',{tokenId:this.$store.state.user.tokenId,limit:this.per_page1,offset:this.currentPage1}).then(res => {
+    		console.log(res.data[0].rows)
+    		this.tableData = res.data[0].rows
+    		this.total_pages1 = res.data[0].total;
+    	})
+    	},
+    	marketShow(row){
+				console.log(row.id);
+				var params = {
+					tokenId:this.$store.state.user.tokenId,
+					id:row.id
+				}
+				this.$get('industry/get',params).then(res =>{
+					console.log(res)
+				})
+			},
     	miniTable(row){
       return 'miniTable'
     },
@@ -434,7 +447,9 @@ export default {
         })
       },
       handleCurrentChange(val) {
-      	
+      	this.currentPage1=val;
+//    	alert(this.currentPage1)
+      	this.getMarket()
         console.log(`当前页: ${val}`);
       },
       deleteRow(index, rows) {

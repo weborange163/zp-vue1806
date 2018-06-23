@@ -11,12 +11,11 @@
 		<div class="box">
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn">预览</el-button>
-				<el-button size="small" class="light_btn"  @click="toAudit('form1',0)">仅保存</el-button>
-				<el-button size="small" class="light_btn"  @click="toAudit('form1',1)">保存并提交审核</el-button>
+				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
+				<el-button size="small" class="light_btn"  @click="creatNews('form1',1)">保存并提交审核</el-button>
 			</div>
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form">
-				<div style="width: 40%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
+				<div style="width: 40%;float: left;padding:15px;margin-left:5%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
 						<el-input v-model="form1.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
@@ -31,7 +30,7 @@
 					</el-form-item>
 					
 				</div>
-				<div style="width: 35%;float:left;padding:15px;">
+				<div style="width: 40%;float:left;padding:15px;">
 					<el-form-item label="发布到:">
 						<el-input :disabled="true" v-model="form1.column"></el-input>
 					</el-form-item>
@@ -143,33 +142,41 @@ import { getBaceUrl } from '@/utils/auth'
 		},
 		methods:{
 			getFullUrl(){
-				console.log(this.baceUrl+'/news/add')
 				return (this.baceUrl+'/news/add')
 			},
-			toAudit(formName,status){
+			// 新建新闻
+			creatNews(formName,status){
 				this.$refs[formName].validate((valid) => {
           if (valid) {
 						console.log(valid)
             this.uploadData={
 							tokenId:this.$store.state.user.tokenId,
 							// newsFile:this.form1.newsFile,
-									status:status,
-									title: this.form1.title,
-									content: this.form1.content,
-									sourceType:this.form1.sourceType,
-									source:this.form1.source,
-									author:this.form1.author,
-									userId:this.form1.userId,
-									imgType:this.form1.imgType,
-									tagLabel:this.form1.tagLabel,
-									keyWords:this.form1.keyWords,
-									publishSource:"1"
+							status:status,
+							title: this.form1.title,
+							content: this.form1.content,
+							sourceType:this.form1.sourceType,
+							source:this.form1.source,
+							author:this.form1.author,
+							userId:this.form1.userId,
+							imgType:this.form1.imgType,
+							tagLabel:this.form1.tagLabel,
+							keyWords:this.form1.keyWords,
+							publishSource:"1"
 						}
 						// this.uploadData = params;
 						console.log(this.uploadData)
 						setTimeout(() => {
 							this.$refs.upload.submit();
+							this.$message({
+								type: 'success',
+								message: '添加成功!'
+							});
+							setTimeout(() => {
+								this.$router.push({name: 'news'});
+							}, 100);
 						}, 0);
+						
 					// console.log(params)
 					/* this.$post('news/add',params).then(res =>{
 						if(res.code == 0){

@@ -15,7 +15,7 @@
                 <el-button size="small" class="light_btn" @click="toAudit('form2',2)">保存并提交审核</el-button>
             </div>
             <el-form ref="form2" :model="form2" label-width="80px" :rules="rules2" class="up_form">
-                <div style="width: 35%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
+                <div style="width: 40%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
                     <el-form-item label="文章标题" prop="title">
                         <el-input v-model="form2.title" placeholder="请输入标题"></el-input>
                     </el-form-item>
@@ -26,8 +26,18 @@
                 </div>
                 <div style="width: 35%;float:left;padding:15px;" prop="classifyType">
                     <el-form-item label="发布到:">
-                        <el-input :disabled="true" v-model="form2.classifyType"></el-input>
+                        <el-input :disabled="true" v-model="form2.classifyTypes" style="width:173px;"></el-input>
+                        
+                        
                     </el-form-item>
+                    <el-select v-model="value" name="classifyType" placeholder="请选择">
+					    <el-option
+					      v-for="item in classifyType"
+					      :key="item.id"
+					      :label="item.name"
+					      :value="item.id">
+					    </el-option>
+					  </el-select>
                     <!--<el-form-item label="来源:">
         							<el-radio-group v-model="form.resource" required @change="test()">
         								<el-radio label="2" >原创</el-radio>
@@ -85,20 +95,40 @@ export default {
             editorOption: {},
             dialogImageUrl: '',
             dialogVisible: false,
+            classifyType:'',
             form2: {
                 title: '',
                 content: '',
-                classifyType: '行情',
+                classifyTypes: '行情',
                 userId: '1',
                 imgType: '1',
                 tagLabel: '',
                 resource: '',
+                source:'',
                 type: [],
                 desc: '',
                 author: '',
                 img: ''
+                
             },
             uploadData: {},
+//	            options: [{
+//	          value: '选项1',
+//	          label: '黄金糕'
+//	        }, {
+//	          value: '选项2',
+//	          label: '双皮奶'
+//	        }, {
+//	          value: '选项3',
+//	          label: '蚵仔煎'
+//	        }, {
+//	          value: '选项4',
+//	          label: '龙须面'
+//	        }, {
+//	          value: '选项5',
+//	          label: '北京烤鸭'
+//	        }],
+	        value: '',
             rules2: {
                 title: [
                     { required: true, message: '请输入标题', trigger: 'blur' },
@@ -107,9 +137,9 @@ export default {
                 content: [
                     { required: true, message: '请输入内容', trigger: 'change' }
                 ],
-                classifyType: [
-                    { required: true, message: '请输入内容', trigger: 'change' }
-                ],
+//              classifyType: [
+//                  { required: true, message: '请输入内容', trigger: 'change' }
+//              ],
                 userId: [
                     { required: true, message: '请选择发布账号', trigger: 'change' }
                 ],
@@ -121,15 +151,23 @@ export default {
                 ],
                 desc: [
                     { required: true, message: '请填写活动形式', trigger: 'blur' }
-                ]
+                ],
+                 source: [
+            { required: true, message: '请选择活动资源', trigger: 'change' }
+          ]
             }
         };
 		},
 		created(){
 			this.baceUrl = getBaceUrl();
 			// console.log(this.baceUrl)
+			
 		},
     mounted() {
+    	this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
+    		console.log(res.data)
+    		this.classifyType = res.data
+    	})
         // console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
     },
     methods: {
@@ -150,10 +188,12 @@ export default {
 											status: status,
 											title: this.form2.title,
 											content: this.form2.content,
-											classifyType: this.form2.classifyType,
+//											classifyType: this.form2.classifyType,
 											userId: this.form2.userId,
 											imgType: this.form2.imgType,
-											tagLabel: this.form2.tagLabel
+											tagLabel: this.form2.tagLabel,
+											publishSource:'1',
+											classifyType:this.value
 									};
 									this.uploadData = params;
 									setTimeout(() => {

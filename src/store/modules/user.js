@@ -1,7 +1,7 @@
 // import Vue from 'vue'
-import { getToken } from '@/utils/auth'
+import { getToken, getNickname } from '@/utils/auth'
 const state = {
-  user: null,
+  nickname: getNickname(),
   isLogin: false,
   tokenId:getToken()
 }
@@ -9,6 +9,7 @@ const state = {
 const actions = {
   saveUserInfo(context,res){
     context.commit("SAVEUSERINFO",res);
+
   },
    login ({commit}, user,tokenId) {
     console.log(111)
@@ -56,7 +57,7 @@ const mutations = {
     // state.token
     //console.log('SAVEUSERINFO',res.tokenId)
     state.tokenId = res.tokenId
-    console.log(12221111,state.tokenId)
+    state.nickname = res.name
   },
   SET_DOING_LOGIN (state, isLogin) {
     state.isLogin = isLogin

@@ -19,3 +19,6 @@ export function removeToken() {
 export function getBaceUrl(){
   return process.env.BASE_API
 }
+export function getNickname(){
+  return sessionStorage.getItem('nickname')
+}

@@ -1,6 +1,6 @@
 <template>
 	<div class="big">
-		<p id="title-1"><a>小黄人，早上好！</a><span>上次登录时间：2018.04.25   12:30</span></p>
+		<p id="title-1"><a>{{nickname}}，早上好！</a><span>上次登录时间：2018.04.25   12:30</span></p>
 		<div class="main">
 			<div class="main-1">
 				<img class="img-1" src="../assets/img/y1.png" />
@@ -110,6 +110,7 @@
   export default {
     data() {
       return {
+				nickname:this.$store.state.user.nickname
 
       }
     },
