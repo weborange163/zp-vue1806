@@ -44,7 +44,7 @@
             </el-col>
             <el-col :span="6" class="text-center">
               <el-button class="light_btn" @click="addById()">添加</el-button>
-              <el-button class="light_btn" @click="searchAdd=true">搜索添加</el-button>
+              <el-button class="light_btn" @click="searchAdd=true;searchLinkArt=[];searchInput=''">搜索添加</el-button>
             </el-col>
           </el-row>
         </el-form-item>
@@ -54,7 +54,7 @@
             <el-table-column prop="articleId" label="文章ID" width="150"></el-table-column>
             <el-table-column  label="操作" width="150">
               <template slot-scope="scope">
-                <el-button @click="handleClick(scope.$index, artData)" type="text" size="small">取消关联</el-button>
+                <el-button @click="handleClick(scope.$index,artData,0)" type="text" size="small">取消关联</el-button>
               </template>
             </el-table-column>
           </el-table>
@@ -65,13 +65,13 @@
           <el-input v-model="searchInput" style="width:80%"></el-input>
           <el-button class="light_btn" @click="searchMore">搜索</el-button>
         </div>
-        <el-table :data="searchLinkArt" border >
+        <el-table :data="searchLinkArt" border :row-class-name="miniTable" :header-row-class-name="miniTable">
           <el-table-column prop="title" label="标题" width="150"></el-table-column>
-          <el-table-column prop="id" label="文章ID" width="200"></el-table-column>
+          <el-table-column prop="articleId" label="文章ID" width="200"></el-table-column>
           <el-table-column  label="操作">
             <template slot-scope="scope">
-              <el-button v-if="scope.row.flag" @click="handleClick(scope.row,0)" type="text" size="small">取消关联</el-button>
-              <el-button v-else @click="handleClick(scope.row,1)" type="text" size="small">关联</el-button>
+              <el-button v-if="!scope.row.flag" @click="handleClick1(scope.row,artData,0)" type="text" size="small">取消关联</el-button>
+              <el-button v-else @click="handleClick1(scope.row,artData,1)" type="text" size="small">关联</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -123,7 +123,9 @@ export default {
     onSuccess(){
       console.log(111)
     },
+    // 模糊搜索添加文章关联
     searchMore(){
+      this.searchLinkArt=[];  // 重置搜索表格
       if(!this.searchInput){
         this.$message({
           message: '请输入搜索内容!',
@@ -135,12 +137,12 @@ export default {
           idOrTitle:this.searchInput
         }
         console.log(params)
-        this.$post('news/list',params).then(res => {
-            console.log(res)
+        this.$post('news/getlist',params).then(res => {
+            console.log(res);
             if(!res.data[0]){
               this.$message.error('很抱歉,没有匹配的文章!');
             }else{
-              var result = res.data[0];
+              var result = res.data;
               var arr=[]; // 获取表单里关联列表的articleId
               this.artData.map((item) =>{
                 arr.push(item.articleId);
@@ -231,8 +233,31 @@ export default {
     miniTable(row){
       return 'miniTable'
     },
-    handleClick(index, rows){
-      this.$confirm('此操作将取消关联, 是否继续?', '提示', {
+    //搜索更多 之 关联操作
+    //参数:每条新闻对象,table表格,操作指令
+    handleClick1(index,rows,status){
+      if(status == 1){
+        rows.push(index);
+        index.flag = false;
+        // console.log(index.flag)
+        this.$message({
+          message: '关联成功.',
+          type: 'success'
+        });
+      }else if(status == 0){
+        rows.splice(index,1);
+        index.flag = true;
+        // console.log(index.flag);
+        this.$message({
+          message: '操作成功.',
+          type: 'info'
+        });
+      }
+      
+    },
+    // 表单中table 取消关联. 
+    handleClick(index,rows,status){
+        this.$confirm('此操作将取消关联, 是否继续?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -248,8 +273,6 @@ export default {
             message: '已取消操作'
           });          
         });
-      
-      console.log(row)
     },
     handleRemove(file, fileList) {
         console.log(file, fileList);

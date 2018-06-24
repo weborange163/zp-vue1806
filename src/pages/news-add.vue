@@ -174,7 +174,7 @@ import { getBaceUrl } from '@/utils/auth'
 							});
 							setTimeout(() => {
 								this.$router.push({name: 'news'});
-							}, 100);
+							}, 1000);
 						}, 0);
 						
 					// console.log(params)

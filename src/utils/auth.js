@@ -22,3 +22,10 @@ export function getBaceUrl(){
 export function getNickname(){
   return sessionStorage.getItem('nickname')
 }
+export function HTMLDecode(text) { 
+  var temp = document.createElement("div"); 
+  temp.innerHTML = text; 
+  var output = temp.innerText || temp.textContent; 
+  temp = null; 
+  return output; 
+} 

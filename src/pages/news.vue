@@ -71,7 +71,7 @@
 									<p v-if="scope.row.publish_source=='3'">数据爬取</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="文章ID" prop="id"></el-table-column>
+							<el-table-column label="文章ID" prop="article_id"></el-table-column>
 							<el-table-column label="操作" width="300" fixed="right">
 								<template slot-scope="scope">
 									<el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.isUping" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
@@ -93,31 +93,31 @@
 				<el-tab-pane label="新建" name="second">
 					<div class="tab2">
 						<div class="text-right marBo4">
-							<el-button class="light_btn">批量提交审核</el-button>
+							<el-button class="light_btn" @click="toAudits">批量提交审核</el-button>
 							<el-button class="light_btn">刷新</el-button>
 						</div>
 						<el-table :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="newArticle" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
-							<el-table-column type="selection" width="55">
+							<el-table-column type="selection" width="55" align="center">
 							</el-table-column>
-							<el-table-column type="index" label="序号" width="120">
+							<el-table-column type="index" label="序号" width="50">
 							</el-table-column>
 							<el-table-column prop="title" label="标题">
 							</el-table-column>
-							<el-table-column prop="author" label="创建人" show-overflow-tooltip>
+							<el-table-column prop="author" label="创建人" width="100">
 							</el-table-column>
-							<el-table-column label="状态" show-overflow-tooltip>
+							<el-table-column label="状态" width="50">
 								<template slot-scope="scope">
 									<p v-if="scope.row.status=='0'">新建</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="发布来源"  width="120">
+							<el-table-column label="发布来源"  width="100">
 								<template slot-scope="scope">
 									<p v-if="scope.row.publish_source=='1'">pc后台</p>
 									<p v-if="scope.row.publish_source=='2'">移动端</p>
 									<p v-if="scope.row.publish_source=='3'">数据爬取</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="文章ID" prop="id"></el-table-column>
+							<el-table-column label="文章ID" prop="article_id"></el-table-column>
 							<el-table-column label="操作" width="300" fixed="right">
 								<template slot-scope="scope">
 									<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
@@ -175,7 +175,7 @@
 	</div>
 </template>
 <script type="text/javascript">
-	import { get } from '../utils/http.js' 
+	import { HTMLDecode } from '@/utils/auth'
 	export default {
 		name: 'home',
 		data() {
@@ -191,7 +191,7 @@
 				dialogVisible: false,
 				dialogVisible1: false,
 				per_page1: 5,
-				per_page2:10,
+				per_page2:5,
 				total_pages1: 0,
 				total_pages2:0,
 				currentPage1: 1, // 页面默认展示的当前页码
@@ -241,6 +241,7 @@
 				value1: '',
 				value2: '',
 				dataList: [],
+				ids:[]
 			}
 		},
 		created(){
@@ -263,7 +264,7 @@
 					this.upData = res.data;
 				})
 			},
-			//提交审核&批量提交审核
+			//提交审核
 			toAudit(row){
 				this.$confirm('是否提交到审核列表?', '提示', {
           confirmButtonText: '确定',
@@ -275,16 +276,16 @@
 						ids:row.id
 					}
 					this.$post('news/batchWaitCheck',params).then(res => {
-						console.log(res)
+						this.creatList();
+						this.$message({
+							type: 'success',
+							message: '操作成功!'
+						});
 					})
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
         }).catch(() => {
           this.$message({
             type: 'info',
-            message: '已取消删除'
+            message: '操作已取消'
           });          
         });
 				
@@ -321,14 +322,30 @@
 				}
 				// console.log(params)
 				this.$post('/news/list',params).then(res => {
-					// console.log(res.data[0].rows)
+					console.log(res.data[0].rows)
+					//&lt;p&gt;&lt;b&gt;123&amp;456&lt;/b&gt;&lt;/p&gt;
+					//& lt;p& gt;哈哈哈& lt;
+					var a = res.data[0].rows[0].content
+					console.log(HTMLDecode(a));
 					this.tableData = res.data[0].rows;
 					this.total_pages1 = res.data[0].total;
-				})
+				});
 			},
 			//新建的新闻列表
-			creatList(){
-
+			creatList(params){
+				if(!params){
+					//console.log(params)
+					var params={
+						tokenId:this.$store.state.user.tokenId,
+						queryType:'create',
+						limit:this.per_page2,
+						offset:this.currentPage2
+					}
+				}
+				this.$post('/news/list',params).then(res => {
+					this.newArticle = res.data[0].rows;
+					this.total_pages2 = res.data[0].total;
+				})
 			},
 			//tab1 分页
 			handleCurrentChange1(val) {
@@ -340,27 +357,68 @@
 			//tab2 分页
 			handleCurrentChange2(val) {
 				this.currentPage2 = val;
+				var params={
+						tokenId:this.$store.state.user.tokenId,
+						queryType:'create',
+						limit:this.per_page2,
+						offset:this.currentPage2
+					}
+				this.creatList(params);
 
 			},
+			// 批量提交审核
+			toAudits(){
+				if(this.ids == false){
+					this.$message({
+						message: '请勾选需要提交审核的文章!',
+						type: 'warning'
+					});
+					return;
+				}
+				this.$confirm('确定要提交审核吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						ids:this.ids.join(',')
+					}
+					console.log(params)
+					this.$post('news/batchWaitCheck',params).then(res => {
+						console.log(res)
+						this.creatList();
+						this.$message({
+							type: 'success',
+							message: '提交成功!'
+						});
+					})
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });          
+        });
+				
+			},
+			// 复选框操作, 获取选中的新闻的article_id
 			handleSelectionChange(val) {
 				this.multipleSelection = val;
-				console.log(this.multipleSelection)
+				this.ids = [];
+				this.multipleSelection.map(item => {
+					this.ids.push(item.id);
+				})
 			},
 			handleClick(tab, event) {
 				console.log(tab.name, event);
-				if(tab.name == 'second'){ 	// 待提取为createList
+				if(tab.name == 'second'){ 	
 					var params = {
 						tokenId:this.$store.state.user.tokenId,
 						queryType:'create',
 						limit:this.per_page2,
 						offset:this.currentPage2
 					}
-					console.log(params)
-					this.$post('/news/list',params).then(res => {
-						this.newArticle = res.data[0].rows;
-						this.total_pages2 = res.data[0].total;
-					})
-					
+					this.creatList(params)
 				}
 				//this.newsList(params);
 			},

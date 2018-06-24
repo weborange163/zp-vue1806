@@ -42,8 +42,10 @@ export default new Router({
         {path:'/accounts',name:'accounts',component: page('accounts')},
         {path:'/content-data',name:'content-data',component: page('content-data')},
         {path:'/third-party',name:'third-party',component: page('third-party')},
-        
-        
+        {path:'/editor',name:'editor',component: page('ueditor_demo')},
+
+
+
         {path: '/button', name: 'c-button', component: page('c-button')},
         {path: '/switch', name: 'c-switch', component: page('c-switch')},
         {path: '/checkbox', name: 'c-checkbox', component: page('c-checkbox')},
