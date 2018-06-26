@@ -108,7 +108,12 @@ export default {
                 type: [],
                 desc: '',
                 author: '',
-                img: ''
+                img: '',
+                //未置顶
+                topFlag:'0',
+//              排序
+                orderNum:'0'
+
                 
             },
             uploadData: {},
@@ -193,7 +198,9 @@ export default {
 											imgType: this.form2.imgType,
 											tagLabel: this.form2.tagLabel,
 											publishSource:'1',
-											classifyType:this.value
+											classifyType:this.value,
+											topFlag:this.form2.topFlag,
+											orderNum:this.form2.orderNum
 									};
 									this.uploadData = params;
 									setTimeout(() => {

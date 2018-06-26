@@ -3,7 +3,8 @@ const merge = require('webpack-merge')
 const prodEnv = require('./prod.env')
 
 module.exports = merge(prodEnv, {
- BASE_API: '"http://192.168.1.91:8080"',
+// BASE_API: '"http://192.168.1.91:8080"',
+ BASE_API: '"http://192.168.1.154:8089"',
 //  BASE_API: '"http://192.168.1.182:8089"',
 //  BASE_API: '"http://192.168.1.126:8089"',
 //BASE_API: '"http://118.26.10.18:78"',

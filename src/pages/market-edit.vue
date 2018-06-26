@@ -177,8 +177,7 @@ export default {
 //  		console.log(res.data)
     		this.classifyType = res.data
     	})
-//  	图片回显
-					
+//  	图片回显	
 		this.$get('/images/showImage',{tokenId:this.$store.state.user.tokenId,id:'459733906246074368'}).then(res => {
     		console.log(res);
     		alert(res)

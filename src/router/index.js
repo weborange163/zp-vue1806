@@ -28,6 +28,7 @@ export default new Router({
         {path:'/market/edit',name:'market-edit',component: page('market-edit')},
         {path:'/audit-news',name:'audit-news',component: page('audit-news')},
         {path:'/audit-market',name:'audit-market',component: page('audit-market')},
+        {path:'/second-market',name:'second-market',component: page('second-market')},
         {path:'/banner',name:'banner',component: page('banner')},
         {path:'/subject',name:'subject',component: page('subject')},
         {path:'/subject/add',name:'subject-add',component: page('subject-add')},

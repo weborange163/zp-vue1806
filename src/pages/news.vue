@@ -44,7 +44,7 @@
 							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
-									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.isUping"></i>
+									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag"></i>
 									<el-popover trigger="hover" placement="top" v-if="scope.row.link">
 										<p>{{ scope.row.link }}</p>
 										<div slot="reference" class="name_wrapper">
@@ -59,8 +59,8 @@
 								<template slot-scope="scope">
 									<p v-if="scope.row.status=='0'" >新建</p>
 									<p v-if="scope.row.status=='4'" class="yshx">已上线</p>
-									<p v-if="scope.row.status=='1'" class="dshx">待审核</p>
 									<p v-if="scope.row.status=='5'" class="yxx">已下线</p>
+									<p v-if="scope.row.status=='1'" class="dshx">待审核</p>
 									<p v-if="scope.row.status=='3'" class="yxx">已审核</p>
 								</template>
 							</el-table-column>
@@ -74,10 +74,10 @@
 							<el-table-column label="文章ID" prop="article_id"></el-table-column>
 							<el-table-column label="操作" width="300" fixed="right">
 								<template slot-scope="scope">
-									<el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.isUping" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
+									<el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
 									<el-button type="text" v-if="scope.row.status =='4'" style="margin-right:8px;vertical-align:middle;">下线</el-button>
 									<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
-									<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>
+									<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
 									<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 									<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
@@ -129,9 +129,9 @@
 						</el-table>
 					</div>
 					<div style="margin-top:20px;">
-				<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
-				</el-pagination>
-			</div>
+						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
+						</el-pagination>
+					</div>
 				</el-tab-pane>
 
 			</el-tabs>
@@ -158,15 +158,15 @@
 				</el-table>
 				<span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="dialogVisible = false">发 布</el-button>
+          <el-button type="primary" @click="toPublish()">发 布</el-button>
         </span>
 			</el-dialog>
-			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose">
-				<el-radio v-model="recommendRadio" label="1">推荐到banner</el-radio><br/>
-				<el-radio v-model="recommendRadio" label="2">置顶-新闻推荐列表区</el-radio>
+			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose2">
+				<el-radio v-model="recommendRadio" label="1" class="marBo4">置顶-新闻推荐列表区</el-radio><br/>
+				<el-radio v-model="recommendRadio" label="2">推荐到banner</el-radio>
 				<span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible1 = false">取 消</el-button>
-          <el-button type="primary" @click="dialogVisible1 = false">确 定</el-button>
+          <el-button @click="dialogVisible1 = false;recommendRadio=''" class="light_btn">取 消</el-button>
+          <el-button type="primary" @click="sureReco" class="light_btn">确 定</el-button>
         </span>
 			</el-dialog>
 			<!-- 分页 -->
@@ -187,7 +187,8 @@
 					author: 'web'
 				}],
 				activeTab: 'first',
-				recommendRadio: 1,
+				recommendRadio: '',
+				recoIndex:0,
 				dialogVisible: false,
 				dialogVisible1: false,
 				per_page1: 5,
@@ -263,6 +264,21 @@
 				this.$get('news/publishWaitTop',{tokenId:this.$store.state.user.tokenId}).then(res =>{
 					this.upData = res.data;
 				})
+			},
+			//提交置顶排序(弹框点击发布)
+			toPublish(){
+				// console.log(this.upData)
+				var arr =[];
+				this.upData.map(item => {
+					arr.push({id:item.id})
+				})
+				console.log(arr);
+				var params = {
+					tokenId:this.$store.state.user.tokenId,
+					newsInfo:arr
+				}
+				this.$post('news/publishTop',params)
+				//this.dialogVisible = false
 			},
 			//提交审核
 			toAudit(row){
@@ -370,7 +386,7 @@
 			toAudits(){
 				if(this.ids == false){
 					this.$message({
-						message: '请勾选需要提交审核的文章!',
+						message: '您没有勾选任何文章!',
 						type: 'warning'
 					});
 					return;
@@ -385,14 +401,14 @@
 						ids:this.ids.join(',')
 					}
 					console.log(params)
-					this.$post('news/batchWaitCheck',params).then(res => {
+					/* this.$post('news/batchWaitCheck',params).then(res => {
 						console.log(res)
 						this.creatList();
 						this.$message({
 							type: 'success',
 							message: '提交成功!'
 						});
-					})
+					}) */
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -409,6 +425,7 @@
 					this.ids.push(item.id);
 				})
 			},
+			// tab切换
 			handleClick(tab, event) {
 				console.log(tab.name, event);
 				if(tab.name == 'second'){ 	
@@ -422,9 +439,39 @@
 				}
 				//this.newsList(params);
 			},
+			// 确定推荐到置顶/banner
+			sureReco(){
+				if(this.recommendRadio == '1'){	// 推荐到置顶
+					console.log(this.recoIndex)
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						id: this.tableData[this.recoIndex].id,
+						topFlag:'1'
+					}
+					this.$post('news/top',params).then(res => {
+							console.log(res);
+					})
+					// this.tableData[this.recoIndex].top_flag = "1";
+				}else if(this.recommendRadio == '2'){	// 推荐到banner
+					console.log('推荐到banner');
+				}
+				this.dialogVisible1 = false;
+
+			},
 			//推荐到
-			recommend(row) {
-				this.dialogVisible1 = true;
+			recommend(index,row) {
+				if(row.top_flag){
+					this.$message({
+						message: '本条消息已经置顶,需取消置顶才能操作',
+						type: 'warning'
+					});
+				}else{
+					this.dialogVisible1 = true;
+					this.recoIndex = index;
+					console.log(row,this.recommendRadio);
+				}
+				
+
 			},
 			//取消置顶
 			cancelUp(row) {
@@ -433,14 +480,22 @@
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
-					this.$message({
-						type: 'success',
-						message: '删除成功!'
-					});
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						id: this.tableData[this.recoIndex].id,
+						topFlag:'0'
+					}
+					this.$post('news/top',params).then(res => {
+						console.log(res);
+						this.$message({
+							type: 'success',
+							message: '操作成功!'
+						});
+					})
 				}).catch(() => {
 					this.$message({
 						type: 'info',
-						message: '已取消删除'
+						message: '已取消操作'
 					});
 				});
 			},
@@ -461,6 +516,15 @@
 			handleClose(done) {
 				this.$confirm('确认关闭？')
 					.then(_ => {
+
+						done();
+					})
+					.catch(_ => {});
+			},
+			handleClose2(done) {
+				this.$confirm('确认关闭？')
+					.then(_ => {
+						this.recommendRadio='';
 						done();
 					})
 					.catch(_ => {});

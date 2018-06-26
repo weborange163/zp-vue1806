@@ -7,6 +7,9 @@ import Axios from '@/utils/http'
 import { post, get } from '@/api/index'
 import NProgress from 'nprogress'
 import VueQuillEditor from 'vue-quill-editor'
+import MQuillEditor from 'vue-m-quill-editor'
+
+
 import axios from 'axios'
 //import VueAxios from 'vue-axios'
 
@@ -47,6 +50,7 @@ console.log(process.env)
 
 Vue.use(ElementUI)
 Vue.use(VueQuillEditor, /* { default global options } */)
+Vue.use(MQuillEditor)
 Vue.use(DropdownPlugin)
 Vue.use(NavbarPlugin)
 Vue.use(ContextMenuPlugin)

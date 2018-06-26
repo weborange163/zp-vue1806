@@ -18,7 +18,7 @@ const service = axios.create({
 // request interceptor 请求拦截
 service.interceptors.request.use(config => {
   // POST传参序列化
-  if(config.method  === 'post') {
+  if(config.method  === 'post'&& config.data.constructor !== FormData) {
     config.data = qs.stringify(config.data)
   }
   // Do something before request is sent

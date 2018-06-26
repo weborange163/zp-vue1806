@@ -79,7 +79,7 @@ export default {
   data(){
     return{
       subjectList:[],
-      per_page:10,
+      per_page:2,
       currentPage:1,
       total_pages:0,
       currentPage:1,
@@ -121,7 +121,37 @@ export default {
     },
     handleCurrentChange(val) {
       console.log(`当前页: ${val}`);
+      this.currentPage = val;
+      this.getSubjectList();
     },
+    // 删除专题
+    deleteRow(index, rows) {
+      console.log(index,rows)
+				// rows.splice(index, 1);
+				this.$confirm('此操作将永久删除该专题, 是否继续?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						id:rows.id
+					}
+					this.$post('specialInfo/delete',params).then(res => {
+						console.log(res)
+						this.$message({
+							type: 'success',
+							message: '删除成功!'
+						});
+						this.getSubjectList();
+					})
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '已取消删除'
+					});
+				});
+			}
   }
 }
 </script>

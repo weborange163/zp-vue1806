@@ -10,73 +10,90 @@
             <el-button class="light_btn">刷新</el-button>
           </div>
           <div class="banner_show">
-            <el-table :data="banner_data" border stripe>
-              <el-table-column label="序号" prop="num" width='50'></el-table-column>
-              <el-table-column label="原文标题" prop="title"></el-table-column>
-              <el-table-column label="短标语" prop="shotTitle"></el-table-column>
+            <el-table :data="banner_data" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
+              <el-table-column label="序号" type="index" width='50'></el-table-column>
+              <el-table-column label="原文标题" prop="title_original"></el-table-column>
+              <el-table-column label="短标语" prop="title_short"></el-table-column>
               <el-table-column label="发布状态" prop="status" width="80">
                 <template  slot-scope="scope">
-                  <p v-if="scope.row.status=='已上线'" class="yshx">{{scope.row.status}}</p>
-                  <p v-if="scope.row.status=='待上线'" class="dshx">{{scope.row.status}}</p>
-                  <p v-if="scope.row.status=='已下线'" class="yxx">{{scope.row.status}}</p>
+                  <p v-if="scope.row.status=='1'" class="yshx">已上线</p>
+                  <p v-if="scope.row.status=='0'" class="dshx">待上线</p>
+                  <p v-if="scope.row.status=='2'" class="yxx">已下线</p>
                 </template>
               </el-table-column>
-              <el-table-column label="内容类型" prop="type" width='100'></el-table-column>
-              <el-table-column label="图片" prop="picture" width='100'></el-table-column>
-              <el-table-column label="上传时间" prop="upTime" width='100'></el-table-column>
-              <el-table-column label="创建时间" prop="createTime" width='100'></el-table-column>
+              <el-table-column label="内容类型" width='100'>
+                <template  slot-scope="scope">
+                  <p v-if="scope.row.banner_type=='1'" >新闻</p>
+                  <p v-if="scope.row.banner_type=='2'" >专题</p>
+                </template>
+              </el-table-column>
+              <el-table-column label="图片" prop="cover_img_id" width='100'></el-table-column>
+              <el-table-column label="上线时间" prop="online_time" width='100'></el-table-column>
+              <el-table-column label="创建时间" prop="create_time" width='100'></el-table-column>
               <el-table-column label="操作" width="260" fixed="right">
                 <template slot-scope="scope">
-                  <el-button type="text" style="margin-right:8px;vertical-align:middle;" @click="deleteRow(scope.$index,scope.row)">取消置顶</el-button>
-                  <el-button type="text" v-if="scope.row.status =='已上线'" style="margin-right:8px;vertical-align:middle;">下线</el-button>
+                  <el-button type="text" v-if="scope.row.status =='1'" style="margin-right:8px;vertical-align:middle;">下线</el-button>
                   <el-button type="text"><i class="iconfont icon-see" ></i></el-button>
-                  <el-button type="text"><i class="iconfont icon-share" ></i></el-button>
                   <el-button type="text"><i class="iconfont icon-edit" ></i></el-button>
                   <el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete" ></i></el-button>
                 </template>
               </el-table-column>
             </el-table>
+            <div style="margin-top:20px;">
+              <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
+              </el-pagination>
+            </div>
           </div>
         </div>
     </div>
 </template>
 <script>
+import { btnTable } from '@/utils/table-style.js'
 export default {
   data() {
     return {
       search_info:'',
-      banner_data:[
-        {num:22,
-        title: '王大虎打伤了王小虎',
-        shotTitle:'恶意伤人事件',
-        status:'已上线',
-        type:'新闻',
-        picture:'图片',
-        upTime:'2018-01-01',
-        createTime:'2018-01-01'
-        },
-        {num:242,
-        title: '区块链到底是什么?关于区块链最深刻的理解哈哈哈哈或或或',
-        shotTitle:'带你认识区块链',
-        status:'已上线',
-        type:'专题',
-        picture:'图片',
-        upTime:'2018-08-01',
-        createTime:'2018-07-01'
-        },
-        {num:29,
-        title: '真的不知道编些啥内容了',
-        shotTitle:'内容',
-        status:'已上线',
-        type:'新闻',
-        picture:'图片',
-        upTime:'2018-01-01',
-        createTime:'2018-01-01'
-        }
-      ]
+      btnTable:btnTable,
+      per_page: 2,
+      params:{},
+      total_pages: 0,
+      currentPage: 1, // 页面默认展示的当前页码
+      banner_data:[]
     }
   },
+  created(){
+    this.initParams();
+    this.getBannerlist();
+  },
   methods:{
+    getBannerlist(params){
+      if(!params){
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          limit:this.per_page,
+          offset:this.currentPage
+        }
+      }
+      this.$post('bannerInfo/list',params).then(res => {
+        console.log(res.data[0].rows);
+        this.banner_data = res.data[0].rows;
+        this.total_pages = res.data[0].total;
+      })
+    },
+    // 
+    initParams(){
+      this.params = {
+        tokenId:this.$store.state.user.tokenId,
+        limit:this.per_page,
+        offset:this.currentPage
+      }
+    },
+    handleCurrentChange(val){
+      this.currentPage = val;
+      this.initParams()
+      console.log(this.params)
+      this.getBannerlist(this.params);
+    },
     deleteRow(index, rows) {
        // rows.splice(index, 1);
        this.$confirm('此操作将永久删除该新闻, 是否继续?', '提示', {

@@ -19,16 +19,24 @@
 					<el-form-item label="文章标题" prop="title" >
 						<el-input v-model="form1.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
-					<el-form-item label="文章内容" prop="content">
-						<quill-editor v-model="form1.content"
+					<el-form-item label="文章内容" prop="content" class="editor">
+						<!-- <quill-editor v-model="form1.content"
 							ref="myQuillEditor"
 							:options="editorOption"
 							@blur="onEditorBlur($event)"
 							@focus="onEditorFocus($event)"
 							@ready="onEditorReady($event)">
-						</quill-editor>
+						</quill-editor> -->
+						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
+						:width="quill.width" :getContent="onEditorChange"
+						:has-border="quill.border" :zIndex="quill.zIndex"
+						:sync-output="quill.syncOutput"
+						:theme="quill.theme"
+						:disabled="quill.disabled"
+						:fullscreen="quill.full"
+						@upload="uploadImg" @blur="onEditorBlur($event)"
+						></m-quill-editor>
 					</el-form-item>
-					
 				</div>
 				<div style="width: 40%;float:left;padding:15px;">
 					<el-form-item label="发布到:">
@@ -81,16 +89,35 @@
 					</el-form-item>
 				</div>
 			</el-form>
-				    
 		</div>
-
 	</div>
 </template>
 <script>
+//import MQuillEditor from 'm-quill-editor'
 import { getBaceUrl } from '@/utils/auth'
+import axios from 'axios'
 	export default{
+		components: {
+		//	MQuillEditor
+		},
 		data(){
 			return{
+				pkg:'',
+      quill: {
+        width: 420,
+				border: true,
+				height:150,
+				zIndex:10000,
+        content: 'wellcome ~',
+        syncOutput: true,
+        theme: 'snow', //bubble snow
+        disabled: false,
+        full: false,
+        toolbar: [
+          [{ 'header': 1 }, { 'header': 2 }],
+          ['bold', 'italic', 'underline', 'strike', 'link']
+        ]
+      },
 				uploadData:{},
 				baceUrl:'',
 				// content:'111',
@@ -141,11 +168,27 @@ import { getBaceUrl } from '@/utils/auth'
 			// console.log(this.baceUrl)
 		},
 		methods:{
+			// 富文本图片上传
+			uploadImg(file,insert){
+				console.log(file)
+				let params = new FormData(); // 创建form对象
+				params.append('file',file,file.name);
+				// params.append('name',file.name);
+				console.log(file.name)
+				
+				this.$post('images/upload',params).then(res => {
+					let url = this.baceUrl + res.data[0].showUrl;
+					// console.log(url)
+					insert(url, 'center')
+					console.log(res);
+				})
+			},
 			getFullUrl(){
 				return (this.baceUrl+'/news/add')
 			},
 			// 新建新闻
 			creatNews(formName,status){
+				console.log(this.form1.content)
 				this.$refs[formName].validate((valid) => {
           if (valid) {
 						console.log(valid)
@@ -154,7 +197,7 @@ import { getBaceUrl } from '@/utils/auth'
 							// newsFile:this.form1.newsFile,
 							status:status,
 							title: this.form1.title,
-							content: this.form1.content,
+							content: 'this.form1.content',
 							sourceType:this.form1.sourceType,
 							source:this.form1.source,
 							author:this.form1.author,
@@ -193,8 +236,9 @@ import { getBaceUrl } from '@/utils/auth'
 			test(){
 				console.log(this.form1.source);
 			},
-			onEditorBlur(quill) {
-				console.log('editor blur!', quill)
+			// 获取富文本的内容
+			onEditorBlur({quill, html,text}) {
+				// console.log('editor blur!', quill, html, text)
 				console.log(this.form1.content)
       },
       onEditorFocus(quill) {
@@ -203,9 +247,9 @@ import { getBaceUrl } from '@/utils/auth'
       onEditorReady(quill) {
         console.log('editor ready!', quill)
       },
-      onEditorChange({ quill, html, text }) {
-        console.log('editor change!', quill, html, text)
-				this.content = html
+      onEditorChange(val) {
+        console.log('editor change!', val)
+				// this.content = html
 			},
 			handleRemove(file, fileList) {
         console.log(file, fileList);
@@ -213,18 +257,24 @@ import { getBaceUrl } from '@/utils/auth'
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
-      }
+			}
 		}
 	}
 </script>
 <style type="text/css">
-	
+	.quill-editor .ql-toolbar.ql-snow{
+		height: 60px;
+	}
+	.editor .el-form-item__content {
+		line-height: 20px;
+	}
 	.up_form .el-input__inner{
 		height: 30px;
 		line-height: 30px;
 		max-width: 300px;
 	}
 	.up_form .quill-editor .ql-container{
-		min-height: 550px;
+		height: 550px;
+		overflow-y: auto;
 	}
 </style>
