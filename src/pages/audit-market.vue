@@ -55,16 +55,11 @@
               <el-table-column label="创建时间" prop="create_time" width="200"></el-table-column>
               <el-table-column label="操作" width="100" fixed="right">
                 <template slot-scope="scope">
-                    <router-link :to="{name:'second-market'}" ><el-button type="text" v-if="scope.row.status=='2'">审核</el-button></router-link>
-<!--                    <el-button class="light_btn">添加行情</el-button>-->
+                    <router-link :to="{name:'second-market',params:{id:scope.row.id}}" ><el-button type="text" v-if="scope.row.status=='2'">审核</el-button></router-link>
                     <el-button type="text" :disabled="true"  v-if="scope.row.status=='3'">审核</el-button>
-                    <el-button type="text" v-if="scope.row.status=='4'" @click="toAudit4(scope.row)">查看</el-button>
-                    <el-button type="text" v-if="scope.row.status=='5'" @click="toAudit5(scope.row)">查看</el-button>
-                    <!--<el-button v-else type="text"></el-button>
-                    <p v-if="scope.row.status=='2'" >审核</p>
-                    	<p v-if="scope.row.status=='3'" >审核</p>
-                    	<p v-if="scope.row.status=='5'" >查看</p>
-                    	<p v-if="scope.row.status=='4'" >查看</p>-->
+                    <router-link :to="{name:'market-lookes'}" ><el-button type="text" v-if="scope.row.status=='4'">查看</el-button></router-link>
+                   <router-link :to="{name:'market-lookes'}" > <el-button type="text" v-if="scope.row.status=='5'">查看</el-button></router-link>
+                    
                 </template>
               </el-table-column>
             </el-table>
@@ -77,7 +72,11 @@
         </el-tab-pane>
         <el-tab-pane label="待审核" name="second">
           <div>
-            <el-table :data="audit_no" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
+          	<div class="text-right marBo4">
+							<el-button class="light_btn" @click="toAudited">批量审核</el-button>
+							<el-button class="light_btn">刷新</el-button>
+						</div>
+            <el-table :data="audit_no" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
               <el-table-column label="序号" type="index" width='50'></el-table-column>
               <el-table-column label="标题" prop="title"></el-table-column>
@@ -261,6 +260,7 @@ export default {
       timeEnd:'',
       value6:'',
       inputs:'',
+      aa:'',
       options: [{
       value: '1',
       label: '后台发布'
@@ -296,17 +296,62 @@ export default {
     timeVal:'',
     activeName: 'first',
     search_pra:'',
-    value:''
+    value:'',
+    ids:[],
+    multipleSelection:[],
     }
   },
   created(){
     this.getAuditAll();
   },
   methods: {
-//	 <p v-if="scope.row.status=='2'" >待审核</p>
-//                  <p v-if="scope.row.status=='3'" >审核中</p>
-//                  <p v-if="scope.row.status=='5'" >审核通过</p>
-//                  <p v-if="scope.row.status=='4'" >审核失败</p>
+ // 批量提交审核
+    toAudited(){
+      if(this.ids == false){
+        this.$message({
+          message: '请勾选需要提交审核的文章!',
+          type: 'warning'
+        });
+        return;
+      }
+      this.$confirm('确定要提交吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }).then(() => {
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          ids:this.ids.join(','),
+          status:5,
+          checkCause:'2',
+          checkMessage:'审核信息'
+        }
+        console.log(params)
+        this.$post('industry/checkByIds',params).then(res => {
+          console.log(res)
+          this.activeName = 'first';
+          this.getAuditAll();
+          this.$message({
+            type: 'success',
+            message: '提交成功!'
+          });
+        })
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '操作已取消'
+        });          
+      });
+    },
+     // 批量审核 之 复选框操作 获取要批量操作的行情
+    handleSelectionChange(val){
+       this.multipleSelection = val;
+       this.ids = [];
+				this.multipleSelection.map(item => {
+					this.ids.push(item.id);
+				})
+    },
+    
     //待审核
     toAudit2(row){
       // console.log(row.id);
@@ -345,6 +390,9 @@ export default {
       }
       this.$post('/industry/listChick',params).then(res =>{
         console.log(res.data[0].rows)
+        for(var i=0;i<res.data[0].rows.length;i++){
+					console.log(res.data[0].rows[i]['id'])
+			}
         this.audit_all = res.data[0].rows;
         this.total_pages1 = res.data[0].total;
       })

@@ -2,12 +2,12 @@
     <div class="page-body banner">
         <div class="page-header clearfix">
           <el-input v-model="search_info" placeholder="请输入内容" style="width:220px;margin:0 20px;"></el-input>
-          <el-button class="light_btn">搜索</el-button>
+          <el-button class="light_btn" @click.native.prevent="getBannerlist()" >搜索</el-button>
         </div>
         <div class="box">
           <div style="text-align:right;margin-bottom:4px;">
             <el-button class="light_btn">发布</el-button>
-            <el-button class="light_btn">刷新</el-button>
+            <el-button class="light_btn" @click.native.prevent="getBannerlist1()">刷新</el-button>
           </div>
           <div class="banner_show">
             <el-table :data="banner_data" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
@@ -71,7 +71,26 @@ export default {
         var params = {
           tokenId:this.$store.state.user.tokenId,
           limit:this.per_page,
-          offset:this.currentPage
+          offset:this.currentPage,
+          simpleParameter:this.search_info
+          
+        }
+      }
+      this.$post('bannerInfo/list',params).then(res => {
+        console.log(res.data[0].rows);
+        this.banner_data = res.data[0].rows;
+        this.total_pages = res.data[0].total;
+      })
+    },
+    //刷新
+    getBannerlist1(params){
+      if(!params){
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          limit:this.per_page,
+          offset:this.currentPage,
+//        simpleParameter:this.search_info
+          
         }
       }
       this.$post('bannerInfo/list',params).then(res => {

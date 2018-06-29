@@ -19,10 +19,24 @@
                     <el-form-item label="文章标题" prop="title">
                         <el-input v-model="datas.title" placeholder="请输入标题"></el-input>
                     </el-form-item>
-                    <el-form-item label="正文内容" prop="content">
-                        <quill-editor v-model="datas.content" ref="myQuillEditor" :options="editorOption" @blur="onEditorBlur($event)" @focus="onEditorFocus($event)" @ready="onEditorReady($event)">
-                        </quill-editor>
-                    </el-form-item>
+                     <el-form-item label="文章内容" prop="content" class="editor">
+						<!-- <quill-editor v-model="form1.content"
+							ref="myQuillEditor"
+							:options="editorOption"
+							@blur="onEditorBlur($event)"
+							@focus="onEditorFocus($event)"
+							@ready="onEditorReady($event)">
+						</quill-editor> -->
+						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
+						:width="quill.width" :getContent="onEditorChange"
+						:has-border="quill.border" :zIndex="quill.zIndex"
+						:sync-output="quill.syncOutput"
+						:theme="quill.theme"
+						:disabled="quill.disabled"
+						:fullscreen="quill.full"
+						@upload="uploadImg" @blur="onEditorBlur($event)"
+						></m-quill-editor>
+					</el-form-item>
                 </div>
                 <div style="width: 35%;float:left;padding:15px;">
                     <el-form-item label="发布到:">
@@ -91,6 +105,23 @@ import { getBaceUrl } from '@/utils/auth'
 export default {
     data() {
         return {
+        		 	  quill: {
+        width: 420,
+				border: true,
+				height:150,
+				zIndex:10000,
+        content: 'wellcome ~',
+        syncOutput: true,
+        theme: 'snow', //bubble snow
+        disabled: false,
+        full: false,
+        toolbar: [
+          [{ 'header': 1 }, { 'header': 2 }],
+          ['bold', 'italic', 'underline', 'strike', 'link']
+        ]
+      },
+        	
+        	
 						baceUrl:'',
             // url: 'http://192.168.1.91:8080/industry/save',
             // 上传图片
@@ -168,7 +199,7 @@ export default {
 		},
     mounted() {
 //  	修改查看
-    	this.$get('/industry/get',{tokenId:this.$store.state.user.tokenId,id:'459733959777976321'}).then(res => {
+    	this.$get('/industry/get',{tokenId:this.$store.state.user.tokenId,id:'4597339597779763211'}).then(res => {
 //  		console.log(res.data[0].industry)
     		this.datas = res.data[0].industry
     	})
@@ -180,7 +211,7 @@ export default {
 //  	图片回显	
 		this.$get('/images/showImage',{tokenId:this.$store.state.user.tokenId,id:'459733906246074368'}).then(res => {
     		console.log(res);
-    		alert(res)
+//  		alert(res)
     		this.classifyType = res.data
     	})
     	
@@ -188,7 +219,27 @@ export default {
     	
         // console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
     },
+    created(){
+			this.baceUrl = getBaceUrl();
+		},
+    
+    
     methods: {
+    	// 富文本图片上传
+			uploadImg(file,insert){
+				console.log(file)
+				let params = new FormData(); // 创建form对象
+				params.append('file',file,file.name);
+				// params.append('name',file.name);
+				console.log(file.name)
+				
+				this.$post('images/upload',params).then(res => {
+					let url = this.baceUrl + res.data[0].showUrl;
+					// console.log(url)
+					insert(url, 'center')
+					console.log(res);
+				})
+			},
 			getFullUrl(){
 				console.log(this.baceUrl+'/industry/save')
 				return (this.baceUrl+'/industry/save')
@@ -218,6 +269,13 @@ export default {
 									this.uploadData = params;
 									setTimeout(() => {
 										this.$refs.upload.submit();
+										this.$message({
+											type: 'success',
+											message: '添加成功!'
+										});
+										setTimeout(() => {
+											this.$router.push({name: 'market'});
+										}, 1000);
 									}, 0);
 									// console.log(params)
 									// this.$post('industry/save', params).then(res => {
@@ -273,4 +331,21 @@ export default {
 /*.app-container .app-page-body{
 		min-height: 890px !important;
 	}*/
+	.quill-editor .ql-toolbar.ql-snow{
+		height: 60px;
+	}
+	.editor .el-form-item__content {
+		line-height: 20px;
+	}
+	
+	.up_form .el-input__inner{
+		height: 30px;
+		line-height: 30px;
+		max-width: 300px;
+	}
+	.up_form .quill-editor .ql-container{
+		height: 550px;
+		overflow-y: auto;
+	}
+	
 </style>

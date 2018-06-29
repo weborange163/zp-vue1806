@@ -1,5 +1,5 @@
 <template>
-	<div class="page-body">
+	<div class="page-body" style="min-width:980px;">
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
@@ -8,14 +8,14 @@
 			</el-breadcrumb>
 		</div>
 		
-		<div class="box">
+		<div class="box" >
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1',1)">保存并提交审核</el-button>
 			</div>
-			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form">
-				<div style="width: 40%;float: left;padding:15px;margin-left:5%;margin-right:5%;">
+			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
+				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
 						<el-input v-model="form1.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
@@ -38,7 +38,7 @@
 						></m-quill-editor>
 					</el-form-item>
 				</div>
-				<div style="width: 40%;float:left;padding:15px;">
+				<div style="width: 35%;float:left;padding:15px;">
 					<el-form-item label="发布到:">
 						<el-input :disabled="true" v-model="form1.column"></el-input>
 					</el-form-item>
@@ -48,8 +48,12 @@
 							<el-radio label="2" >转载</el-radio>
 						</el-radio-group>
 						<el-select v-if="form1.sourceType == 2" v-model="form1.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
-							<el-option label="第一网站" value="1"></el-option>
-							<el-option label="第二网站" value="2"></el-option>
+							<el-option
+								v-for="item in cities"
+								:key="item.id"
+								:label="item.name"
+								:value="item.id">
+							</el-option>
 						</el-select>
 					</el-form-item>
 					<el-form-item label="作者:">
@@ -137,6 +141,7 @@ import axios from 'axios'
 					tagLabels:'',
 					keyWords:''
 				},
+				cities:[],
 				rules1: {
           title: [
             { required: true, message: '请输入标题', trigger: 'blur' },
@@ -167,6 +172,12 @@ import axios from 'axios'
 			this.baceUrl = getBaceUrl();
 			// console.log(this.baceUrl)
 		},
+		mounted() {
+			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
+    		console.log(res.data)
+    		this.cities = res.data
+    	})
+		},
 		methods:{
 			// 富文本图片上传
 			uploadImg(file,insert){
@@ -188,10 +199,12 @@ import axios from 'axios'
 			},
 			// 新建新闻
 			creatNews(formName,status){
-				console.log(this.form1.content)
 				this.$refs[formName].validate((valid) => {
           if (valid) {
 						console.log(valid)
+						if(this.form1.sourceType == '2' && !this.form1.source){ // 选择转载时候,需要选择转载来源 (待)
+
+						}
             this.uploadData={
 							tokenId:this.$store.state.user.tokenId,
 							// newsFile:this.form1.newsFile,
@@ -268,6 +281,7 @@ import axios from 'axios'
 	.editor .el-form-item__content {
 		line-height: 20px;
 	}
+	
 	.up_form .el-input__inner{
 		height: 30px;
 		line-height: 30px;

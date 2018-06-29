@@ -49,7 +49,7 @@
 								<el-button class="light_btn">添加行情</el-button>
 							</router-link>
 							<el-button class="light_btn" @click="dialogVisible = true">置顶排序</el-button>
-							<el-button class="light_btn">刷新</el-button>
+							<el-button class="light_btn" @click.native.prevent="getMarket1()">刷新</el-button>
 						</div>
 						<el-table :data="tableData" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
 							<!--<el-table-column label="#" type="index"></el-table-column>-->
@@ -58,7 +58,7 @@
 							</el-table-column>
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
-									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.isUping"></i>
+									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
 									<el-popover trigger="hover" placement="top" v-if="scope.row.link">
 										<p>{{ scope.row.link }}</p>
 										<div slot="reference" class="name_wrapper">
@@ -69,7 +69,7 @@
 								</template>
 							</el-table-column>
 
-							<el-table-column label="所属分类" prop="classify_type_name" width="180"></el-table-column>
+							<el-table-column label="所属分类" prop="classify_type_name" width="120"></el-table-column>
 							<el-table-column label="创建人" prop="create_user_id" width="80"></el-table-column>
 							<el-table-column label="发布状态" prop="onlineTime" width="80">
 								<template slot-scope="scope">
@@ -79,7 +79,7 @@
 								</template>
 							</el-table-column>
 							<el-table-column label="上线时间" prop="online_time" width="120"></el-table-column>
-							<el-table-column label="发布来源" prop="publish_source" width="120">
+							<el-table-column label="发布来源" prop="publish_source" width="80">
 								<template slot-scope="scope">
 									<p v-if="scope.row.publish_source=='1'">pc后台</p>
 									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
@@ -87,8 +87,8 @@
 								</template>
 
 							</el-table-column>
-							<el-table-column label="文章ID" prop="article_id"></el-table-column>
-							<el-table-column label="操作" width="300" fixed="right">
+							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
+							<el-table-column label="操作" width="220" fixed="right">
 								<template slot-scope="scope">
 									<!--v-if="scope.row.isUping"-->
 								
@@ -358,10 +358,8 @@
         // console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
     },
 		methods: {
-			//  	,status:'1'
+			//列表
 			getMarket() {
-				console.log(typeof(this.value6[0]))
-				console.log(this.value6[1])
 //				alert(Date.parse(this.value6[0]))
 //				alert(Date.parse(this.value6[1]))
 				this.$get('industry/list', {
@@ -384,9 +382,26 @@
 					this.total_pages1 = res.data[0].total;
 				})
 			},
+			//刷新
+			getMarket1() {
+				this.$get('industry/list', {
+					tokenId: this.$store.state.user.tokenId,
+					limit: this.per_page1,
+					offset: this.currentPage1,				
+				}).then(res => {
+					console.log(res.data[0].rows)
+					this.tableData = res.data[0].rows
+					this.total_pages1 = res.data[0].total;
+				})
+			},
+//<<<<<<< .mine
+//=======
+			
+			
 //			seach(){
 //				this.getMarket(); 
 //			},
+//>>>>>>> .r386
 			marketShow(row) {
 				console.log(row.id);
 				var params = {
@@ -468,10 +483,18 @@
 					}
 					this.$post('/industry/onTop', params).then(res => {
 						// console.log(res)
+						if(res.code == '0'){
 						this.$message({
 							type: 'success',
 							message: '置顶成功!'
 						});
+						}
+						if(res.code == '1'){
+							this.$message({
+								message: res.msg,
+								type: 'warning'
+							});
+						}
 						this.getMarket();
 					})
 				}).catch(() => {
