@@ -275,7 +275,7 @@
 			//通过
 			toAudit1() {
 				var params = {
-					id: '4597339597779763211',
+					id: this.$route.params.id,
 					tokenId: this.$store.state.user.tokenId,
 					status: '5',
 				};
@@ -292,7 +292,7 @@
 			toAudit() {
 				this.dialogFormVisible = false
 				var params = {
-					id: '461605576636366848',
+					id: this.$route.params.id,
 					tokenId: this.$store.state.user.tokenId,
 					status: '4',
 					checkCause:this.form.region,

@@ -120,10 +120,18 @@ export default {
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.$message({
-            type: 'success',
-            message: '删除成功!'
-          });
+        	var params = {
+						tokenId: this.$store.state.user.tokenId,
+						id: rows.id
+					}
+					this.$post('/bannerInfo/delete', params).then(res => {
+						// console.log(res)
+						this.$message({
+							type: 'success',
+							message: '删除成功!'
+						});
+						this.getBannerlist();
+					})
         }).catch(() => {
           this.$message({
             type: 'info',

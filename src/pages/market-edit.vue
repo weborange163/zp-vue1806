@@ -20,13 +20,6 @@
                         <el-input v-model="datas.title" placeholder="请输入标题"></el-input>
                     </el-form-item>
                      <el-form-item label="文章内容" prop="content" class="editor">
-						<!-- <quill-editor v-model="form1.content"
-							ref="myQuillEditor"
-							:options="editorOption"
-							@blur="onEditorBlur($event)"
-							@focus="onEditorFocus($event)"
-							@ready="onEditorReady($event)">
-						</quill-editor> -->
 						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
 						:width="quill.width" :getContent="onEditorChange"
 						:has-border="quill.border" :zIndex="quill.zIndex"
@@ -199,7 +192,7 @@ export default {
 		},
     mounted() {
 //  	修改查看
-    	this.$get('/industry/get',{tokenId:this.$store.state.user.tokenId,id:'4597339597779763211'}).then(res => {
+    	this.$get('/industry/get',{tokenId:this.$store.state.user.tokenId,id:this.$route.params.id}).then(res => {
 //  		console.log(res.data[0].industry)
     		this.datas = res.data[0].industry
     	})
@@ -211,7 +204,7 @@ export default {
 //  	图片回显	
 		this.$get('/images/showImage',{tokenId:this.$store.state.user.tokenId,id:'459733906246074368'}).then(res => {
     		console.log(res);
-//  		alert(res)
+    		alert(res)
     		this.classifyType = res.data
     	})
     	

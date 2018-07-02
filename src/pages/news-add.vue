@@ -275,6 +275,12 @@ import axios from 'axios'
 	}
 </script>
 <style type="text/css">
+	.up_form .el-upload-list--picture-card .el-upload-list__item,
+	.up_form .el-upload--picture-card{
+		width: 80px;
+		height: 80px;
+		line-height: 88px;
+	}
 	.quill-editor .ql-toolbar.ql-snow{
 		height: 60px;
 	}

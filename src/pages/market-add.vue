@@ -11,7 +11,7 @@
             <div class="text-right">
                 <el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
                 <el-button size="small" class="light_btn">预览</el-button>
-                <el-button size="small" class="light_btn" @click="toAudit('form2',1)">仅保存</el-button>
+                <el-button size="small" class="light_btn" @click="toAudit1('form2',1)">仅保存</el-button>
                 <el-button size="small" class="light_btn" @click="toAudit('form2',2)">保存并提交审核</el-button>
             </div>
             <el-form ref="form2" :model="form2" label-width="80px" :rules="rules2" class="up_form">
@@ -227,7 +227,7 @@ export default {
 			fileOver(){
 				this.$message('只允许添加一张图片,如果替换请删除后再上传');
 			},
-			toAudit(formName, status) {
+			toAudit1(formName, status) {
 					this.$refs[formName].validate((valid) => {
 							console.log(valid);
 							// console.log(this.$store.state.user.tokenId);
@@ -259,11 +259,11 @@ export default {
 										
 									}, 0);
 									// console.log(params)
-									 this.$post('industry/save', params).then(res => {
-									     if (res.code === 0) {
-									         console.log(1111111, res);
-									     }
-									 });
+//									 this.$post('industry/save', params).then(res => {
+//									     if (res.code === 0) {
+//									         console.log(1111111, res);
+//									     }
+//									 });
 									return true;
 							}else{
 								console.log('error submit!!');

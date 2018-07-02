@@ -1,5 +1,35 @@
 <template>
   <div class="page-body audit_news">
+  	<el-dialog title="审核页面" :visible.sync="dialogFormVisible">
+			<el-form :model="form">
+				<el-form-item label="审核原因" :label-width="formLabelWidth">
+					<el-select v-model="form.region" placeholder="请选择区域">
+						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
+						<el-option label="您发布的内容排版、错字过于混乱" value="您发布的内容排版、错字过于混乱"></el-option>
+						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
+						<el-option label="您发布的内容不符合栏目属性" value="您发布的内容不符合栏目属性"></el-option>
+					</el-select>
+				</el-form-item>
+				<el-form-item label="审核信息" :label-width="formLabelWidth">
+					<el-input v-model="form.name" auto-complete="off"></el-input>
+				</el-form-item>
+
+			</el-form>
+			<div slot="footer" class="dialog-footer">
+				<el-button @click="dialogFormVisible = false">取 消</el-button>
+				<el-button type="primary" @click="toAudits1()" >确 定</el-button>
+			</div>
+		</el-dialog>
+  	<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose2">
+				<el-radio v-model="recommendRadio" label="2" class="marBo4">不通过</el-radio><br/>
+				<el-radio v-model="recommendRadio" label="1">通过</el-radio>
+				<span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible1 = false;recommendRadio=''" class="light_btn">取 消</el-button>
+          <el-button type="primary" @click="toAudits()" class="light_btn">确 定</el-button>
+        </span>
+			</el-dialog>
+  	
+  	
     <div class="page-header">
       <el-row>
         <el-col :span="4">
@@ -57,8 +87,8 @@
                 <template slot-scope="scope">
                     <router-link :to="{name:'second-market',params:{id:scope.row.id}}" ><el-button type="text" v-if="scope.row.status=='2'">审核</el-button></router-link>
                     <el-button type="text" :disabled="true"  v-if="scope.row.status=='3'">审核</el-button>
-                    <router-link :to="{name:'market-lookes'}" ><el-button type="text" v-if="scope.row.status=='4'">查看</el-button></router-link>
-                   <router-link :to="{name:'market-lookes'}" > <el-button type="text" v-if="scope.row.status=='5'">查看</el-button></router-link>
+                    <router-link :to="{name:'market-lookes',params:{id:scope.row.id}}" ><el-button type="text" v-if="scope.row.status=='4'">查看</el-button></router-link>
+                   <router-link :to="{name:'market-lookes',params:{id:scope.row.id}}" > <el-button type="text" v-if="scope.row.status=='5'">查看</el-button></router-link>
                     
                 </template>
               </el-table-column>
@@ -299,12 +329,77 @@ export default {
     value:'',
     ids:[],
     multipleSelection:[],
+    //弹框
+    recommendRadio: '',
+				dialogTableVisible: false,
+				dialogFormVisible: false,
+				dialogVisible1: false,
+				form: {
+					name: '',
+					region: '',
+					date1: '',
+					date2: '',
+					delivery: false,
+					type: [],
+					resource: '',
+					desc: ''
+				},
+				formLabelWidth: '120px',
     }
   },
   created(){
     this.getAuditAll();
   },
   methods: {
+//	通过
+		toAudits(){
+			if(this.recommendRadio == '1'){	// 通过
+				
+					console.log(this.recoIndex)
+					var params = {
+						id:this.ids.join(','),
+						tokenId: this.$store.state.user.tokenId,
+						status: '5',
+					}
+					this.$post('industry/save',params).then(res => {
+						console.log(res,res.code);
+						this.getAuditAll();
+
+					})
+					// this.tableData[this.recoIndex].top_flag = "1";
+					this.dialogVisible1 = false;
+				}else if(this.recommendRadio == '2'){
+					this.dialogVisible1 = false;
+				this.dialogFormVisible = true	
+				}
+		},
+		//不通过
+			toAudits1(){
+					console.log(this.recoIndex)
+					var params = {
+						id:this.ids.join(','),
+						tokenId: this.$store.state.user.tokenId,
+						status: '5',
+						checkCause:this.form.region,
+         		checkMessage:this.form.name
+					}
+					this.$post('industry/save',params).then(res => {
+						console.log(res,res.code);
+						this.getAuditAll();
+
+					})
+					this.dialogFormVisible = false;
+		},
+  	//关闭不通过弹窗
+  	handleClose2(done) {
+				this.$confirm('确认关闭？')
+					.then(_ => {
+						this.recommendRadio='';
+						done();
+					})
+					.catch(_ => {});
+			},
+  	
  // 批量提交审核
     toAudited(){
       if(this.ids == false){
@@ -314,34 +409,7 @@ export default {
         });
         return;
       }
-      this.$confirm('确定要提交吗?', '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'info'
-      }).then(() => {
-        var params = {
-          tokenId:this.$store.state.user.tokenId,
-          ids:this.ids.join(','),
-          status:5,
-          checkCause:'2',
-          checkMessage:'审核信息'
-        }
-        console.log(params)
-        this.$post('industry/checkByIds',params).then(res => {
-          console.log(res)
-          this.activeName = 'first';
-          this.getAuditAll();
-          this.$message({
-            type: 'success',
-            message: '提交成功!'
-          });
-        })
-      }).catch(() => {
-        this.$message({
-          type: 'info',
-          message: '操作已取消'
-        });          
-      });
+      this.dialogVisible1 = true;
     },
      // 批量审核 之 复选框操作 获取要批量操作的行情
     handleSelectionChange(val){

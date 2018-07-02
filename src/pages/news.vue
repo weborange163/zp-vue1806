@@ -161,7 +161,7 @@
           <el-button size="small" type="primary" @click="toPublish()">发 布</el-button>
         </span>
 			</el-dialog>
-			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose2">
+			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" >
 				<el-radio v-model="recommendRadio" label="1" class="marBo4">置顶-新闻推荐列表区</el-radio><br/>
 				<el-radio v-model="recommendRadio" label="2">推荐到banner</el-radio>
 				<span slot="footer" class="dialog-footer">
@@ -169,14 +169,41 @@
           <el-button type="primary" @click="sureReco" class="light_btn">确 定</el-button>
         </span>
 			</el-dialog>
-			<el-dialog
+			<el-dialog center
 					width="30%"
-					title="内层 Dialog"
 					:visible.sync="bannerDialog"
 					append-to-body>
+					<el-form :model="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
+						<el-form-item label="原文标题">
+							<el-input v-model="bannerForm.title" :disabled="true"></el-input>
+						</el-form-item>
+						<el-form-item label="短标题" prop="title_short">
+							<el-input v-model="bannerForm.title_short"></el-input>
+						</el-form-item>
+						<el-form-item label="banner图片" label-width="110px" required>
+							<el-upload 
+								:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
+								ref="upload" name="newsFile"
+								list-type="picture-card"
+								:auto-upload="false" :on-exceed="handleExceed"
+								:on-preview="handlePictureCardPreview"
+								:on-remove="handleRemove">
+								<i class="el-icon-plus"></i>
+							</el-upload>
+							<el-dialog :visible.sync="dialogVisible2">
+								<img width="100%" :src="dialogImageUrl" alt="">
+							</el-dialog>
+						</el-form-item>
+						<el-form-item label="类型">
+							<el-input v-model="bannerForm.type" :disabled="true"></el-input>
+						</el-form-item>
+						<el-form-item label="链接">
+							<el-input v-model="bannerForm.link" :disabled="true"></el-input>
+						</el-form-item>
+					</el-form>
 					<span slot="footer" class="dialog-footer">
 						<el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
-						<el-button type="primary" @click="toBanner" class="light_btn">确 定</el-button>
+						<el-button type="primary" @click="toBanner" class="light_btn">保 存</el-button>
 					</span>
 				</el-dialog>
 			<!-- 分页 -->
@@ -185,11 +212,24 @@
 	</div>
 </template>
 <script type="text/javascript">
-	import { HTMLDecode } from '@/utils/auth'
+	import { HTMLDecode,getBaceUrl } from '@/utils/auth'
+
 	export default {
 		name: 'home',
 		data() {
 			return {
+				bannerForm:{
+					title:'',
+					title_short:'',
+					articleId:'',
+					type:'新闻',
+					link:''
+				},
+				bannerRules: {
+					title_short: [
+            { required: true, message: '请输入短标题', trigger: 'blur' }
+          ]
+				},
 				bannerDialog:false,
 				loading:false,
 				multipleSelection: [],
@@ -199,10 +239,11 @@
 					author: 'web'
 				}],
 				activeTab: 'first',
-				recommendRadio: '',
-				recoIndex:0,
+				recommendRadio: '', // 推荐到banner/置顶的radio值
+				recoIndex:0,	// 点击推荐到时的表格的index
 				dialogVisible: false,
 				dialogVisible1: false,
+				dialogVisible2: false,
 				per_page1: 5,
 				per_page2:5,
 				total_pages1: 0,
@@ -241,12 +282,16 @@
 				value1: '',
 				value2: '',
 				dataList: [],
-				ids:[]
+				ids:[],
+				baceUrl:'',
+				dialogImageUrl:'',
+				uploadData:{}
 			}
 		},
 		created(){
 			this.initParams();
 			this.newsList(this.params);
+			this.baceUrl = getBaceUrl();
 		},
 		mounted() {
 			// this.db();
@@ -257,6 +302,17 @@
 			}
 		},
 		methods: {
+			handleRemove(file, fileList) {
+        console.log(file, fileList);
+      },
+      handlePictureCardPreview(file) {
+				console.log(file)
+        this.dialogImageUrl = file.url;
+        this.dialogVisible2 = true;
+			},
+			getFullUrl(){
+				return (this.baceUrl+'/bannerInfo/save')
+			},
 			// 置顶排序
 			publishWaitTop(){
 				this.dialogVisible = true;
@@ -343,7 +399,7 @@
 //						status:this.value,
 						publishSource:this.value1,
 						timeType:this.value2,
-        				simpleParameter:this.inputs,
+        		simpleParameter:this.inputs,
 	////					开始也就是逗号前面的
 						startTime:this.value6[0],
 	////					结束也就是逗号后面的
@@ -396,8 +452,31 @@
 				this.creatList(params);
 
 			},
+			// 点击 推荐到banner 保存按钮
 			toBanner(){
-				
+					this.$refs.bannerForm.validate((valid) => {
+						if(valid){
+							this.uploadData={
+								tokenId:this.$store.state.user.tokenId,
+								titleShort:this.bannerForm.title_short,
+								bannerType:this.bannerForm.type,
+								linkId:this.bannerForm.link,
+								articleId:this.bannerForm.articleId,
+							}
+							setTimeout(() => {
+								this.$refs.upload.submit();
+								this.$message({
+									type: 'success',
+									message: '添加成功!'
+								});
+								setTimeout(() => {
+									this.newsList();
+								}, 1000);
+								this.bannerDialog = false;
+							}, 0);
+						}
+					})
+        
 			},
 			// 批量提交审核
 			toAudits(){
@@ -473,19 +552,21 @@
 								type: 'warning'
 							});
 						}
-						
 						this.newsList();
-
 					})
 					// this.tableData[this.recoIndex].top_flag = "1";
 				}else if(this.recommendRadio == '2'){	// 推荐到banner
 					console.log('推荐到banner');
+					// this.tableData[this.recoIndex].title,
+					this.bannerForm.title = this.tableData[this.recoIndex].title;
+					this.bannerForm.link = this.tableData[this.recoIndex].id;
+					this.bannerForm.articleId = this.tableData[this.recoIndex].articleId;
 					this.dialogVisible1 = false;
 					this.bannerDialog =true;
-
+				}else{
+					 this.$message('请选择置顶或者banner');
 				}
-				this.dialogVisible1 = false;
-
+				// this.dialogVisible1 = false;
 			},
 			//推荐到
 			recommend(index,row) {
@@ -496,11 +577,9 @@
 					});
 				}else{
 					this.dialogVisible1 = true;
-					this.recoIndex = index;
+					this.recoIndex = index;	// 保存当前的index
 					console.log(row,this.recoIndex);
 				}
-				
-
 			},
 			//取消置顶
 			cancelUp(row) {
@@ -511,11 +590,12 @@
 				}).then(() => {
 					var params = {
 						tokenId:this.$store.state.user.tokenId,
-						id: this.tableData[this.recoIndex].id,
+						id: row.id,
 						topFlag:'0'
 					}
+					console.log(params.id)
 					this.$post('news/top',params).then(res => {
-						// console.log(res);
+						console.log(res);
 						this.$message({
 							type: 'success',
 							message: '操作成功!'
@@ -547,14 +627,6 @@
 				this.$confirm('确认关闭？')
 					.then(_ => {
 
-						done();
-					})
-					.catch(_ => {});
-			},
-			handleClose2(done) {
-				this.$confirm('确认关闭？')
-					.then(_ => {
-						this.recommendRadio='';
 						done();
 					})
 					.catch(_ => {});
@@ -601,11 +673,24 @@
 			},
 			btnTable(row) {
 				return 'btnTable'
-			}
+			},
+			handleExceed(files, fileList) {
+        this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+      },
 		}
 	}
 </script>
 <style type="text/css">
+	.bannerForm .el-upload--picture-card{
+		width: 80px;
+		height: 80px;
+		line-height: 88px;
+	}
+	.bannerForm .el-upload-list--picture-card .el-upload-list__item{
+		width: 80px;
+		height: 80px;
+		line-height: 88px;
+	}
 	.el-range-editor.el-input__inner {
 		padding: 0;
 	}

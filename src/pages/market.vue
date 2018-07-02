@@ -48,7 +48,7 @@
 							<router-link :to="{name:'market-add'}">
 								<el-button class="light_btn">添加行情</el-button>
 							</router-link>
-							<el-button class="light_btn" @click="dialogVisible = true">置顶排序</el-button>
+							<el-button class="light_btn" @click="publishWaitTop()">置顶排序</el-button>
 							<el-button class="light_btn" @click.native.prevent="getMarket1()">刷新</el-button>
 						</div>
 						<el-table :data="tableData" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
@@ -93,7 +93,7 @@
 									<!--v-if="scope.row.isUping"-->
 								
 										<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-										<el-button type="text" v-if="scope.row.top_flag=='0'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+										<el-button type="text" v-if="scope.row.top_flag=='0'"   style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
 										
 										<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp2(scope.$index, scope.row)"> 提交审核 </el-button>
 
@@ -108,7 +108,7 @@
 
 									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
 
-									<router-link :to="{name:'market-edit'}">
+									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
 										<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
 
@@ -171,8 +171,33 @@
 					
 				</el-tab-pane>
 			</el-tabs>
-
 			<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+				<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
+					<el-table-column prop="title" label="标题"></el-table-column>
+					<el-table-column prop="name" label="操作" width="70" class="text-center">
+						<template slot-scope="scope">
+							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
+								<i class="iconfont icon-up"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-up unclick"></i>
+							</el-button>
+							<el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'isDown')">
+								<i class="iconfont icon-down"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-down" style="cursor:not-allowed"></i>
+							</el-button>
+						</template>
+					</el-table-column>
+				</el-table>
+				<span slot="footer" class="dialog-footer">
+          <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+          <el-button size="small" type="primary" @click="toPublish()">发 布</el-button>
+        </span>
+			</el-dialog>
+
+			<!--<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
 				<el-table :data="upData" border style="width: 100%">
 					<el-table-column prop="title" label="标题"></el-table-column>
 					<el-table-column prop="name" label="操作" width="70" class="text-center">
@@ -194,9 +219,9 @@
 				</el-table>
 				<span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="dialogVisible = false">发 布</el-button>
+          <el-button type="primary" @click="toPublish()">发 布</el-button>
         </span>
-			</el-dialog>
+			</el-dialog>-->
 			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose">
 				<!--<el-radio v-model="recommendRadio" label="1">推荐到banner</el-radio><br/>-->
 				<el-radio v-model="recommendRadio" label="2">置顶-列表区</el-radio>
@@ -260,6 +285,7 @@
 				recommendRadio: 1,
 				dialogVisible: false,
 				dialogVisible1: false,
+				loading:false,
 				apps: false,
 				per_page: 10, //每页显示几条
 				total_pages: 100, // 总页数
@@ -358,6 +384,56 @@
         // console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
     },
 		methods: {
+			//实现置顶排序的方法
+			changeIndex(index, rows, dir) {
+				if(dir == 'isUp') {
+					var a = rows[index]
+					var b = rows[index - 1]
+					rows.splice(index - 1, 1, a)
+					rows.splice(index, 1, b)
+				} else {
+					var a = rows[index]
+					var b = rows[index + 1]
+					rows.splice(index + 1, 1, a)
+					rows.splice(index, 1, b)
+				}
+			},
+			
+			
+			// 置顶排序
+			publishWaitTop(){
+				this.dialogVisible = true;
+				this.loading = true;
+				this.$get('/industry/findIndustryList',{tokenId:this.$store.state.user.tokenId,status:'5',topFlag:'1'}).then(res =>{
+					this.loading = false;
+					console.log(res)
+					this.upData = res.data;
+				})
+			},
+			//提交置顶排序(弹框点击发布)
+			toPublish(){
+				// console.log(this.upData)
+				var newsInfos =[];
+				this.upData.map((item, index) => {
+				//	newsInfos.push({id:item.id,orderNum:index+1})
+					newsInfos.push(item.id);
+				})
+				var params = {
+					tokenId:this.$store.state.user.tokenId,
+					// newsInfos:JSON.stringify(newsInfos)
+					ids:newsInfos.join(',')
+				}
+				console.log(params);
+				this.$post('/industry/publishOrederByIds',params).then(res => {
+					console.log(res)
+				})
+				this.dialogVisible = false
+			},
+			
+			
+			
+			
+			
 			//列表
 			getMarket() {
 //				alert(Date.parse(this.value6[0]))
@@ -394,14 +470,6 @@
 					this.total_pages1 = res.data[0].total;
 				})
 			},
-//<<<<<<< .mine
-//=======
-			
-			
-//			seach(){
-//				this.getMarket(); 
-//			},
-//>>>>>>> .r386
 			marketShow(row) {
 				console.log(row.id);
 				var params = {
