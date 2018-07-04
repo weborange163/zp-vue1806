@@ -93,7 +93,8 @@
 									<!--v-if="scope.row.isUping"-->
 								
 										<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-										<el-button type="text" v-if="scope.row.top_flag=='0'"   style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+										<el-button type="text" v-else-if="scope.row.top_flag=='0' && scope.row.status=='1'" :disabled="true"  style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+										<el-button type="text" v-else-if="scope.row.top_flag=='0'"   style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
 										
 										<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp2(scope.$index, scope.row)"> 提交审核 </el-button>
 
@@ -108,7 +109,7 @@
 
 									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
 
-									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
+									<router-link :to="{name:'market-edit',params:{rowInfo:scope.row}}">
 										<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
 
@@ -196,32 +197,6 @@
           <el-button size="small" type="primary" @click="toPublish()">发 布</el-button>
         </span>
 			</el-dialog>
-
-			<!--<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
-				<el-table :data="upData" border style="width: 100%">
-					<el-table-column prop="title" label="标题"></el-table-column>
-					<el-table-column prop="name" label="操作" width="70" class="text-center">
-						<template slot-scope="scope">
-							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
-								<i class="iconfont icon-up"></i>
-							</el-button>
-							<el-button type="text" v-else disabled>
-								<i class="iconfont icon-up unclick"></i>
-							</el-button>
-							<el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'isDown')">
-								<i class="iconfont icon-down"></i>
-							</el-button>
-							<el-button type="text" v-else disabled>
-								<i class="iconfont icon-down" style="cursor:not-allowed"></i>
-							</el-button>
-						</template>
-					</el-table-column>
-				</el-table>
-				<span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible = false">取 消</el-button>
-          <el-button type="primary" @click="toPublish()">发 布</el-button>
-        </span>
-			</el-dialog>-->
 			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose">
 				<!--<el-radio v-model="recommendRadio" label="1">推荐到banner</el-radio><br/>-->
 				<el-radio v-model="recommendRadio" label="2">置顶-列表区</el-radio>

@@ -42,10 +42,10 @@
 			<el-form ref="form2" :model="form2" label-width="80px" class="up_form">
 				<div style="width: 40%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
 					<el-form-item label="文章标题" prop="title">
-						<el-input v-model="datas.title" placeholder="请输入标题"></el-input>
+						<el-input v-model="form2.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
-					<p>{{$route.params.id}}</p>
-					 <!--<el-form-item label="文章内容" prop="content" class="editor">
+					<!--<p>{{$route.params.id}}</p>-->
+					 <el-form-item label="文章内容" prop="content" class="editor">
 						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
 						:width="quill.width" :getContent="onEditorChange"
 						:has-border="quill.border" :zIndex="quill.zIndex"
@@ -55,11 +55,11 @@
 						:fullscreen="quill.full"
 						@upload="uploadImg" @blur="onEditorBlur($event)"
 						></m-quill-editor>
-					</el-form-item>-->
+					</el-form-item>
 				</div>
 				<div style="width: 35%;float:left;padding:15px;">
 					<el-form-item label="发布到:">
-						<el-input :disabled="true" v-model="form2.classifyTypes" style="width:173px;"></el-input>
+						<el-input :disabled="true" v-model="classifyTypes" style="width:173px;"></el-input>
 					</el-form-item>
 
 					<el-select v-model="value" name="classifyType" placeholder="请选择">
@@ -102,7 +102,7 @@
 						</el-dialog>
 					</el-form-item>
 					<el-form-item label="Tag标签:">
-						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="datas.tagLabel"></el-input>
+						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form2.tagLabel"></el-input>
 					</el-form-item>
 					<!--<el-form-item label="关键词:">
         							<el-input placeholder="用英文 “ , ” 隔开"></el-input>
@@ -138,11 +138,12 @@
 				editorOption: {},
 				dialogImageUrl: '',
 				dialogVisible: false,
+				classifyTypes: '行情',
 				classifyType: '',
 				form2: {
 					title: '',
 					content: '',
-					classifyTypes: '行情',
+					
 					userId: '1',
 					imgType: '1',
 					tagLabel: '',
@@ -228,24 +229,24 @@
 				id: this.$route.params.id
 			}).then(res => {
 				//  		console.log(res.data[0].industry)
-				this.datas = res.data[0].industry
+				this.form2 = res.data[0].industry
 			})
 			//  	下拉菜单
 			this.$get('/industryCategory/findIndustryCategoryList', {
 				tokenId: this.$store.state.user.tokenId
 			}).then(res => {
-				//  		console.log(res.data)
+				  		console.log(res.data)
 				this.classifyType = res.data
 			})
-			//  	图片回显	
-			this.$get('/images/showImage', {
-				tokenId: this.$store.state.user.tokenId,
-				id: '459733906246074368'
-			}).then(res => {
-//				console.log(res);
-				//  		alert(res)
-				this.classifyType = res.data
-			})
+//			//  	图片回显	
+//			this.$get('/images/showImage', {
+//				tokenId: this.$store.state.user.tokenId,
+//				id: '459733906246074368'
+//			}).then(res => {
+////				console.log(res);
+//				//  		alert(res)
+//				this.classifyType = res.data
+//			})
 
 			// console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
 		},
@@ -284,7 +285,9 @@
 						console.log(1111111, res);
 					}
 				});
-
+				setTimeout(() => {
+						this.$router.push({name: 'audit-market'});
+						}, 1000);
 //				return true;
 			},
 
@@ -321,13 +324,9 @@
 			onEditorReady(quill) {
 				console.log('editor ready!', quill);
 			},
-			onEditorChange({
-				quill,
-				html,
-				text
-			}) {
-				console.log('editor change!', quill, html, text);
-				this.content = html;
+			onEditorChange({val}) {
+					console.log('editor change!', val);
+//					this.content = html;
 			},
 			// 文件上传的删除  和放大!
 			handleRemove(file, fileList) {

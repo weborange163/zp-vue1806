@@ -128,9 +128,10 @@
               <el-table-column label="创建时间" prop="create_time" width="200"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
                 <template slot-scope="scope">
-                    <el-button type="text" style="margin-right:8px;vertical-align:middle;">
-                    	查看
-                    </el-button>
+                   <router-link :to="{name:'second-market',params:{id:scope.row.id}}" ><el-button type="text" v-if="scope.row.status=='2'">审核</el-button></router-link>
+                    <el-button type="text" :disabled="true"  v-if="scope.row.status=='3'">审核</el-button>
+                    <router-link :to="{name:'market-lookes',params:{id:scope.row.id}}" ><el-button type="text" v-if="scope.row.status=='4'">查看</el-button></router-link>
+                   <router-link :to="{name:'market-lookes',params:{id:scope.row.id}}" > <el-button type="text" v-if="scope.row.status=='5'">查看</el-button></router-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -168,7 +169,7 @@
               <el-table-column label="创建时间" prop="create_time" width="200"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
                 <template slot-scope="scope">
-                    <el-button type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button>
+                     <router-link :to="{name:'market-lookes',params:{id:scope.row.id}}" > <el-button type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button></router-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -205,7 +206,7 @@
               <el-table-column label="创建时间" prop="create_time" width="200"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
                 <template slot-scope="scope">
-                    <el-button type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button>
+                	 <router-link :to="{name:'market-lookes',params:{id:scope.row.id}}" > <el-button type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button></router-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -241,7 +242,7 @@
               <el-table-column label="创建时间" prop="create_time" width="200"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
                 <template slot-scope="scope">
-                    <el-button type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button>
+                    <router-link :to="{name:'market-lookes',params:{id:scope.row.id}}" > <el-button type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button></router-link>
                 </template>
               </el-table-column>
             </el-table>

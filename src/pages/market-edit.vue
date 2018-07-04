@@ -17,7 +17,7 @@
             <el-form ref="form2" :model="form2" label-width="80px" class="up_form">
                 <div style="width: 40%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
                     <el-form-item label="文章标题" prop="title">
-                        <el-input v-model="datas.title" placeholder="请输入标题"></el-input>
+                        <el-input v-model="form2.title" placeholder="请输入标题"></el-input>
                     </el-form-item>
                      <el-form-item label="文章内容" prop="content" class="editor">
 						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
@@ -45,21 +45,6 @@
 					      :value="item.id">
 					    </el-option>
 					  </el-select>
-					  
-					  
-                    <!--<el-form-item label="来源:">
-        							<el-radio-group v-model="form.resource" required @change="test()">
-        								<el-radio label="2" >原创</el-radio>
-        								<el-radio label="1" >转载</el-radio>
-        							</el-radio-group>
-        							<el-select v-model="form.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
-        								<el-option label="第一网站" value="shanghai"></el-option>
-        								<el-option label="第二网站" value="beijing"></el-option>
-        							</el-select>
-        						</el-form-item>-->
-                    <!--<el-form-item label="作者:" :required="true">
-        							<el-input v-model="form.author"></el-input>
-        						</el-form-item>-->
                     <el-form-item label="发布账号:" prop="userId" label-width="82">
                         <el-select v-model="form2.userId" placeholder="请选择发布账号">
                             <el-option label="小号1" value="1"></el-option>
@@ -83,7 +68,7 @@
                         </el-dialog>
                     </el-form-item>
                     <el-form-item label="Tag标签:">
-                        <el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="datas.tagLabel"></el-input>
+                        <el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form2.tagLabel"></el-input>
                     </el-form-item>
                     <!--<el-form-item label="关键词:">
         							<el-input placeholder="用英文 “ , ” 隔开"></el-input>
@@ -122,117 +107,57 @@ export default {
             dialogImageUrl: '',
             dialogVisible: false,
             classifyType:'',
-            form2: {
-                title: '',
-                content: '',
-                classifyTypes: '行情',
-                userId: '1',
-                imgType: '1',
-                tagLabel: '',
-                resource: '',
-                source:'',
-                type: [],
-                desc: '',
-                author: '',
-                img: ''
-                
-            },
+            form2: {},
             uploadData: {},
-//	            options: [{
-//	          value: '选项1',
-//	          label: '黄金糕'
-//	        }, {
-//	          value: '选项2',
-//	          label: '双皮奶'
-//	        }, {
-//	          value: '选项3',
-//	          label: '蚵仔煎'
-//	        }, {
-//	          value: '选项4',
-//	          label: '龙须面'
-//	        }, {
-//	          value: '选项5',
-//	          label: '北京烤鸭'
-//	        }],
 	        value: '',
-	        datas:''
-//          rules2: {
-//              title: [
-//                  { required: true, message: '请输入标题', trigger: 'blur' },
-//                  { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
-//              ],
-//              content: [
-//                  { required: true, message: '请输入内容', trigger: 'change' }
-//              ],
-////              classifyType: [
-////                  { required: true, message: '请输入内容', trigger: 'change' }
-////              ],
-//              userId: [
-//                  { required: true, message: '请选择发布账号', trigger: 'change' }
-//              ],
-//              imgType: [
-//                  { required: true, message: '请选择图片', trigger: 'change' }
-//              ],
-//              resource: [
-//                  { required: true, message: '请选择活动资源', trigger: 'change' }
-//              ],
-//              desc: [
-//                  { required: true, message: '请填写活动形式', trigger: 'blur' }
-//              ],
-//               source: [
-//          { required: true, message: '请选择活动资源', trigger: 'change' }
-//        ]
-//          }
         };
 		},
 		created(){
-			this.baceUrl = getBaceUrl();
-			// console.log(this.baceUrl)
-			
+			this.baceUrl = getBaceUrl();			
 		},
     mounted() {
 //  	修改查看
-    	this.$get('/industry/get',{tokenId:this.$store.state.user.tokenId,id:this.$route.params.id}).then(res => {
-//  		console.log(res.data[0].industry)
-    		this.datas = res.data[0].industry
+    	this.$get('/industry/get',{tokenId:this.$store.state.user.tokenId,id:this.$route.params.rowInfo.id}).then(res => {
+    		console.log(res.data[0].industry),
+    		this.form2 = res.data[0].industry
     	})
 //  	下拉菜单
-    	this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
-//  		console.log(res.data)
-    		this.classifyType = res.data
-    	})
+//  	this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
+////  		console.log(res.data)
+//  		this.classifyType = res.data
+//  	})
 //  	图片回显	
-		this.$get('/images/showImage',{tokenId:this.$store.state.user.tokenId,id:'459733906246074368'}).then(res => {
-    		console.log(res);
-    		alert(res)
-    		this.classifyType = res.data
-    	})
-    	
-    	
-    	
+//		this.$get('/images/showImage',{tokenId:this.$store.state.user.tokenId,id:'459733906246074368'}).then(res => {
+////  		console.log(res);
+////  		alert(res)
+//  		this.classifyType = res.data
+//  	})
         // console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
     },
     created(){
 			this.baceUrl = getBaceUrl();
 		},
-    
-    
     methods: {
     	// 富文本图片上传
 			uploadImg(file,insert){
-				console.log(file)
+//				console.log(file)
 				let params = new FormData(); // 创建form对象
 				params.append('file',file,file.name);
 				// params.append('name',file.name);
-				console.log(file.name)
+//				console.log(file.name)
 				
 				this.$post('images/upload',params).then(res => {
 					let url = this.baceUrl + res.data[0].showUrl;
 					// console.log(url)
 					insert(url, 'center')
-					console.log(res);
+//					console.log(res);
 				})
 			},
+			// 获取富文本的内容
+			onEditorBlur({quill, html,text}) {
+				// console.log('editor blur!', quill, html, text)
+//				console.log(this.form2.content)
+      },
 			getFullUrl(){
 				console.log(this.baceUrl+'/industry/save')
 				return (this.baceUrl+'/industry/save')
@@ -242,7 +167,7 @@ export default {
 			},
 			toAudit(formName, status) {
 					this.$refs[formName].validate((valid) => {
-							console.log(valid);
+//							console.log(valid);
 							// console.log(this.$store.state.user.tokenId);
 							if (valid) {
 									var params = {
@@ -294,9 +219,9 @@ export default {
 			onEditorReady(quill) {
 					console.log('editor ready!', quill);
 			},
-			onEditorChange({ quill, html, text }) {
-					console.log('editor change!', quill, html, text);
-					this.content = html;
+			onEditorChange({val}) {
+					console.log('editor change!', val);
+//					this.content = html;
 			},
 			// 文件上传的删除  和放大!
 			handleRemove(file, fileList) {
@@ -308,9 +233,15 @@ export default {
 					this.dialogVisible = true;
 					console.log(this.dialogImageUrl);
 					alert('放大');
-			}
+					
+			},
+			watch: {
+    // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
+      '$route': 'getParams'
+    }
     }
 };
+	
 </script>
 <style type="text/css">
 .up_form .el-input__inner {

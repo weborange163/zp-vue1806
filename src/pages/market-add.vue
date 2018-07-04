@@ -227,6 +227,8 @@ export default {
 			fileOver(){
 				this.$message('只允许添加一张图片,如果替换请删除后再上传');
 			},
+			
+			//仅保存
 			toAudit1(formName, status) {
 					this.$refs[formName].validate((valid) => {
 							console.log(valid);
@@ -272,6 +274,54 @@ export default {
 					});
 					return true;
 			},
+			
+			toAudit(formName, status) {
+					this.$refs[formName].validate((valid) => {
+							console.log(valid);
+							// console.log(this.$store.state.user.tokenId);
+							if (valid) {
+									var params = {
+											tokenId: this.$store.state.user.tokenId,
+											status: '2',
+											title: this.form2.title,
+											content: this.form2.content,
+//											classifyType: this.form2.classifyType,
+											userId: this.form2.userId,
+											imgType: this.form2.imgType,
+											tagLabel: this.form2.tagLabel,
+											publishSource:'1',
+											classifyType:this.value,
+											topFlag:this.form2.topFlag,
+											orderNum:this.form2.orderNum
+									};
+									this.uploadData = params;
+									setTimeout(() => {
+										this.$refs.upload.submit();
+										this.$message({
+											type: 'success',
+											message: '添加成功!'
+										});
+										setTimeout(() => {
+											this.$router.push({name: 'market'});
+										}, 1000);
+										
+									}, 0);
+									// console.log(params)
+//									 this.$post('industry/save', params).then(res => {
+//									     if (res.code === 0) {
+//									         console.log(1111111, res);
+//									     }
+//									 });
+									return true;
+							}else{
+								console.log('error submit!!');
+								return false;
+							}
+					});
+					return true;
+			},
+			
+			
 			onEditorBlur(quill) {
 					console.log('editor blur!', quill);
 					console.log(this.form2.content);

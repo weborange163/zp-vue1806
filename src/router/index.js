@@ -23,6 +23,7 @@ export default new Router({
         {path:'/news/add',name:'news-add',component: page('news-add')},
         {path:'/news/second',name:'news-second',component: page('news-second')},
         {path:'/news/lookes',name:'news-lookes',component: page('news-lookes')},
+        {path:'/news/edit',name:'news-edit',component: page('news-edit')},
         {path:'/member',name:'member',component: page('member')},
         {path:'/member/info',name:'member-info',component: page('member-info')},
         {path:'/market',name:'market',component: page('market')},

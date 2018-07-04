@@ -20,7 +20,7 @@
 				<el-button type="primary" @click="toAudits1()" >确 定</el-button>
 			</div>
 		</el-dialog>
-  	<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose2">
+  	<el-dialog title="是否通过审核" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose2">
 				<el-radio v-model="recommendRadio" label="2" class="marBo4">不通过</el-radio><br/>
 				<el-radio v-model="recommendRadio" label="1">通过</el-radio>
 				<span slot="footer" class="dialog-footer">
@@ -297,23 +297,21 @@ export default {
       total_pages5:0,
       
        //弹框
-    recommendRadio: '',
-				dialogTableVisible: false,
-				dialogFormVisible: false,
-				dialogVisible1: false,
-				form: {
-					name: '',
-					region: '',
-					date1: '',
-					date2: '',
-					delivery: false,
-					type: [],
-					resource: '',
-					desc: ''
-				},
-				formLabelWidth: '120px',
-   
-      
+      recommendRadio: '',
+      dialogTableVisible: false,
+      dialogFormVisible: false,
+      dialogVisible1: false,
+      form: {
+        name: '',
+        region: '',
+        date1: '',
+        date2: '',
+        delivery: false,
+        type: [],
+        resource: '',
+        desc: ''
+      },
+			formLabelWidth: '120px',
       btnTable:btnTable,
      options: [{
       value: '1',
@@ -343,17 +341,24 @@ export default {
   	//	通过
 		toAudits(){
 			if(this.recommendRadio == '1'){	// 通过
-				
 					console.log(this.recoIndex)
 					var params = {
-						id:this.ids.join(','),
+						ids:this.ids.join(','),
 						tokenId: this.$store.state.user.tokenId,
 						status: '4',
 					}
 					this.$post('news/check',params).then(res => {
 						console.log(res,res.code);
-						this.getAuditlist();
-
+						var params = {
+              tokenId:this.$store.state.user.tokenId,
+              status:'1',
+              limit:this.per_page2,
+              offset:this.currentPage2
+            }
+            this.$post('news/list',params).then(res =>{
+              this.audit_no = res.data[0].rows;
+              this.total_pages2 = res.data[0].total;
+            })
 					})
 					// this.tableData[this.recoIndex].top_flag = "1";
 					this.dialogVisible1 = false;
@@ -366,7 +371,7 @@ export default {
 			toAudits1(){
 					console.log(this.recoIndex)
 					var params = {
-						id:this.ids.join(','),
+						ids:this.ids.join(','),
 						tokenId: this.$store.state.user.tokenId,
 						status: '3',
 						checkReason:this.form.region,
@@ -388,7 +393,6 @@ export default {
 					})
 					.catch(_ => {});
 			},
-  	
  // 批量提交审核
     toAudited(){
       if(this.ids == false){
@@ -408,44 +412,6 @@ export default {
 					this.ids.push(item.id);
 				})
     },
-    // 批量提交审核
-//  toAudited(){
-//    if(this.ids == false){
-//      this.$message({
-//        message: '请勾选需要提交审核的文章!',
-//        type: 'warning'
-//      });
-//      return;
-//    }
-//    this.$confirm('确定要提交吗?', '提示', {
-//      confirmButtonText: '确定',
-//      cancelButtonText: '取消',
-//      type: 'info'
-//    }).then(() => {
-//      var params = {
-//        tokenId:this.$store.state.user.tokenId,
-//        ids:this.ids.join(','),
-//        status:4,
-//        checkReason:'审核原因',
-//        checkMessage:'审核信息'
-//      }
-//      console.log(params)
-//      this.$post('news/check',params).then(res => {
-//        console.log(res)
-//        this.activeName = 'first';
-//        this.getAuditlist();
-//        this.$message({
-//          type: 'success',
-//          message: '提交成功!'
-//        });
-//      })
-//    }).catch(() => {
-//      this.$message({
-//        type: 'info',
-//        message: '操作已取消'
-//      });          
-//    });
-//  },
     //去审核,模拟实现
     toAudit(row){
       // console.log(row.id);
@@ -492,6 +458,7 @@ export default {
         this.total_pages1 = res.data[0].total;
       })
     },
+    // 切换tab 
     handleClick(tab, event) {
       console.log(tab.name, event);
       if(tab.name == 'second'){
@@ -507,46 +474,42 @@ export default {
         })
 
       }else if(tab.name == 'third'){ 	
-					var params = {
-						tokenId:this.$store.state.user.tokenId,
-						limit:this.per_page3,
-						offset:this.currentPage3,
-						status:'2'
-					}
-			this.$post('/news/list',params).then(res =>{
-				
-        console.log(res.data[0].rows)
-        this.audit_no	 = res.data[0].rows;
-        this.total_pages3 = res.data[0].total;
-      })
-				}else if(tab.name == 'fourth'){ 	
-					var params = {
-						tokenId:this.$store.state.user.tokenId,
-						limit:this.per_page4,
-						offset:this.currentPage4,
-						status:'4'
-					}
-			this.$post('news/list',params).then(res =>{
-				
-        console.log(res.data[0].rows)
-        this.audit_no	 = res.data[0].rows;
-        this.total_pages4 = res.data[0].total;
-      })
-				}else if(tab.name == 'fifth'){ 	
-					var params = {
-						tokenId:this.$store.state.user.tokenId,
-						limit:this.per_page5,
-						offset:this.currentPage5,
-						status:'3'
-					}
-			this.$post('news/list',params).then(res =>{
-				
-        console.log(res.data[0].rows)
-        this.audit_no	 = res.data[0].rows;
-        this.total_pages5 = res.data[0].total;
-      })
-				}
-
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          limit:this.per_page3,
+          offset:this.currentPage3,
+          status:'2'
+        }
+        this.$post('/news/list',params).then(res =>{
+          console.log(res.data[0].rows)
+          this.audit_no	 = res.data[0].rows;
+          this.total_pages3 = res.data[0].total;
+        })
+      }else if(tab.name == 'fourth'){ 	
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          limit:this.per_page4,
+          offset:this.currentPage4,
+          status:'4'
+        }
+        this.$post('news/list',params).then(res =>{
+          console.log(res.data[0].rows)
+          this.audit_no	 = res.data[0].rows;
+          this.total_pages4 = res.data[0].total;
+        })
+      }else if(tab.name == 'fifth'){ 	
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          limit:this.per_page5,
+          offset:this.currentPage5,
+          status:'3'
+        }
+        this.$post('news/list',params).then(res =>{
+          console.log(res.data[0].rows)
+          this.audit_no	 = res.data[0].rows;
+          this.total_pages5 = res.data[0].total;
+        })
+			}
     },
 //  全部
     handleCurrentChange1(val) {

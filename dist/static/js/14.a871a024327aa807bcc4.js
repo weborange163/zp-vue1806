@@ -1,2 +1,0 @@
-webpackJsonp([14],{Grwd:function(e,t){},zWKW:function(e,t,n){"use strict";Object.defineProperty(t,"__esModule",{value:!0});var s={render:function(){this.$createElement;this._self._c;return this._m(0)},staticRenderFns:[function(){var e=this.$createElement,t=this._self._c||e;return t("div",{staticClass:"page-body"},[t("h2",[this._v("行业信息管理，内容与news类似")])])}]};var r=n("VU/8")({},s,!1,function(e){n("Grwd")},null,null);t.default=r.exports}});
-//# sourceMappingURL=14.a871a024327aa807bcc4.js.map

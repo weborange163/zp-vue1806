@@ -75,10 +75,16 @@
 							<el-table-column label="操作" width="300" fixed="right">
 								<template slot-scope="scope">
 									<el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
-									<el-button type="text" v-if="scope.row.status =='4'" style="margin-right:8px;vertical-align:middle;">下线</el-button>
-									<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
+									<el-button type="text" v-if="scope.row.status =='4'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+									<el-button type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
+									
+									<router-link :to="{name:'news-lookes',params:{rowInfo:scope.row}}">
+										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
 									<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
-									<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
+									<router-link :to="{name:'news-edit',params:{rowInfo:scope.row}}">
+										<el-button type="text" v-if="scope.row.status != '4'"><i class="iconfont icon-edit"></i></el-button>
+									</router-link>
 									<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
@@ -302,6 +308,34 @@
 			}
 		},
 		methods: {
+			//上下线操作
+			onOff(row,status,type){
+				this.$confirm(`确定要${type}该新闻吗?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						status:status,
+						id:row.id
+					}
+					this.$post('news/isOnline',params).then(res => {
+						console.log(res)
+						this.newsList();
+						this.$message({
+							type: 'success',
+							message: res.msg
+						});
+					})
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: res.msg
+          });          
+        });
+				console.log(row)
+			},
 			handleRemove(file, fileList) {
         console.log(file, fileList);
       },
@@ -376,6 +410,7 @@
 					id:row.id
 				}
 				this.$get('news/show',params).then(res =>{
+					
 					console.log(res)
 				})
 			},
@@ -463,6 +498,7 @@
 								linkId:this.bannerForm.link,
 								articleId:this.bannerForm.articleId,
 							}
+							console.log(this.uploadData)
 							setTimeout(() => {
 								this.$refs.upload.submit();
 								this.$message({
@@ -554,7 +590,7 @@
 						}
 						this.newsList();
 					})
-					// this.tableData[this.recoIndex].top_flag = "1";
+					this.dialogVisible1 = false;
 				}else if(this.recommendRadio == '2'){	// 推荐到banner
 					console.log('推荐到banner');
 					// this.tableData[this.recoIndex].title,

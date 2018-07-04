@@ -71,12 +71,13 @@
 								<el-radio label="2">提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item>
+					<el-form-item label="封面图:" prop="">
 						<el-upload
 							:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
 							ref="upload" name="newsFile"
 							list-type="picture-card"
 							:auto-upload="false"
+							:on-change="valiImg"
 							:on-preview="handlePictureCardPreview"
 							:on-remove="handleRemove">
 							<i class="el-icon-plus"></i>
@@ -111,7 +112,7 @@ import axios from 'axios'
         width: 420,
 				border: true,
 				height:150,
-				zIndex:10000,
+				zIndex:1,
         content: 'wellcome ~',
         syncOutput: true,
         theme: 'snow', //bubble snow
@@ -158,7 +159,10 @@ import axios from 'axios'
           ],
           imgType: [
             {required: true, message: '请选择图片', trigger: 'change' }
-          ],
+					],
+					coverImg:[
+						{required: true, message: '请上传图片', trigger: 'change' }
+					],
           source: [
             { required: true, message: '请选择活动资源', trigger: 'change' }
           ],
@@ -210,13 +214,13 @@ import axios from 'axios'
 							// newsFile:this.form1.newsFile,
 							status:status,
 							title: this.form1.title,
-							content: 'this.form1.content',
+							content: this.form1.content,
 							sourceType:this.form1.sourceType,
 							source:this.form1.source,
 							author:this.form1.author,
 							userId:this.form1.userId,
 							imgType:this.form1.imgType,
-							tagLabel:this.form1.tagLabel,
+							tagLabels:this.form1.tagLabels,
 							keyWords:this.form1.keyWords,
 							publishSource:"1"
 						}
@@ -248,6 +252,12 @@ import axios from 'axios'
 			},
 			test(){
 				console.log(this.form1.source);
+			},
+			//图片的验证
+			valiImg(){
+				// this.$refs.upload.validate(valid => {
+
+				// })
 			},
 			// 获取富文本的内容
 			onEditorBlur({quill, html,text}) {

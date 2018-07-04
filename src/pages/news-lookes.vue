@@ -1,32 +1,28 @@
 <template>
-	<div class="page-body" style="min-width:980px;">
+	<div class="page-body news_lookes" style="min-width:980px;">
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
 				<el-breadcrumb-item>行业信息</el-breadcrumb-item>
-				<el-breadcrumb-item>发布新闻资讯</el-breadcrumb-item>
+				<el-breadcrumb-item>查看新闻资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		
 		<div class="box" >
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
-				<el-button size="small" class="light_btn"  @click="creatNews('form1',1)">保存并提交审核</el-button>
+				<el-button size="small" class="light_btn" >预览</el-button>
+				<el-button size="small" v-if="status == '0'" class="light_btn" @click="toAudit()">提交审核</el-button>
+				<el-button size="small" class="light_btn" v-if="status == '5'" @click="onOff('4','上线')">上线</el-button>
+				<el-button size="small" class="light_btn" v-if="status == '4'" @click="onOff('5','下线')">下线</el-button>
 			</div>
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
-						<el-input v-model="form1.title" placeholder="请输入标题"></el-input>
+						<el-input v-model="form1.title" :disabled="true"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
-						<!-- <quill-editor v-model="form1.content"
-							ref="myQuillEditor"
-							:options="editorOption"
-							@blur="onEditorBlur($event)"
-							@focus="onEditorFocus($event)"
-							@ready="onEditorReady($event)">
-						</quill-editor> -->
+						
 						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
 						:width="quill.width" :getContent="onEditorChange"
 						:has-border="quill.border" :zIndex="quill.zIndex"
@@ -37,15 +33,16 @@
 						@upload="uploadImg" @blur="onEditorBlur($event)"
 						></m-quill-editor>
 					</el-form-item>
+					<!-- <div id="test" class="ql-editor"></div> -->
 				</div>
 				<div style="width: 35%;float:left;padding:15px;">
 					<el-form-item label="发布到:">
-						<el-input :disabled="true" v-model="form1.column"></el-input>
+						<el-input :disabled="true" v-model="type"></el-input>
 					</el-form-item>
 					<el-form-item label="来源:" prop="sourceType">
 						<el-radio-group v-model="form1.sourceType" @change="test()">
-							<el-radio label="1" >原创</el-radio>
-							<el-radio label="2" >转载</el-radio>
+							<el-radio label="1" disabled>原创</el-radio>
+							<el-radio label="2" disabled>转载</el-radio>
 						</el-radio-group>
 						<el-select v-if="form1.sourceType == 2" v-model="form1.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
 							<el-option
@@ -57,39 +54,28 @@
 						</el-select>
 					</el-form-item>
 					<el-form-item label="作者:">
-						<el-input v-model="form1.author"></el-input>
+						<el-input v-model="form1.author" :disabled="true"></el-input>
 					</el-form-item>
 					<el-form-item label="发布账号:" prop="userId" label-width="82">
-						<el-select v-model="form1.userId" placeholder="请选择发布账号">
+						<el-select v-model="form1.userId" disabled>
 							<el-option label="小号1" value="shanghai"></el-option>
 							<el-option label="小号2" value="beijing"></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="附加选项:" prop="imgType" label-width="82">
-							<el-radio-group v-model="form1.imgType">
-								<el-radio label="1">上传缩略图</el-radio>
-								<el-radio label="2">提取第一个图为缩略图</el-radio>
+					<el-form-item label="附加选项:" prop="sourceType" label-width="82">
+							<el-radio-group v-model="form1.sourceType">
+								<el-radio label="1" disabled>上传缩略图</el-radio>
+								<el-radio label="2" disabled>提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item>
-						<el-upload
-							:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
-							ref="upload" name="newsFile"
-							list-type="picture-card"
-							:auto-upload="false"
-							:on-preview="handlePictureCardPreview"
-							:on-remove="handleRemove">
-							<i class="el-icon-plus"></i>
-						</el-upload>
-						<el-dialog :visible.sync="dialogVisible">
-							<img width="100%" :src="dialogImageUrl" alt="">
-						</el-dialog>
+					<el-form-item label="封面图">
+						<img :src="imgFullSrc" alt="封面图展示">
 					</el-form-item>
 					<el-form-item label="Tag标签:">
-						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form1.tagLabels"></el-input>
+						<el-input  v-model="form1.tagLabels" :disabled="true"></el-input>
 					</el-form-item>
 					<el-form-item label="关键词:">
-						<el-input placeholder="用英文 “ , ” 隔开" v-model="form1.keyWords"></el-input>
+						<el-input  v-model="form1.keyWords" :disabled="true"></el-input>
 					</el-form-item>
 				</div>
 			</el-form>
@@ -106,16 +92,19 @@ import axios from 'axios'
 		},
 		data(){
 			return{
+				type:'新闻',
+				imgFullSrc:'',
+				imgSrc:'',
 				pkg:'',
       quill: {
         width: 420,
 				border: true,
 				height:150,
-				zIndex:10000,
+				zIndex:1,
         content: 'wellcome ~',
-        syncOutput: true,
+        syncOutput: false,
         theme: 'snow', //bubble snow
-        disabled: false,
+        disabled: true,
         full: false,
         toolbar: [
           [{ 'header': 1 }, { 'header': 2 }],
@@ -124,6 +113,7 @@ import axios from 'axios'
       },
 				uploadData:{},
 				baceUrl:'',
+				status:'',
 				// content:'111',
 				editorOption:{},
 				dialogImageUrl: '',
@@ -134,13 +124,16 @@ import axios from 'axios'
 					column:'新闻资讯',
 					sourceType:'1',
 					source:'',
+					status:'',
 					author:'',
 					userId:'1',
 					imgType:'1',
 					newsFile:'',
 					tagLabels:'',
-					keyWords:''
+					keyWords:'',
+					coverImgId:''
 				},
+				idDetail:'',
 				cities:[],
 				rules1: {
           title: [
@@ -170,15 +163,103 @@ import axios from 'axios'
 		},
 		created(){
 			this.baceUrl = getBaceUrl();
-			// console.log(this.baceUrl)
+			this.getParams();
+			console.log(this.idDetail)
+			this.showNews();
+			// this.getImgUrl();
 		},
 		mounted() {
-			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
-    		console.log(res.data)
-    		this.cities = res.data
-    	})
+			
+		//	var test =  document.getElementById('test');
+			//test.innerHTML=this.form1.content;
 		},
 		methods:{
+			//上下线操作
+			onOff(status,type){
+				this.$confirm(`确定要${type}该新闻吗?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						status:status,
+						id:this.form1.id
+					}
+					this.$post('news/isOnline',params).then(res => {
+						// console.log(res)
+						setTimeout(() => {
+								this.$router.push({name: 'news'});
+							}, 1000);
+						this.$message({
+							type: 'success',
+							message: res.msg
+						});
+					})
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: res.msg
+          });          
+        });
+			},
+			//提交审核
+			toAudit(){
+				this.$confirm('确认要提交审核吗', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						ids:this.form1.id,
+					}
+					console.log(params)
+					this.$post('news/batchWaitCheck',params).then(res =>{
+						// console.log(res);
+						setTimeout(() => {
+								this.$router.push({name: 'news'});
+							}, 1000);
+						this.$message({
+							type: 'success',
+							message: res.msg
+						});
+					})
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: res.msg
+          });          
+        });
+			},
+			//获取封面图路径
+			getImgUrl(){
+				this.imgFullSrc = this.baceUrl + this.imgSrc;
+				console.log(this.imgSrc)
+				console.log(this.imgFullSrc)
+			},
+			// 获取新闻详情
+			showNews(){
+				var params = {
+					tokenId:this.$store.state.user.tokenId,
+					id:this.idDetail
+				}
+				this.$get('news/show',params).then(res => {
+					this.form1 = res.data[0];
+					console.log(this.form1)
+					this.imgSrc = this.form1.coverImgId;
+					this.status = this.form1.status;
+					this.imgFullSrc = this.baceUrl + this.imgSrc;
+				});
+			},
+			getParams () {
+        // 取到路由带过来的参数 
+				let routerParams = this.$route.params.rowInfo
+        // 将数据放在当前组件的数据内
+				// this.form1 = routerParams
+				this.idDetail = routerParams.id
+				// console.log(this.idDetail)
+      },
 			// 富文本图片上传
 			uploadImg(file,insert){
 				console.log(file)
@@ -196,55 +277,6 @@ import axios from 'axios'
 			},
 			getFullUrl(){
 				return (this.baceUrl+'/news/add')
-			},
-			// 新建新闻
-			creatNews(formName,status){
-				this.$refs[formName].validate((valid) => {
-          if (valid) {
-						console.log(valid)
-						if(this.form1.sourceType == '2' && !this.form1.source){ // 选择转载时候,需要选择转载来源 (待)
-
-						}
-            this.uploadData={
-							tokenId:this.$store.state.user.tokenId,
-							// newsFile:this.form1.newsFile,
-							status:status,
-							title: this.form1.title,
-							content: 'this.form1.content',
-							sourceType:this.form1.sourceType,
-							source:this.form1.source,
-							author:this.form1.author,
-							userId:this.form1.userId,
-							imgType:this.form1.imgType,
-							tagLabel:this.form1.tagLabel,
-							keyWords:this.form1.keyWords,
-							publishSource:"1"
-						}
-						// this.uploadData = params;
-						console.log(this.uploadData)
-						setTimeout(() => {
-							this.$refs.upload.submit();
-							this.$message({
-								type: 'success',
-								message: '添加成功!'
-							});
-							setTimeout(() => {
-								this.$router.push({name: 'news'});
-							}, 1000);
-						}, 0);
-						
-					// console.log(params)
-					/* this.$post('news/add',params).then(res =>{
-						if(res.code == 0){
-							console.log(1111111,res)
-						}
-					}) */
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-				
 			},
 			test(){
 				console.log(this.form1.source);
@@ -271,7 +303,11 @@ import axios from 'axios'
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
 			}
-		}
+		},
+		watch: {
+    // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
+      '$route': 'getParams'
+    }
 	}
 </script>
 <style type="text/css">

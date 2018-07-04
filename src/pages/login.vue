@@ -134,7 +134,7 @@ export default {
     height: 420px;
     margin: 0 auto;
     padding: 40px 0 0 290px;
-    background:url(../assets/img/log-img.png) no-repeat;
+    background:url(/static/img/log-img.png) no-repeat;
   }
   .login-box .logo{
     /* max-width: 40%; */

@@ -1,5 +1,75 @@
 <template>
   <div class="page-body subject">
+  		<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+				<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
+					<el-table-column prop="title" label="标题"></el-table-column>
+					<el-table-column prop="name" label="操作" width="70" class="text-center">
+						<template slot-scope="scope">
+							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
+								<i class="iconfont icon-up"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-up unclick"></i>
+							</el-button>
+							<el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'isDown')">
+								<i class="iconfont icon-down"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-down" style="cursor:not-allowed"></i>
+							</el-button>
+						</template>
+					</el-table-column>
+				</el-table>
+				<span slot="footer" class="dialog-footer">
+          <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+          <el-button size="small" type="primary" @click="toPublish()">发 布</el-button>
+        </span>
+			</el-dialog>
+			<el-dialog title="推荐到专题主页" :visible.sync="dialogVisible1" center width="30%" >
+				<el-radio v-model="recommendRadio" label="1" class="marBo4">置顶-专题推荐列表区</el-radio><br/>
+				<el-radio v-model="recommendRadio" label="2">推荐到banner</el-radio>
+				<span slot="footer" class="dialog-footer">
+          <el-button @click="dialogVisible1 = false;recommendRadio=''" class="light_btn">取 消</el-button>
+          <el-button type="primary" @click="sureReco" class="light_btn">确 定</el-button>
+        </span>
+			</el-dialog>
+			<el-dialog center
+					width="30%"
+					:visible.sync="bannerDialog"
+					append-to-body>
+					<el-form :model="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
+						<el-form-item label="原文标题">
+							<el-input v-model="bannerForm.title" :disabled="true"></el-input>
+						</el-form-item>
+						<el-form-item label="短标题" prop="title_short">
+							<el-input v-model="bannerForm.title_short"></el-input>
+						</el-form-item>
+						<el-form-item label="banner图片" label-width="110px" required>
+							<el-upload 
+								:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
+								ref="upload" name="newsFile"
+								list-type="picture-card"
+								:auto-upload="false" :on-exceed="handleExceed"
+								:on-preview="handlePictureCardPreview"
+								:on-remove="handleRemove">
+								<i class="el-icon-plus"></i>
+							</el-upload>
+							<el-dialog :visible.sync="dialogVisible2">
+								<img width="100%" :src="dialogImageUrl" alt="">
+							</el-dialog>
+						</el-form-item>
+						<el-form-item label="类型">
+							<el-input v-model="bannerForm.type" :disabled="true"></el-input>
+						</el-form-item>
+						<el-form-item label="链接">
+							<el-input v-model="bannerForm.link" :disabled="true"></el-input>
+						</el-form-item>
+					</el-form>
+					<span slot="footer" class="dialog-footer">
+						<el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
+						<el-button type="primary" @click="toBanner" class="light_btn">保 存</el-button>
+					</span>
+				</el-dialog>
     <div class="page-header">
       <el-row>
         <el-col :span="3">
@@ -26,12 +96,17 @@
     <div class="box">
       <div class="text-right marBo4">
         <router-link :to="{name:'subject-add'}" ><el-button class="light_btn">新建专题</el-button></router-link>
-        <el-button class="light_btn" @click="dialogVisible = true">置顶排序</el-button>
+        <el-button class="light_btn" @click="publishWaitTop()">置顶排序</el-button>
         <el-button class="light_btn" @click.native.prevent="getSubjectList1()">刷新</el-button>
       </div>
       <el-table :data="subjectList" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
         <el-table-column label="序号" type="index" width='50'></el-table-column>
-        <el-table-column label="专题标题" prop="title" ></el-table-column>
+        <el-table-column label="专题标题" prop="title" >
+					<template slot-scope="scope">
+						<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+						<p style="display:inline-block;">{{ scope.row.title }}</p>
+					</template>
+				</el-table-column>
         <el-table-column label="专题封面" prop="cover_img_id"></el-table-column>
         <el-table-column label="发布状态" width="80">
           <template slot-scope="scope">
@@ -47,15 +122,15 @@
         <el-table-column label="操作" width="220" fixed="right">
 					<template slot-scope="scope">
 						<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-						<el-button type="text" v-if="scope.row.top_flag=='0' && scope.row.status =='4'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
 						<el-button type="text" v-if="scope.row.status=='4' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
 						<el-button type="text" v-if="scope.row.status=='3'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
-						<el-button type="text" @click="marketShow(scope.row)" :disabled="true"><i class="iconfont icon-see"></i></el-button>
+						<el-button type="text" @click="marketShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
+						<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
 						<router-link :to="{name:'subject-edit'}">
 							<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 						</router-link>
 						<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-						<el-button type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
+						<el-button type="text" v-else disabled><i class="iconfont icon-delete"></i></el-button>
 					</template>
 				</el-table-column>
       </el-table>
@@ -69,9 +144,23 @@
 </template>
 <script>
 import {btnTable} from '@/utils/table-style.js'
+import { getBaceUrl } from '@/utils/auth'
 export default {
   data(){
     return{
+			bannerForm:{},
+			dialogImageUrl:'',
+			dialogVisible2:false,
+			uploadData:{},
+			baceUrl:'',
+			recoIndex:0,
+			bannerRules: {
+				title_short: [
+					{ required: true, message: '请输入短标题', trigger: 'blur' }
+				]
+			},
+			bannerDialog:false,
+			recommendRadio:'',
       subjectList:[],
       per_page:5,
       currentPage:1,
@@ -98,12 +187,146 @@ export default {
 				 value6:'',
 				 inputs:'',
 				 topFlag:'',
+				 dialogVisible: false,
+				dialogVisible1: false,
+				loading:false,
+				upData:[],
     }
   },
+  computed: {
+			upDataLength: function() {
+				return this.upData.length - 1;
+			}
+		},
   created(){
     this.getSubjectList();
+		this.baceUrl = getBaceUrl();
   },
   methods:{
+		// 点击 推荐到banner 保存按钮
+			toBanner(){
+					this.$refs.bannerForm.validate((valid) => {
+						if(valid){
+							this.uploadData={
+								tokenId:this.$store.state.user.tokenId,
+								titleShort:this.bannerForm.title_short,
+								bannerType:this.bannerForm.type,
+								linkId:this.bannerForm.link,
+								articleId:this.bannerForm.articleId,
+							}
+							setTimeout(() => {
+								this.$refs.upload.submit();
+								this.$message({
+									type: 'success',
+									message: '添加成功!'
+								});
+								setTimeout(() => {
+									this.getSubjectList();
+								}, 1000);
+								this.bannerDialog = false;
+							}, 0);
+						}
+					})
+        
+			},
+		// 确定推荐到置顶/banner
+			sureReco(){
+				if(this.recommendRadio == '1'){	// 推荐到置顶
+					console.log(this.recoIndex)
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						id: this.subjectList[this.recoIndex].id,
+						topFlag:'1'
+					}
+					this.$post('/specialInfo/top',params).then(res => {
+						console.log(res,res.code);
+						if(res.code == '2'){
+							this.$message({
+								message: res.msg,
+								type: 'warning'
+							});
+						}
+						this.getSubjectList();
+					})
+					 this.dialogVisible1=false;
+				}else if(this.recommendRadio == '2'){	// 推荐到banner
+					console.log('推荐到banner');
+					// this.subjectList[this.recoIndex].title,
+					this.bannerForm.title = this.subjectList[this.recoIndex].title;
+					this.bannerForm.link = this.subjectList[this.recoIndex].id;
+					this.bannerForm.articleId = this.subjectList[this.recoIndex].articleId;
+					this.dialogVisible1 = false;
+					this.bannerDialog =true;
+				}else{
+					 this.$message('请选择置顶或者banner');
+				}
+				// this.dialogVisible1 = false;
+			},
+  			//实现置顶排序的方法
+			changeIndex(index, rows, dir) {
+				if(dir == 'isUp') {
+					var a = rows[index]
+					var b = rows[index - 1]
+					rows.splice(index - 1, 1, a)
+					rows.splice(index, 1, b)
+				} else {
+					var a = rows[index]
+					var b = rows[index + 1]
+					rows.splice(index + 1, 1, a)
+					rows.splice(index, 1, b)
+				}
+			},
+			handleClose(done) {
+				this.$confirm('确认关闭？')
+					.then(_ => {
+						done();
+					})
+					.catch(_ => {});
+			},
+  		// 置顶排序
+			publishWaitTop(){
+				this.dialogVisible = true;
+				this.loading = true;
+				this.$get('/specialInfo/publishWaitTop',{tokenId:this.$store.state.user.tokenId}).then(res =>{
+					this.loading = false;
+					console.log(res)
+					
+					this.upData = res.data;
+				})
+			},
+			//提交置顶排序(弹框点击发布)
+			toPublish(){
+				// console.log(this.upData)
+				var newsInfos =[];
+				this.upData.map((item, index) => {
+				//	newsInfos.push({id:item.id,orderNum:index+1})
+					newsInfos.push(item.id);
+				})
+				var params = {
+					tokenId:this.$store.state.user.tokenId,
+					// newsInfos:JSON.stringify(newsInfos)
+					ids:newsInfos.join(',')
+				}
+				console.log(params);
+				this.$post('/specialInfo/publishTop',params).then(res => {
+					console.log(res)
+				})
+				this.dialogVisible = false
+			},
+		//推荐到banner
+		recommend(index,row) {
+			console.log(index,row);
+				if(row.top_flag == '1'){
+					this.$message({
+						message: '本条消息已经置顶,需取消置顶才能操作',
+						type: 'warning'
+					});
+				}else{
+					this.dialogVisible1 = true;
+					this.recoIndex = index;	// 保存当前的index
+					console.log(row,this.recoIndex);
+				}
+		},
     //专题列表
     getSubjectList(){
       var params = {
@@ -256,6 +479,20 @@ export default {
 					});
 				});
 			},
+			getFullUrl(){
+				return (this.baceUrl+'/bannerInfo/save')
+			},
+			handleRemove(file, fileList) {
+        console.log(file, fileList);
+      },
+      handlePictureCardPreview(file) {
+				console.log(file)
+        this.dialogImageUrl = file.url;
+        this.dialogVisible2 = true;
+			},
+			handleExceed(files, fileList) {
+        this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+      },
 //					上线
 			top_flag2(index, rows) {
 				this.$confirm('确定上线吗?', '提示', {
@@ -287,6 +524,12 @@ export default {
 }
 </script>
 <style>
+  .el-upload--picture-card,
+  .el-upload-list--picture-card .el-upload-list__item{
+		width: 80px;
+		height: 80px;
+		line-height: 88px;
+	}
   .el-date-editor .el-range__icon,
   .el-date-editor .el-range-separator{
     line-height: 20px;

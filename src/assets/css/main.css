@@ -187,6 +187,9 @@ p{
 .btnTable{
   line-height: 36px;
 }
+.quill-editor{
+  margin: 0;
+}
 @keyframes progress {
   0% {
     margin-left: -50%;
