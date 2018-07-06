@@ -69,7 +69,7 @@
 							</el-radio-group>
 					</el-form-item>
 					<el-form-item label="封面图">
-						<img :src="imgFullSrc" alt="封面图展示">
+						<img class="imgs" :src="imgFullSrc" alt="封面图展示">
 					</el-form-item>
 					<el-form-item label="Tag标签:">
 						<el-input  v-model="form1.tagLabels" :disabled="true"></el-input>
@@ -326,5 +326,9 @@ import axios from 'axios'
 	.up_form .quill-editor .ql-container{
 		height: 550px;
 		overflow-y: auto;
+	}
+	.imgs{
+		width: 300px;
+		height: 30px;
 	}
 </style>

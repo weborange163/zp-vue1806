@@ -39,6 +39,7 @@ export default new Router({
         {path:'/subject',name:'subject',component: page('subject')},
         {path:'/subject/add',name:'subject-add',component: page('subject-add')},
         {path:'/subject/edit',name:'subject-edit',component: page('subject-edit')},
+        {path:'/subject/lookes',name:'subject-lookes',component: page('subject-lookes')},
         {path:'/comments',name:'comments',component: page('comments')},
         {path:'/broadcast',name:'broadcast',component: page('broadcast')},
         {path:'/feedback',name:'feedback',component: page('feedback')},

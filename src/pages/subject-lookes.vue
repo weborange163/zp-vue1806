@@ -37,9 +37,6 @@
         <el-form-item label="tag标签" prop="tag">
           <el-input v-model="subjectForm.tagLabels"></el-input>
         </el-form-item>
-        <el-form-item label="关键字" prop="keyWords">
-          <el-input v-model="subjectForm.tagLabels"></el-input>
-        </el-form-item>
         <el-form-item label="关联文章" prop="linkArt">
           <el-row>
             <el-col :span="18">
@@ -109,7 +106,7 @@ export default {
       subjectRules:{
         title: [
             { required: true, message: '请输入专题名称', trigger: 'blur' },
-            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+            { min: 3, max: 15, message: '长度在 3 到 5 个字符', trigger: 'blur' }
           ],
         description:[
           { required: true, message: '请输入专题描述', trigger: 'blur' }
@@ -122,19 +119,9 @@ export default {
     this.baceUrl = getBaceUrl();
     // console.log(this.baceUrl)http://localhost:8089/specialInfo/add
   },
-  mounted() {
-				this.$get('/specialInfo/show', {
-				tokenId: this.$store.state.user.tokenId,
-				id: this.$route.params.rowInfo.id
-			}).then(res => {
-				this.subjectForm=res.data[0]
-			})
-		},
-  
-  
   methods:{
     onSuccess(){
-      console.log(111)
+      //console.log('图片上传成功');
     },
     // 模糊搜索添加文章关联
     searchMore(){
@@ -208,27 +195,34 @@ export default {
         })
       }
     },
-    // 新建专题
-//  /specialInfo/add
+    // 新建专题 
     addSubject(formName,status){
       this.$refs[formName].validate((valid) => {
           if (valid) {
             console.log(valid)
             var ids = [];
+            this.artData.map(item => {
+              ids.push(item.articleId);
+            }) 
             this.uploadData={
 							tokenId:this.$store.state.user.tokenId,
               status:status,
               title: this.subjectForm.title,
               description: this.subjectForm.description,
               tagLabels:this.subjectForm.tagLabels,
-              newsArticleIds:ids
+              newsArticleIds:ids.join(',')
 						}
 						// this.uploadData = params;
 						console.log(this.uploadData)
-//						alert(1111)
 						setTimeout(() => {
               this.$refs.upload.submit();
-//            this.$router.back(-1);
+              this.$message({
+								type: 'success',
+								message: '添加成功!'
+							});
+							setTimeout(() => {
+								this.$router.push({name: 'subject'});
+							}, 1000);
 						}, 0);
 					// console.log(params)
 					/* this.$post('news/add',params).then(res =>{
@@ -243,7 +237,7 @@ export default {
         });
     },
     getFullUrl(){
-      return (this.baceUrl+'/specialInfo/edit')
+      return (this.baceUrl+'/specialInfo/add')
     },
     miniTable(row){
       return 'miniTable'
@@ -256,7 +250,7 @@ export default {
         index.flag = false;
         // console.log(index.flag)
         this.$message({
-          message: '关联成功.',
+          message: '已添加至关联列表.',
           type: 'success'
         });
       }else if(status == 0){

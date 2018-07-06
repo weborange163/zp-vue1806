@@ -17,7 +17,7 @@
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="dialogFormVisible = false">取 消</el-button>
-				<el-button type="primary" @click="toAudit()">确 定</el-button>
+				<el-button type="primary" @click="toAudit('3')">确 定</el-button>
 			</div>
 		</el-dialog>
 
@@ -33,7 +33,7 @@
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="dialogFormVisible = true">不通过</el-button>
-				<el-button size="small" class="light_btn" @click="toAudit1()">通过</el-button>
+				<el-button size="small" class="light_btn" @click="toAudit('4')">通过</el-button>
 			</div>
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
@@ -241,11 +241,9 @@
 				return(this.baceUrl + '/news/add')
 			},
 			//不通过
-
 			toAudit() {
-				console.log(this.$route.params.id.split(","))
 				var params = {
-					ids: this.$route.params.id.split(","),
+					ids: this.$route.params.id,
 					tokenId: this.$store.state.user.tokenId,
 					status: '3',
 					checkReason: this.form.region,
@@ -261,26 +259,6 @@
 						});
 					}, 1000);
 				});
-			},
-			//通过
-			toAudit1() {
-				var params = {
-					ids: this.$route.params.id.split(","),
-					tokenId: this.$store.state.user.tokenId,
-					status: '4',
-				};
-				this.$post('/news/check', params).then(res => {
-					if(res.code === 0) {
-						console.log(1111111, res);
-					}
-					setTimeout(() => {
-						this.$router.push({
-							name: 'audit-news'
-						});
-					}, 1000);
-				});
-
-				//				return true;
 			},
 
 			// 新建新闻

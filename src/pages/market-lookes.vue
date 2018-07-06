@@ -1,302 +1,403 @@
 <template>
-  <div class="page-body subject-add">
-    <div class="breadcrumb" style="padding:8px;">
-      <el-breadcrumb separator-class="el-icon-arrow-right" >
-			<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
-			<el-breadcrumb-item>专题管理</el-breadcrumb-item>
-			<el-breadcrumb-item>新建专题</el-breadcrumb-item>
-		</el-breadcrumb>
-    </div>
-    <div class="box">
+	<div class="page-body">
+		<div class="breadcrumb" style="padding:8px;">
+			<el-breadcrumb separator-class="el-icon-arrow-right">
+				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
+				<el-breadcrumb-item>行业信息</el-breadcrumb-item>
+				<el-breadcrumb-item>添加行情</el-breadcrumb-item>
+			</el-breadcrumb>
+		</div>
+		<div class="box">
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn">预览</el-button>
-				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','3')">仅保存</el-button>
-				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','4')">保存并上线</el-button>
-			</div>
-      <el-form :model="subjectForm" :rules="subjectRules" ref="subjectForm" label-width="100px" style="max-width:800px;">
-        <el-form-item label="专题标题" prop="title">
-          <el-input v-model="subjectForm.title"></el-input>
-        </el-form-item>
-        <el-form-item label="专题描述" prop="description">
-          <el-input type="textarea" v-model="subjectForm.description"></el-input>
-        </el-form-item>
-        <el-form-item label="封面缩略图" ref="imgItem">
-          <el-upload name="file" :data="uploadData" ref="upload" :multiple="false" :limit='1'
-            :action="getFullUrl()" :on-success="onSuccess"
-            list-type="picture-card"
-            :auto-upload="false"
-            :on-preview="handlePictureCardPreview"
-            :on-remove="handleRemove">
-            <i class="el-icon-plus"></i>
-          </el-upload>
-          <el-dialog :visible.sync="dialogVisible">
-            <img width="100%" :src="dialogImageUrl" alt="">
-          </el-dialog>
-        </el-form-item>
-        <el-form-item label="tag标签" prop="tag">
-          <el-input v-model="subjectForm.tagLabels"></el-input>
-        </el-form-item>
-        <el-form-item label="关联文章" prop="linkArt">
-          <el-row>
-            <el-col :span="18">
-              <el-input v-model="subjectForm.ariId"></el-input>
-            </el-col>
-            <el-col :span="6" class="text-center">
-              <el-button class="light_btn" @click="addById()">添加</el-button>
-              <el-button class="light_btn" @click="searchAdd=true;searchLinkArt=[];searchInput=''">搜索添加</el-button>
-            </el-col>
-          </el-row>
-        </el-form-item>
-        <el-form-item>
-          <el-table :data="artData" border :row-class-name="miniTable" :header-row-class-name="miniTable">
-            <el-table-column prop="title" label="标题"></el-table-column>
-            <el-table-column prop="articleId" label="文章ID" width="150"></el-table-column>
-            <el-table-column  label="操作" width="150">
-              <template slot-scope="scope">
-                <el-button @click="handleClick(scope.$index,artData,0)" type="text" size="small">取消关联</el-button>
-              </template>
-            </el-table-column>
-          </el-table>
-        </el-form-item>
-      </el-form>
-      <el-dialog :visible.sync="searchAdd">
-        <div style="margin-bottom:20px">
-          <el-input v-model="searchInput" style="width:80%"></el-input>
-          <el-button class="light_btn" @click="searchMore">搜索</el-button>
-        </div>
-        <el-table :data="searchLinkArt" border :row-class-name="miniTable" :header-row-class-name="miniTable">
-          <el-table-column prop="title" label="标题" width="150"></el-table-column>
-          <el-table-column prop="articleId" label="文章ID" width="200"></el-table-column>
-          <el-table-column  label="操作">
-            <template slot-scope="scope">
-              <el-button v-if="!scope.row.flag" @click="handleClick1(scope.row,artData,0)" type="text" size="small">取消关联</el-button>
-              <el-button v-else @click="handleClick1(scope.row,artData,1)" type="text" size="small">关联</el-button>
-            </template>
-          </el-table-column>
-        </el-table>
-      </el-dialog>
+				<el-button size="small" class="light_btn" type="text" v-if="status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2()">上线</el-button>
+				<el-button size="small" class="light_btn" type="text" v-if="status=='5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1()">下线</el-button>
+				<el-button size="small" class="light_btn" type="text" v-if="status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp2()">提交审核</el-button>
 
-    </div>
-  </div>
+				<!--<el-button size="small" class="light_btn" @click="toAudit('form2',1)">仅保存</el-button>
+                <el-button size="small" class="light_btn" @click="toAudit('form2',2)">保存并提交审核</el-button>-->
+			</div>
+			<el-form ref="form2" :model="form2" label-width="80px" class="up_form">
+				<div style="width: 35%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
+					<el-form-item label="文章标题" prop="title">
+						<el-input v-model="form2.title" placeholder="请输入标题"></el-input>
+					</el-form-item>
+					<el-form-item label="文章内容" prop="content" class="editor">
+						
+						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
+						:width="quill.width" :getContent="onEditorChange"
+						:has-border="quill.border" :zIndex="quill.zIndex"
+						:sync-output="quill.syncOutput"
+						:theme="quill.theme"
+						:disabled="quill.disabled"
+						:fullscreen="quill.full"
+						@upload="uploadImg" @blur="onEditorBlur($event)"
+						></m-quill-editor>
+					</el-form-item>
+				</div>
+				<div style="width: 35%;float:left;padding:15px;">
+
+					<el-form-item label="发布到:">
+						<el-input :disabled="true" v-model="classifyTypes"></el-input>
+					</el-form-item>
+					<el-select v-model="value" name="classifyType" placeholder="请选择">
+						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
+						</el-option>
+					</el-select>
+					<el-form-item label="发布账号:" prop="userId" label-width="82">
+						<el-select v-model="form2.userId" placeholder="请选择发布账号">
+							<el-option label="小号1" value="1"></el-option>
+							<el-option label="小号2" value="2"></el-option>
+						</el-select>
+					</el-form-item>
+					<el-form-item label="附加选项:" prop="imgType" label-width="82">
+						<el-radio-group v-model="form2.imgType">
+							<el-radio label="1">上传缩略图</el-radio>
+							<el-radio label="2">提取第一个图为缩略图</el-radio>
+						</el-radio-group>
+					</el-form-item>
+					<!--上传图片-->
+					<el-form-item label="封面图">
+						<img class="imgs" :src="imgFullSrc" alt="封面图展示">
+					</el-form-item>
+					<el-form-item label="Tag标签:">
+						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form2.tagLabel"></el-input>
+					</el-form-item>
+					<!--<el-form-item label="关键词:">
+        							<el-input placeholder="用英文 “ , ” 隔开"></el-input>
+        						</el-form-item>-->
+				</div>
+			</el-form>
+		</div>
+	</div>
 </template>
 <script>
 import { getBaceUrl } from '@/utils/auth'
-export default {
-  data(){
-    return{
-      searchInput:'',
-      uploadData:{},
-      baceUrl:'',
-      artData:[
-      ],
-      searchLinkArt:[],
-      dialogImageUrl: '',
-      dialogVisible:false,
-      imageUrl: '',
-      editorOption:{},
-      searchAdd:false,
-      subjectForm:{
-        title:'',
-        description:'',
-        tagLabels:'',
-        newsArticleIds:'',
-        ariId:''
-      },
-      subjectRules:{
-        title: [
-            { required: true, message: '请输入专题名称', trigger: 'blur' },
-            { min: 3, max: 15, message: '长度在 3 到 5 个字符', trigger: 'blur' }
-          ],
-        description:[
-          { required: true, message: '请输入专题描述', trigger: 'blur' }
-        ]
-        
-      }
-    }
-  },
-  created(){
-    this.baceUrl = getBaceUrl();
-    // console.log(this.baceUrl)http://localhost:8089/specialInfo/add
-  },
-  methods:{
-    onSuccess(){
-      //console.log('图片上传成功');
-    },
-    // 模糊搜索添加文章关联
-    searchMore(){
-      this.searchLinkArt=[];  // 重置搜索表格
-      if(!this.searchInput){
-        this.$message({
-          message: '请输入搜索内容!',
-          type: 'warning'
-        });
-      }else{
-        var params = {
-          tokenId:this.$store.state.user.tokenId,
-          idOrTitle:this.searchInput
-        }
-        console.log(params)
-        this.$post('news/getlist',params).then(res => {
-            console.log(res);
-            if(!res.data[0]){
-              this.$message.error('很抱歉,没有匹配的文章!');
-            }else{
-              var result = res.data;
-              var arr=[]; // 获取表单里关联列表的articleId
-              this.artData.map((item) =>{
-                arr.push(item.articleId);
-              })
-              result.map(item => {
-                if(arr.indexOf(item.articleId) == -1){
-                  item.flag = true
-                }
-              })
-              this.searchLinkArt = result;
-              console.log(this.artData)
-              //this.artData = res.data
-            }
-        })
-      }
-    },
-    //输入ID 点击添加按钮进行添加关联文章
-   // 10000008
-    addById(){
-      var isIn = false;
-      if(!this.subjectForm.ariId){
-        this.$message({
-          message: '请输入文章ID添加!',
-          type: 'warning'
-        });
-      }else{
-        this.artData.map((item) =>{
-          if(this.subjectForm.ariId == item.articleId){
-            this.$message.error('此文章已经被关联!');
-            isIn = true;
-            return;
-          }
-        })
-        if(isIn){
-          return;
-        }
-        var params = {
-          tokenId:this.$store.state.user.tokenId,
-          articleIds:this.subjectForm.ariId
-        }
-        this.$post('news/batchGet',params).then(res => {
-            console.log(res)
-            if(!res.data[0]){
-              this.$message.error('请输入正确的文章ID!');
-            }else{
-              this.artData.push(res.data[0])
-              console.log(this.artData)
-              //this.artData = res.data
-            }
-        })
-      }
-    },
-    // 新建专题 
-    addSubject(formName,status){
-      this.$refs[formName].validate((valid) => {
-          if (valid) {
-            console.log(valid)
-            var ids = [];
-            this.artData.map(item => {
-              ids.push(item.articleId);
-            }) 
-            this.uploadData={
-							tokenId:this.$store.state.user.tokenId,
-              status:status,
-              title: this.subjectForm.title,
-              description: this.subjectForm.description,
-              tagLabels:this.subjectForm.tagLabels,
-              newsArticleIds:ids.join(',')
+	export default {
+		data() {
+			return {
+				quill: {
+					width: 420,
+					border: true,
+					height: 150,
+					zIndex: 10000,
+					content: 'wellcome ~',
+					syncOutput: true,
+					theme: 'snow', //bubble snow
+					disabled: false,
+					full: false,
+					toolbar: [
+						[{
+							'header': 1
+						}, {
+							'header': 2
+						}],
+						['bold', 'italic', 'underline', 'strike', 'link']
+					]
+				},
+				classifyTypes: '行情',
+				status: '',
+				form2: {
+					title: '',
+					content: '',
+					userId: '1',
+					imgType: '1',
+					tagLabel: '',
+					resource: '',
+					source: '',
+					type: [],
+					desc: '',
+					author: '',
+					img: '',
+					//未置顶
+					topFlag: '0',
+					//排序
+					orderNum: '0'
+				},
+
+				baceUrl: '',
+				// url: 'http://192.168.1.91:8080/industry/save',
+				// 上传图片
+				editorOption: {},
+				dialogImageUrl: '',
+				dialogVisible: false,
+				classifyType: '',
+				//			form2: {},
+				uploadData: {},
+				value: '',
+				imgFullSrc: '',
+				imgSrc: '',
+			};
+		},
+		created() {
+			this.baceUrl = getBaceUrl();
+		},
+		mounted() {
+			//  	修改查看
+			this.$get('/industry/get', {
+				tokenId: this.$store.state.user.tokenId,
+				id: this.$route.params.rowInfo.id
+			}).then(res => {
+				console.log(res.data[0].industry)
+				this.form2 = res.data[0].industry
+				this.imgSrc = this.form2.showUrl
+
+				this.status = this.form2.status;
+				this.classifyType = this.form2.classifyType
+				this.imgFullSrc = this.baceUrl + this.imgSrc
+				let selectid = this.classifyType;
+				//				alert(selectid)
+				//  	下拉菜单
+				this.$get('/industryCategory/findIndustryCategoryList', {
+					tokenId: this.$store.state.user.tokenId
+				}).then(res => {
+					console.log(res.data)
+					this.classifyType = res.data
+					for(var i = 0; i < this.classifyType.length; i++) {
+						if(selectid == this.classifyType[i].id) {
+							this.value = this.classifyType[i].name
 						}
-						// this.uploadData = params;
-						console.log(this.uploadData)
-						setTimeout(() => {
-              this.$refs.upload.submit();
-              this.$message({
-								type: 'success',
-								message: '添加成功!'
-							});
-							setTimeout(() => {
-								this.$router.push({name: 'subject'});
-							}, 1000);
-						}, 0);
-					// console.log(params)
-					/* this.$post('news/add',params).then(res =>{
-						if(res.code == 0){
-							console.log(1111111,res)
-						}
-					}) */
-          } else {
-            console.log('error submit!!');
-            return false;
-          }
-        });
-    },
-    getFullUrl(){
-      return (this.baceUrl+'/specialInfo/add')
-    },
-    miniTable(row){
-      return 'miniTable'
-    },
-    //搜索更多 之 关联操作
-    //参数:每条新闻对象,table表格,操作指令
-    handleClick1(index,rows,status){
-      if(status == 1){
-        rows.push(index);
-        index.flag = false;
-        // console.log(index.flag)
-        this.$message({
-          message: '已添加至关联列表.',
-          type: 'success'
-        });
-      }else if(status == 0){
-        rows.splice(index,1);
-        index.flag = true;
-        // console.log(index.flag);
-        this.$message({
-          message: '操作成功.',
-          type: 'info'
-        });
-      }
-      
-    },
-    // 表单中table 取消关联. 
-    handleClick(index,rows,status){
-        this.$confirm('此操作将取消关联, 是否继续?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'warning'
-        }).then(() => {
-          rows.splice(index, 1);
-          this.$message({
-            type: 'success',
-            message: '操作成功!'
-          });
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消操作'
-          });          
-        });
-    },
-    handleRemove(file, fileList) {
-        console.log(file, fileList);
-      },
-    handlePictureCardPreview(file) {
-      this.dialogImageUrl = file.url;
-      this.dialogVisible = true;
-    }
-  }
-}
+
+					}
+
+				})
+
+			})
+
+		},
+		created() {
+			this.baceUrl = getBaceUrl();
+		},
+		methods: {
+			
+			//			下线
+			top_flag1(index, rows) {
+				this.$confirm('确定要下线吗?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					var params = {
+						tokenId: this.$store.state.user.tokenId,
+						id: this.$route.params.rowInfo.id,
+						status:'6'
+					}
+					this.$post('/industry/save', params).then(res => {
+						// console.log(res)
+						this.$message({
+							type: 'success',
+							message: '下线成功!'
+						});
+//						this.getMarket();
+					})
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '下线失败'
+					});
+				});
+			},
+//					上线
+			top_flag2(index, rows) {
+				this.$confirm('确定上线吗?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					var params = {
+						tokenId: this.$store.state.user.tokenId,
+						id: this.$route.params.rowInfo.id,
+						status:'5'
+					}
+					this.$post('/industry/save', params).then(res => {
+						// console.log(res)
+						this.$message({
+							type: 'success',
+							message: '上线成功!'
+						});
+//						this.getMarket();
+					})
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '上线失败'
+					});
+				});
+			},
+			
+			
+			// 富文本图片上传
+			uploadImg(file, insert) {
+				//				console.log(file)
+				let params = new FormData(); // 创建form对象
+				params.append('file', file, file.name);
+				// params.append('name',file.name);
+				//				console.log(file.name)
+
+				this.$post('images/upload', params).then(res => {
+					let url = this.baceUrl + res.data[0].showUrl;
+					// console.log(url)
+					insert(url, 'center')
+					//					console.log(res);
+				})
+			},
+			// 获取富文本的内容
+			onEditorBlur({
+				quill,
+				html,
+				text
+			}) {
+				// console.log('editor blur!', quill, html, text)
+				//				console.log(this.form2.content)
+			},
+			//获取封面图路径
+			getImgUrl() {
+				this.imgFullSrc = this.baceUrl + this.imgSrc;
+				console.log(this.imgSrc)
+				console.log(this.imgFullSrc)
+			},
+			fileOver() {
+				this.$message('只允许添加一张图片,如果替换请删除后再上传');
+			},
+//			toAudit(formName, status) {
+//				this.$refs[formName].validate((valid) => {
+//					//							console.log(valid);
+//					// console.log(this.$store.state.user.tokenId);
+//					if(valid) {
+//						var params = {
+//							id: this.$route.params.rowInfo.id,
+//							tokenId: this.$store.state.user.tokenId,
+//							status: status,
+//							title: this.form2.title,
+//							content: this.form2.content,
+//							//classifyType: this.form2.classifyType,
+//							userId: this.form2.userId,
+//							imgType: this.form2.imgType,
+//							tagLabel: this.form2.tagLabel,
+//							publishSource: '1',
+//							classifyType: this.value,
+//
+//						};
+//						this.uploadData = params;
+//						setTimeout(() => {
+//							this.$refs.upload.submit();
+//							this.$message({
+//								type: 'success',
+//								message: '添加成功!'
+//							});
+//							setTimeout(() => {
+//								this.$router.push({
+//									name: 'market'
+//								});
+//							}, 1000);
+//						}, 0);
+//						return true;
+//					} else {
+//						console.log('error submit!!');
+//						return false;
+//					}
+//				});
+//				return true;
+//			},
+			onEditorBlur(quill) {
+				console.log('editor blur!', quill);
+				console.log(this.form2.content);
+			},
+			onEditorFocus(quill) {
+				console.log('editor focus!', quill);
+			},
+			onEditorReady(quill) {
+				console.log('editor ready!', quill);
+			},
+			onEditorChange({
+				val
+			}) {
+				console.log('editor change!', val);
+				//					this.content = html;
+			},
+			// 文件上传的删除  和放大!
+			handleRemove(file, fileList) {
+				alert('删除');
+				console.log(file, fileList);
+			},
+			handlePictureCardPreview(file) {
+				this.dialogImageUrl = file.url;
+				this.dialogVisible = true;
+				console.log(this.dialogImageUrl);
+				alert('放大');
+
+			},
+			//提交审核
+			cancelUp2(index, rows) {
+				this.$confirm('确定要提交审核吗?', '提示', {
+					confirmButtonText: '确定',
+					cancelButtonText: '取消',
+					type: 'warning'
+				}).then(() => {
+					var params = {
+						tokenId: this.$store.state.user.tokenId,
+						id: rows.id,
+						status: '2'
+					}
+					this.$post('/industry/save', params).then(res => {
+						// console.log(res)
+						this.$message({
+							type: 'success',
+							message: '提交成功!'
+						});
+						this.getMarket();
+					})
+				}).catch(() => {
+					this.$message({
+						type: 'info',
+						message: '提交失败'
+					});
+				});
+			},
+			watch: {
+				// 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
+				'$route': 'getParams'
+			}
+		}
+	};
 </script>
-<style>
-.subject-add .quill-editor .ql-container{
-		min-height: 150px;
-  }
-
+<style type="text/css">
+	.up_form .el-input__inner {
+		height: 30px;
+		line-height: 30px;
+		max-width: 300px;
+	}
+	
+	.up_form .quill-editor .ql-container {
+		min-height: 550px;
+	}
+	/*.app-container .app-page-body{
+		min-height: 890px !important;
+	}*/
+	
+	.quill-editor .ql-toolbar.ql-snow {
+		height: 60px;
+	}
+	
+	.editor .el-form-item__content {
+		line-height: 20px;
+	}
+	
+	.up_form .el-input__inner {
+		height: 30px;
+		line-height: 30px;
+		max-width: 300px;
+	}
+	
+	.up_form .quill-editor .ql-container {
+		height: 550px;
+		overflow-y: auto;
+	}
+	
+	.imgs {
+		width: 200px;
+		height: 200px;
+		display: block;
+	}
 </style>
-

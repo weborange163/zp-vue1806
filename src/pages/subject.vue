@@ -124,9 +124,12 @@
 						<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
 						<el-button type="text" v-if="scope.row.status=='4' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
 						<el-button type="text" v-if="scope.row.status=='3'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
-						<el-button type="text" @click="marketShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
+<!--						
+						<router-link :to="{name:'subject-lookes',params:{rowInfo:scope.row}}">
+						<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+						</router-link>-->
 						<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
-						<router-link :to="{name:'subject-edit'}">
+						<router-link :to="{name:'subject-edit',params:{rowInfo:scope.row}}">
 							<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 						</router-link>
 						<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>

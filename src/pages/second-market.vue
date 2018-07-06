@@ -28,7 +28,7 @@
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
 				<el-breadcrumb-item>行业信息</el-breadcrumb-item>
-				<el-breadcrumb-item>添加行情</el-breadcrumb-item>
+				<el-breadcrumb-item>审核文章</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		<div class="box">
