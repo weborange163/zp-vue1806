@@ -1,5 +1,5 @@
 <template>
-    <div class="page-body">
+    <div class="page-body market_add">
         <div class="breadcrumb" style="padding:8px;">
             <el-breadcrumb separator-class="el-icon-arrow-right">
                 <el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
@@ -10,7 +10,6 @@
         <div class="box">
             <div class="text-right">
                 <el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-                <el-button size="small" class="light_btn">预览</el-button>
                 <el-button size="small" class="light_btn" @click="toAudit1('form2',1)">仅保存</el-button>
                 <el-button size="small" class="light_btn" @click="toAudit('form2',2)">保存并提交审核</el-button>
             </div>
@@ -20,13 +19,6 @@
                         <el-input v-model="form2.title" placeholder="请输入标题"></el-input>
                     </el-form-item>
                     <el-form-item label="文章内容" prop="content" class="editor">
-						<!-- <quill-editor v-model="form1.content"
-							ref="myQuillEditor"
-							:options="editorOption"
-							@blur="onEditorBlur($event)"
-							@focus="onEditorFocus($event)"
-							@ready="onEditorReady($event)">
-						</quill-editor> -->
 						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
 						:width="quill.width" :getContent="onEditorChange"
 						:has-border="quill.border" :zIndex="quill.zIndex"
@@ -41,10 +33,9 @@
                 <div style="width: 35%;float:left;padding:15px;" prop="classifyType">
                     <el-form-item label="发布到:">
                         <el-input :disabled="true" v-model="form2.classifyTypes" style="width:173px;"></el-input>
-                        
-                        
                     </el-form-item>
-                    <el-select v-model="value" name="classifyType" placeholder="请选择">
+                    <el-form-item label="所属分类">
+						<el-select v-model="value" name="classifyType" placeholder="请选择">
 					    <el-option
 					      v-for="item in classifyType"
 					      :key="item.id"
@@ -52,19 +43,7 @@
 					      :value="item.id">
 					    </el-option>
 					  </el-select>
-                    <!--<el-form-item label="来源:">
-        							<el-radio-group v-model="form.resource" required @change="test()">
-        								<el-radio label="2" >原创</el-radio>
-        								<el-radio label="1" >转载</el-radio>
-        							</el-radio-group>
-        							<el-select v-model="form.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
-        								<el-option label="第一网站" value="shanghai"></el-option>
-        								<el-option label="第二网站" value="beijing"></el-option>
-        							</el-select>
-        						</el-form-item>-->
-                    <!--<el-form-item label="作者:" :required="true">
-        							<el-input v-model="form.author"></el-input>
-        						</el-form-item>-->
+					</el-form-item>
                     <el-form-item label="发布账号:" prop="userId" label-width="82">
                         <el-select v-model="form2.userId" placeholder="请选择发布账号">
                             <el-option label="小号1" value="1"></el-option>
@@ -78,7 +57,7 @@
                         </el-radio-group>
                     </el-form-item>
                     <!--上传图片-->
-                    <el-form-item>
+                    <el-form-item label="封面图" required>
                         <el-upload ref="upload" :action="getFullUrl()" name="newsFile" :data="uploadData" :multiple="false" :limit='1' 
 												list-type="picture-card" :auto-upload="false"  :on-preview="handlePictureCardPreview" :on-exceed="fileOver" :on-remove="handleRemove">
                             <i class="el-icon-plus"></i>
@@ -189,7 +168,8 @@ export default {
                  source: [
             { required: true, message: '请选择活动资源', trigger: 'change' }
           ]
-            }
+            }  
+            
         };
 		},
 		created(){
@@ -351,6 +331,11 @@ export default {
 };
 </script>
 <style type="text/css">
+.market_add .el-upload--picture-card{
+	width: 80px;
+	height: 80px;
+	line-height: 88px;
+}
 .up_form .el-input__inner {
     height: 30px;
     line-height: 30px;

@@ -10,7 +10,7 @@
     <div class="box">
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn">预览</el-button>
+				<!-- <el-button size="small" class="light_btn">预览</el-button> -->
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','3')">仅保存</el-button>
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','4')">保存并上线</el-button>
 			</div>

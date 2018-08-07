@@ -1,5 +1,14 @@
 <template>
 	<div class="page-body news_lookes" style="min-width:980px;">
+		<el-dialog center width="375px"  :visible.sync="bannerDialog" append-to-body id='div1'>
+			<el-form :data="form1"  ref="form1" label-width="110px" class="form1">
+				<p id="p1" >{{form1.title }}</p>
+				<p id="p2" v-html="form1.content"></p>
+			</el-form>
+		</el-dialog>
+		
+		
+		
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
@@ -11,10 +20,10 @@
 		<div class="box" >
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn" >预览</el-button>
+				<el-button size="small" class="light_btn" @click="bannerDialog = true;" >预览</el-button>
 				<el-button size="small" v-if="status == '0'" class="light_btn" @click="toAudit()">提交审核</el-button>
 				<el-button size="small" class="light_btn" v-if="status == '5'" @click="onOff('4','上线')">上线</el-button>
-				<el-button size="small" class="light_btn" v-if="status == '4'" @click="onOff('5','下线')">下线</el-button>
+				<!-- <el-button size="small" class="light_btn" v-if="status == '4'" @click="onOff('5','下线')">下线</el-button> -->
 			</div>
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
@@ -44,7 +53,7 @@
 							<el-radio label="1" disabled>原创</el-radio>
 							<el-radio label="2" disabled>转载</el-radio>
 						</el-radio-group>
-						<el-select v-if="form1.sourceType == 2" v-model="form1.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
+						<el-select disabled v-if="form1.sourceType == 2" v-model="form1.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
 							<el-option
 								v-for="item in cities"
 								:key="item.id"
@@ -118,6 +127,7 @@ import axios from 'axios'
 				editorOption:{},
 				dialogImageUrl: '',
         dialogVisible: false,
+        bannerDialog: false,
 				form1: {
 					title: '',
 					content:'',
@@ -233,11 +243,11 @@ import axios from 'axios'
         });
 			},
 			//获取封面图路径
-			getImgUrl(){
+			/* getImgUrl(){
 				this.imgFullSrc = this.baceUrl + this.imgSrc;
 				console.log(this.imgSrc)
 				console.log(this.imgFullSrc)
-			},
+			}, */
 			// 获取新闻详情
 			showNews(){
 				var params = {
@@ -254,10 +264,10 @@ import axios from 'axios'
 			},
 			getParams () {
         // 取到路由带过来的参数 
-				let routerParams = this.$route.params.rowInfo
+				let routerParams = this.$route.params.id
         // 将数据放在当前组件的数据内
 				// this.form1 = routerParams
-				this.idDetail = routerParams.id
+				this.idDetail = routerParams
 				// console.log(this.idDetail)
       },
 			// 富文本图片上传
@@ -327,8 +337,25 @@ import axios from 'axios'
 		height: 550px;
 		overflow-y: auto;
 	}
-	.imgs{
-		width: 300px;
-		height: 30px;
+	.imgs {
+		width: 200px;
+		height: 200px;
+		display: block;
+	}
+	#p1{
+		text-align: center;
+		font-size: 20px;
+	}
+	#p2{
+		 margin: 0 auto; height: 500px;margin-top: 2px;text-indent:2em; overflow-y: auto !important;
+	}
+	#p2 img{
+		display: block;
+		margin: 0 auto;
+		width: 320px !important;
+		
+	}
+	.el-dialog--center .el-dialog__body{
+		padding: 0 !important;
 	}
 </style>

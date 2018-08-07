@@ -61,25 +61,12 @@
 					<el-form-item label="发布到:">
 						<el-input :disabled="true" v-model="classifyTypes" style="width:173px;"></el-input>
 					</el-form-item>
-
-					<el-select v-model="value" name="classifyType" placeholder="请选择">
+					<el-form-item label="所属分类">
+					<el-select  v-model="value" name="classifyType" placeholder="请选择">
 						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
 						</el-option>
 					</el-select>
-
-					<!--<el-form-item label="来源:">
-        							<el-radio-group v-model="form.resource" required @change="test()">
-        								<el-radio label="2" >原创</el-radio>
-        								<el-radio label="1" >转载</el-radio>
-        							</el-radio-group>
-        							<el-select v-model="form.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
-        								<el-option label="第一网站" value="shanghai"></el-option>
-        								<el-option label="第二网站" value="beijing"></el-option>
-        							</el-select>
-        						</el-form-item>-->
-					<!--<el-form-item label="作者:" :required="true">
-        							<el-input v-model="form.author"></el-input>
-        						</el-form-item>-->
+					</el-form-item>
 					<el-form-item label="发布账号:" prop="userId" label-width="82">
 						<el-select v-model="form2.userId" placeholder="请选择发布账号">
 							<el-option label="小号1" value="1"></el-option>
@@ -121,7 +108,7 @@
         width: 420,
 				border: true,
 				height:150,
-				zIndex:10000,
+				zIndex:1,
         content: 'wellcome ~',
         syncOutput: true,
         theme: 'snow', //bubble snow

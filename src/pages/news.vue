@@ -45,12 +45,13 @@
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-									<el-popover trigger="hover" placement="top" v-if="scope.row.link">
+									<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
+									<!-- <el-popover trigger="hover" placement="top" v-if="scope.row.link">
 										<p>{{ scope.row.link }}</p>
 										<div slot="reference" class="name_wrapper">
 											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
 										</div>
-									</el-popover>
+									</el-popover> -->
 									<p style="display:inline-block;">{{ scope.row.title }}</p>
 								</template>
 							</el-table-column>
@@ -75,14 +76,15 @@
 							<el-table-column label="操作" width="300" fixed="right">
 								<template slot-scope="scope">
 									<el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
+									<el-button type="text" v-if="scope.row.status == '0'" @click="toAudit(scope.row)">提交审核</el-button>
 									<el-button type="text" v-if="scope.row.status =='4'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
 									<el-button type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
 									
-									<router-link :to="{name:'news-lookes',params:{rowInfo:scope.row}}">
+									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
 										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
 									<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
-									<router-link :to="{name:'news-edit',params:{rowInfo:scope.row}}">
+									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
 										<el-button type="text" v-if="scope.row.status != '4'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
 									<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
@@ -129,7 +131,7 @@
 									<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
 									<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 									<el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" @click="toAudit(scope.row)">提交审核</el-button>
+									<el-button type="text" @click="toAudit(scope.row,2)">提交审核</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
@@ -167,7 +169,7 @@
           <el-button size="small" type="primary" @click="toPublish()">发 布</el-button>
         </span>
 			</el-dialog>
-			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" >
+			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" style="padding-left:20px;">
 				<el-radio v-model="recommendRadio" label="1" class="marBo4">置顶-新闻推荐列表区</el-radio><br/>
 				<el-radio v-model="recommendRadio" label="2">推荐到banner</el-radio>
 				<span slot="footer" class="dialog-footer">
@@ -189,10 +191,11 @@
 						<el-form-item label="banner图片" label-width="110px" required>
 							<el-upload 
 								:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
-								ref="upload" name="newsFile"
+								ref="upload" name="file"
 								list-type="picture-card"
 								:auto-upload="false" :on-exceed="handleExceed"
 								:on-preview="handlePictureCardPreview"
+								:on-change="fileChange"
 								:on-remove="handleRemove">
 								<i class="el-icon-plus"></i>
 							</el-upload>
@@ -209,7 +212,7 @@
 					</el-form>
 					<span slot="footer" class="dialog-footer">
 						<el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
-						<el-button type="primary" @click="toBanner" class="light_btn">保 存</el-button>
+						<el-button type="primary" @click="toBanner1" class="light_btn">保 存</el-button>
 					</span>
 				</el-dialog>
 			<!-- 分页 -->
@@ -226,6 +229,8 @@
 			return {
 				bannerForm:{
 					title:'',
+					file:'',
+					filename:'',
 					title_short:'',
 					articleId:'',
 					type:'新闻',
@@ -372,12 +377,15 @@
 				}
 				console.log(params);
 				this.$post('news/publishTop',params).then(res => {
-					console.log(res)
+					this.$message({
+          message: res.msg,
+          type: 'success'
+        });
 				})
-				//this.dialogVisible = false
+				this.dialogVisible = false
 			},
 			//提交审核
-			toAudit(row){
+			toAudit(row,tab){
 				this.$confirm('是否提交到审核列表?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -388,7 +396,11 @@
 						ids:row.id
 					}
 					this.$post('news/batchWaitCheck',params).then(res => {
-						this.creatList();
+						if(tab){
+							this.creatList();
+						}else{
+							this.newsList();
+						}
 						this.$message({
 							type: 'success',
 							message: '操作成功!'
@@ -444,10 +456,6 @@
 				// console.log(params)
 				this.$post('/news/list',params).then(res => {
 					console.log(res.data[0].rows)
-					//&lt;p&gt;&lt;b&gt;123&amp;456&lt;/b&gt;&lt;/p&gt;
-					//& lt;p& gt;哈哈哈& lt;
-//					var a = res.data[0].rows[0].content
-//					console.log(HTMLDecode(a));
 					this.tableData = res.data[0].rows;
 					this.total_pages1 = res.data[0].total;
 				});
@@ -494,7 +502,7 @@
 							this.uploadData={
 								tokenId:this.$store.state.user.tokenId,
 								titleShort:this.bannerForm.title_short,
-								bannerType:this.bannerForm.type,
+								bannerType:'1',
 								linkId:this.bannerForm.link,
 								articleId:this.bannerForm.articleId,
 							}
@@ -513,6 +521,41 @@
 						}
 					})
         
+			},
+			toBanner1(){
+					this.$refs.bannerForm.validate((valid) => {
+						if(valid){
+							 let param = new FormData();
+								param.append('file',this.bannerForm.file,this.bannerForm.filename);
+								param.append('tokenId',this.$store.state.user.tokenId);
+								param.append('titleShort',this.bannerForm.title_short);
+								param.append('bannerType','1');
+								param.append('linkId',this.bannerForm.link);
+								param.append('articleId',this.bannerForm.articleId);
+							console.log(param)
+							this.$post('bannerInfo/save',param).then(res =>{
+								console.log(res)
+								this.$message({
+									type: 'success',
+									message: '添加成功!'
+								});
+								setTimeout(() => {
+								//	this.newsList();
+								}, 1000);
+								this.bannerDialog = false;
+							})
+						}
+					})
+        
+			},
+		//图片的验证
+			fileChange(file,fileList){
+				this.bannerForm.filename = file.name;
+				this.bannerForm.file = file.raw;
+				console.log(file.raw)
+				if(fileList.length>0){
+					this.hasFmt = true;
+				}
 			},
 			// 批量提交审核
 			toAudits(){
@@ -573,6 +616,15 @@
 			},
 			// 确定推荐到置顶/banner
 			sureReco(){
+				this.bannerForm={
+					title:'',
+					file:'',
+					filename:'',
+					title_short:'',
+					articleId:'',
+					type:'新闻',
+					link:''
+				};
 				if(this.recommendRadio == '1'){	// 推荐到置顶
 					console.log(this.recoIndex)
 					var params = {
@@ -596,7 +648,7 @@
 					// this.tableData[this.recoIndex].title,
 					this.bannerForm.title = this.tableData[this.recoIndex].title;
 					this.bannerForm.link = this.tableData[this.recoIndex].id;
-					this.bannerForm.articleId = this.tableData[this.recoIndex].articleId;
+					this.bannerForm.articleId = this.tableData[this.recoIndex].article_id;
 					this.dialogVisible1 = false;
 					this.bannerDialog =true;
 				}else{

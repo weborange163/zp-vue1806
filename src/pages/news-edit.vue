@@ -1,18 +1,27 @@
 <template>
 	<div class="page-body news_lookes" style="min-width:980px;">
+		<el-dialog center width="375px"  :visible.sync="bannerDialog" append-to-body id='div1'>
+			<el-form :data="form1" :model="form1" ref="form1" label-width="110px" class="form1">
+				<p id="p1" >{{form1.title }}</p>
+				<p id="p2" v-html="form1.content"></p>
+			</el-form>
+		</el-dialog>
+		
+		
+		
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
-				<el-breadcrumb-item>行业信息</el-breadcrumb-item>
-				<el-breadcrumb-item>查看新闻资讯</el-breadcrumb-item>
+				<el-breadcrumb-item>新闻信息</el-breadcrumb-item>
+				<el-breadcrumb-item>编辑新闻资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		
 		<div class="box" >
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn" >预览</el-button>
-				<el-button size="small" class="light_btn">上线/下线</el-button>
+				<el-button size="small" class="light_btn" @click="bannerDialog = true;" >预览</el-button>
+				<el-button size="small" class="light_btn" @click="editNews('form1',0)">保存</el-button>
 			</div>
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
@@ -20,7 +29,6 @@
 						<el-input v-model="form1.title"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
-						
 						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
 						:width="quill.width" :getContent="onEditorChange"
 						:has-border="quill.border" :zIndex="quill.zIndex"
@@ -28,17 +36,17 @@
 						:theme="quill.theme"
 						:disabled="quill.disabled"
 						:fullscreen="quill.full"
-						@upload="uploadImg" @blur="onEditorBlur($event)"
+						@upload="uploadImg" @change="onEditorBlur($event)"
 						></m-quill-editor>
 					</el-form-item>
 					<!-- <div id="test" class="ql-editor"></div> -->
 				</div>
 				<div style="width: 35%;float:left;padding:15px;">
 					<el-form-item label="发布到:">
-						<el-input v-model="type"></el-input>
+						<el-input v-model="type" disabled></el-input>
 					</el-form-item>
-					<el-form-item label="来源:" prop="source_type">
-						<el-radio-group v-model="form1.source_type" @change="test()">
+					<el-form-item label="来源:" prop="sourceType">
+						<el-radio-group v-model="form1.sourceType" @change="test()">
 							<el-radio label="1">原创</el-radio>
 							<el-radio label="2">转载</el-radio>
 						</el-radio-group>
@@ -55,23 +63,25 @@
 						<el-input v-model="form1.author"></el-input>
 					</el-form-item>
 					<el-form-item label="发布账号:" prop="userId" label-width="82">
-						<el-select v-model="form1.user_id">
+						<el-select v-model="form1.userId">
 							<el-option label="小号1" value="shanghai"></el-option>
 							<el-option label="小号2" value="beijing"></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="附加选项:" prop="img_type" label-width="82">
-							<el-radio-group v-model="form1.img_type">
+					<el-form-item label="附加选项:" prop="imgType" label-width="82">
+							<el-radio-group v-model="form1.imgType">
 								<el-radio label="1">上传缩略图</el-radio>
 								<el-radio label="2">提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item>
+					<el-form-item v-if="form1.imgType=='1'">
 						<el-upload
 							:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
 							ref="upload" name="newsFile"
 							list-type="picture-card"
 							:auto-upload="false"
+							:file-list="fileList"
+							:file-change="fileChange"
 							:on-preview="handlePictureCardPreview"
 							:on-remove="handleRemove">
 							<i class="el-icon-plus"></i>
@@ -81,10 +91,10 @@
 						</el-dialog>
 					</el-form-item>
 					<el-form-item label="Tag标签:">
-						<el-input  v-model="form1.tag_labels" ></el-input>
+						<el-input  v-model="form1.tagLabels" ></el-input>
 					</el-form-item>
 					<el-form-item label="关键词:">
-						<el-input  v-model="form1.key_words" ></el-input>
+						<el-input  v-model="form1.tagLabels" ></el-input>
 					</el-form-item>
 				</div>
 			</el-form>
@@ -101,13 +111,30 @@ import axios from 'axios'
 		},
 		data(){
 			return{
+				fileList:[],	// 预览图片
+				imgFullSrc:'',
+				imgSrc:'',
+				form1: {
+					title: '',
+					content:'',
+					column:'新闻资讯',
+					sourceType:'1',
+					source:'',
+					status:'',
+					author:'',
+					userId:'1',
+					imgType:'1',
+					newsFile:'',
+					tagLabels:'',
+					keyWords:'',
+					coverImgId:''
+				},
 				type:'新闻',
 				pkg:'',
       quill: {
         width: 420,
 				border: true,
 				height:150,
-				zIndex:10000,
         content: 'wellcome ~',
         syncOutput: false,
         theme: 'snow', //bubble snow
@@ -118,38 +145,35 @@ import axios from 'axios'
           ['bold', 'italic', 'underline', 'strike', 'link']
         ]
       },
+      bannerDialog: false,
+			idDetail:'',
+			hasFmt:false,
 				uploadData:{},
 				baceUrl:'',
 				// content:'111',
 				editorOption:{},
 				dialogImageUrl: '',
         dialogVisible: false,
-				form1: {
-					
-				},
 				cities:[],
 				rules1: {
           title: [
             { required: true, message: '请输入标题', trigger: 'blur' },
-            { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
+            { min: 3, max: 45, message: '长度在 3 到 45 个字符', trigger: 'blur' }
           ],
           content: [
             { required: true, message: '请输入内容', trigger: 'change' }
           ],
-          source_type: [
+          sourceType: [
             { required: true, message: '请选择来源', trigger: 'change'}
           ],
           userId: [
             {required: true, message: '请选择发布账号', trigger: 'change' }
           ],
-          img_type: [
+          imgType: [
             {required: true, message: '请选择图片', trigger: 'change' }
           ],
           source: [
             { required: true, message: '请选择活动资源', trigger: 'change' }
-          ],
-          desc: [
-            { required: true, message: '请填写活动形式', trigger: 'blur' }
           ]
         }
 			}
@@ -157,20 +181,128 @@ import axios from 'axios'
 		created(){
 			this.baceUrl = getBaceUrl();
 			this.getParams();
+			this.showNews();
 			// console.log(this.baceUrl)
 		},
 		mounted() {
-			
+			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
+    		console.log(res.data)
+    		this.cities = res.data
+    	})
 		//	var test =  document.getElementById('test');
 			//test.innerHTML=this.form1.content;
 		},
 		methods:{
+			//图片的验证
+			fileChange(file,fileList){
+				this.form1.newsFile = file.raw;
+				console.log(fileList.length)
+				if(fileList.length>0){
+					this.hasFmt = true;
+				}
+			},
+			// 编辑新闻
+			editNews(formName,status){
+				this.$refs[formName].validate((valid) => {
+          if (valid) {
+						console.log(valid)
+						if(this.form1.sourceType == '2' && !this.form1.source){ // 选择转载时候,需要选择转载来源 (待)
+							this.$message.error('请选择转载来源!');
+							return;
+						}
+						if(this.form1.imgType == 2){	// 封面图的类型 
+							var reg = /src=/ig;
+							if(!!this.form1.content.match(reg)){
+								var params ={
+									tokenId:this.$store.state.user.tokenId,
+									status:status,
+									id:this.idDetail,
+									title: this.form1.title,
+									content: this.form1.content,
+									sourceType:this.form1.sourceType,
+									source:this.form1.source,
+									author:this.form1.author,
+									userId:this.form1.userId,
+									imgType:this.form1.imgType,
+									tagLabels:this.form1.tagLabels,
+									keyWords:this.form1.keyWords,
+									publishSource:"1"
+								}
+								this.$post('news/edit',params).then(res =>{
+									if(res.code == 0){
+										setTimeout(() => {
+											this.$router.push({name: 'news'});
+										}, 1000);
+									}
+								})
+							}else{
+								 this.$message.error('内容里没有图片!');
+							}
+						}else{
+							if(!this.hasFmt){
+								this.$message.error('请上传封面图!');
+								return;
+							}
+							this.uploadData={
+								tokenId:this.$store.state.user.tokenId,
+								id:this.idDetail,
+								// newsFile:this.form1.newsFile,
+								status:status,
+								title: this.form1.title,
+								content: this.form1.content,
+								sourceType:this.form1.sourceType,
+								editStatus:'1',
+								source:this.form1.source,
+								articleId:this.form1.articleId,
+								author:this.form1.author,
+								userId:this.form1.userId,
+								imgType:this.form1.imgType,
+								tagLabels:this.form1.tagLabels,
+								keyWords:this.form1.keyWords,
+								publishSource:"1"
+							}
+							// this.uploadData = params;
+							console.log(this.uploadData)
+							setTimeout(() => {
+								this.$refs.upload.submit();
+								this.$message({
+									type: 'success',
+									message: '添加成功!'
+								});
+								setTimeout(() => {
+									this.$router.push({name: 'news'});
+								}, 1000);
+							}, 0);
+						}
+          } else {
+            console.log('error submit!!');
+            return false;
+          }
+        });
+				
+			},
+			// 获取新闻详情
+			showNews(){
+				var params = {
+					tokenId:this.$store.state.user.tokenId,
+					id:this.idDetail
+				}
+				this.$get('news/show',params).then(res => {
+					this.form1 = res.data[0];
+					console.log(this.form1)
+					this.imgSrc = this.form1.coverImgId;
+					this.status = this.form1.status;
+					this.imgFullSrc = this.baceUrl + this.imgSrc;
+					console.log(this.imgFullSrc)
+					this.fileList.push({url:this.imgFullSrc})
+				});
+			},
 			getParams () {
         // 取到路由带过来的参数 
-        let routerParams = this.$route.params.rowInfo
+        let routerParams = this.$route.params.id
         // 将数据放在当前组件的数据内
-				this.form1 = routerParams
-				console.log(this.form1)
+				// this.form1 = routerParams;
+				this.idDetail = routerParams;
       },
 			// 富文本图片上传
 			uploadImg(file,insert){
@@ -188,13 +320,16 @@ import axios from 'axios'
 				})
 			},
 			getFullUrl(){
-				return (this.baceUrl+'/news/add')
+				return (this.baceUrl+'/news/edit')
 			},
 			test(){
 				console.log(this.form1.source);
 			},
 			// 获取富文本的内容
-			onEditorBlur({quill, html,text}) {
+			onEditorBlur(t) {
+				this.form1.content =  t.container.innerHTML;
+				console.log(t)
+				console.log(t.container.innerHTML)
 				// console.log('editor blur!', quill, html, text)
 				console.log(this.form1.content)
       },
@@ -209,7 +344,10 @@ import axios from 'axios'
 				// this.content = html
 			},
 			handleRemove(file, fileList) {
-        console.log(file, fileList);
+				console.log(file, fileList);
+				if(fileList.length == 0){
+					this.hasFmt =false;
+				}
       },
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;
@@ -238,5 +376,26 @@ import axios from 'axios'
 	.up_form .quill-editor .ql-container{
 		height: 550px;
 		overflow-y: auto;
+	}
+.imgs {
+		width: 200px;
+		height: 200px;
+		display: block;
+	}
+	#p1{
+		text-align: center;
+		font-size: 20px;
+	}
+	#p2{
+		 margin: 0 auto; height: 500px;margin-top: 2px;text-indent:2em; overflow-y: auto !important;
+	}
+	#p2 img{
+		display: block;
+		margin: 0 auto;
+		width: 320px !important;
+		
+	}
+	.el-dialog--center .el-dialog__body{
+		padding: 0 !important;
 	}
 </style>

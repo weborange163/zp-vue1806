@@ -1,5 +1,12 @@
 <template>
 	<div class="page-body">
+		<el-dialog center width="22%" :visible.sync="bannerDialog" append-to-body>
+			<el-form :data="form2"  ref="form2" label-width="110px" class="form2">
+				<p id="p1" >{{form2.title }}</p>
+				<p id="p2">{{form2.content }}</p>
+			</el-form>
+		</el-dialog>
+		
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
@@ -10,9 +17,9 @@
 		<div class="box">
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn">预览</el-button>
-				<el-button size="small" class="light_btn" @click="toAudit('form2',1)">仅保存</el-button>
-				<el-button size="small" class="light_btn" @click="toAudit('form2',2)">保存并提交审核</el-button>
+				<el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button>
+				<!--<el-button size="small" class="light_btn" @click="toAudit('form2')">仅保存</el-button>-->
+				<el-button size="small" class="light_btn" @click="toAudit('form2')">保存</el-button>
 			</div>
 			<el-form ref="form2" :model="form2" label-width="80px" class="up_form">
 				<div style="width: 40%;float: left;padding:15px;margin-left:5%;margin-right:10%;">
@@ -27,11 +34,12 @@
 					<el-form-item label="发布到:">
 						<el-input :disabled="true" v-model="classifyTypes" style="width:173px;"></el-input>
 					</el-form-item>
-
-					<el-select v-model="value" name="classifyType" placeholder="请选择">
+					<el-form-item label="所属分类" prop="userId" label-width="82">
+					<el-select v-model="value" name="classifyType" placeholder="请选择"  style='padding-left: 6px;'>
 						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
 						</el-option>
 					</el-select>
+					</el-form-item>
 					<el-form-item label="发布账号:" prop="userId" label-width="82">
 						<el-select v-model="form2.userId" placeholder="请选择发布账号">
 							<el-option label="小号1" value="1"></el-option>
@@ -46,7 +54,7 @@
 					</el-form-item>
 					<!--上传图片-->
 					<el-form-item>
-						<el-upload ref="upload" :action="getFullUrl()" name="newsFile" :data="uploadData" :multiple="false" :limit='1' list-type="picture-card" :auto-upload="false" :on-preview="handlePictureCardPreview" :on-exceed="fileOver" :on-remove="handleRemove">
+						<el-upload ref="upload" :action="getFullUrl()" name="newsFile" :data="uploadData" :multiple="false" :limit='1' list-type="picture-card" :auto-upload="false" :file-list="fileList" :on-preview="handlePictureCardPreview" :on-exceed="fileOver" :on-remove="handleRemove">
 							<i class="el-icon-plus"></i>
 						</el-upload>
 						<el-dialog :visible.sync="dialogVisible">
@@ -62,6 +70,7 @@
 				</div>
 			</el-form>
 		</div>
+		<!--{{$route.params.rowInfo.id}}-->
 	</div>
 </template>
 <script>
@@ -69,11 +78,12 @@
 	export default {
 		data() {
 			return {
+				dialogVisible: false,
+				bannerDialog:false,
 				quill: {
 					width: 420,
 					border: true,
 					height: 150,
-					zIndex: 10000,
 					content: 'wellcome ~',
 					syncOutput: true,
 					theme: 'snow', //bubble snow
@@ -90,11 +100,11 @@
 				},
 
 				baceUrl: '',
+				fileList:[],	// 预览图片
 				// url: 'http://192.168.1.91:8080/industry/save',
 				// 上传图片
 				editorOption: {},
 				dialogImageUrl: '',
-				dialogVisible: false,
 				classifyTypes: '行情',
 				classifyType: '',
 				form2: {
@@ -122,7 +132,7 @@
 		mounted() {
 			this.$get('/industry/get', {
 				tokenId: this.$store.state.user.tokenId,
-				id: this.$route.params.rowInfo.id
+				id: this.$route.params.id
 			}).then(res => {
 				console.log(res.data[0].industry)
 				this.form2 = res.data[0].industry
@@ -131,6 +141,7 @@
 				this.status = this.form2.status;
 				this.classifyType = this.form2.classifyType
 				this.imgFullSrc = this.baceUrl + this.imgSrc
+				this.fileList.push({url:this.imgFullSrc})
 				let selectid = this.classifyType;
 				//				alert(selectid)
 				//  	下拉菜单
@@ -185,17 +196,18 @@
 					// console.log(this.$store.state.user.tokenId);
 					if(valid) {
 						var params = {
-							id: this.$route.params.rowInfo.id,
+							id: this.$route.params.id,
 							tokenId: this.$store.state.user.tokenId,
-							status: status,
+							status: this.status,
 							title: this.form2.title,
 							content: this.form2.content,
-							//classifyType: this.form2.classifyType,
+							classifyType: this.value,
+//							//classifyType: this.form2.classifyType,
 							userId: this.form2.userId,
 							imgType: this.form2.imgType,
 							tagLabel: this.form2.tagLabel,
 							publishSource: '1',
-							classifyType: this.value,
+							
 
 						};
 						this.uploadData = params;

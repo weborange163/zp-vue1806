@@ -203,7 +203,7 @@ export default {
 .info_table .el-table td{
   border-color:#EAEAEA;
 }
-.info_table .el-table td{
+.member_info .info_table .el-table td{
   padding: 6px 0;
   background: #F3F3F3;
 }

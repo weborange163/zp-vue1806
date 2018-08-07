@@ -47,7 +47,7 @@
 						<el-form-item label="banner图片" label-width="110px" required>
 							<el-upload 
 								:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
-								ref="upload" name="newsFile"
+								ref="upload" name="file"
 								list-type="picture-card"
 								:auto-upload="false" :on-exceed="handleExceed"
 								:on-preview="handlePictureCardPreview"
@@ -107,7 +107,11 @@
 						<p style="display:inline-block;">{{ scope.row.title }}</p>
 					</template>
 				</el-table-column>
-        <el-table-column label="专题封面" prop="cover_img_id"></el-table-column>
+        <el-table-column label="专题封面" prop="cover_img_id">
+					<template slot-scope="scope">
+						<img :src="scope.row.imgurl" alt="">
+					</template>
+				</el-table-column>
         <el-table-column label="发布状态" width="80">
           <template slot-scope="scope">
               <p v-if="scope.row.status=='0'" >新建</p>
@@ -124,10 +128,6 @@
 						<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
 						<el-button type="text" v-if="scope.row.status=='4' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
 						<el-button type="text" v-if="scope.row.status=='3'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
-<!--						
-						<router-link :to="{name:'subject-lookes',params:{rowInfo:scope.row}}">
-						<el-button type="text"><i class="iconfont icon-see"></i></el-button>
-						</router-link>-->
 						<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
 						<router-link :to="{name:'subject-edit',params:{rowInfo:scope.row}}">
 							<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
@@ -151,7 +151,9 @@ import { getBaceUrl } from '@/utils/auth'
 export default {
   data(){
     return{
-			bannerForm:{},
+			bannerForm:{
+				type:'专题'
+			},
 			dialogImageUrl:'',
 			dialogVisible2:false,
 			uploadData:{},
@@ -213,7 +215,7 @@ export default {
 							this.uploadData={
 								tokenId:this.$store.state.user.tokenId,
 								titleShort:this.bannerForm.title_short,
-								bannerType:this.bannerForm.type,
+								bannerType:'2',
 								linkId:this.bannerForm.link,
 								articleId:this.bannerForm.articleId,
 							}
@@ -257,7 +259,7 @@ export default {
 					// this.subjectList[this.recoIndex].title,
 					this.bannerForm.title = this.subjectList[this.recoIndex].title;
 					this.bannerForm.link = this.subjectList[this.recoIndex].id;
-					this.bannerForm.articleId = this.subjectList[this.recoIndex].articleId;
+					this.bannerForm.articleId = this.subjectList[this.recoIndex].article_id;
 					this.dialogVisible1 = false;
 					this.bannerDialog =true;
 				}else{
@@ -344,7 +346,12 @@ export default {
 					timeEnd:this.value6[1],
       }
       this.$post('specialInfo/list',params).then(res => {
-        console.log(res.data[0].rows);
+				console.log(res.data[0].rows);
+				var listarr = res.data[0].rows;
+				listarr.map(item => {
+					item.imgsrc = this.baceUrl + item.cover_img_id;
+
+				})
         this.subjectList = res.data[0].rows;
         this.total_pages = res.data[0].total;
       })

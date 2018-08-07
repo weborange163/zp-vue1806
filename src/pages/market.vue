@@ -4,21 +4,9 @@
 			<el-row>
 				<el-col :span="5">
 					<el-select v-model="value" name="classifyType" placeholder="分类" style="width:49%">
-						 <el-option
-					      v-for="item in classifyType"
-					      :key="item.id"
-					      :label="item.name"
-					      :value="item.id">
-					    </el-option>
+						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
+						</el-option>
 					</el-select>
-					<!--<el-select v-model="value" placeholder="发布状态" style="width:32%">
-            <el-option 
-              v-for="item in options"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value">
-            </el-option>
-          </el-select>-->
 					<el-select v-model="value1" placeholder="发布来源" style="width:49%">
 						<el-option v-for="item in optionss" :key="item.value1" :label="item.label" :value="item.value1">
 						</el-option>
@@ -91,29 +79,29 @@
 							<el-table-column label="操作" width="220" fixed="right">
 								<template slot-scope="scope">
 									<!--v-if="scope.row.isUping"-->
-								
-										<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-										<el-button type="text" v-else-if="scope.row.top_flag=='0' && scope.row.status=='1'" :disabled="true"  style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-										<el-button type="text" v-else-if="scope.row.top_flag=='0'"   style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-										
-										<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp2(scope.$index, scope.row)"> 提交审核 </el-button>
 
+									<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
+									<el-button type="text" v-else-if="scope.row.status!='5'" :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+									<el-button type="text" v-else-if="scope.row.top_flag=='0'&& scope.row.status == '5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+
+									<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp2(scope.$index, scope.row)"> 提交审核 </el-button>
 
 									<!--v-if="scope.row.status =='已上线'"-->
 									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag=='1' " :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
 									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
-									
+
 									<el-button type="text" v-if="scope.row.status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
-									<router-link :to="{name:'market-lookes',params:{rowInfo:scope.row}}">
-									<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
+										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
 									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
 
-									<router-link :to="{name:'market-edit',params:{rowInfo:scope.row}}">
-										<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
+									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
+										<el-button type="text" v-if="scope.row.status!='5'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
 
-									<el-button type="text" v-if="scope.row.status !='已上线'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-if="scope.row.top_flag=='1'" :disabled="true" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-else :disabled="false" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
 							</el-table-column>
@@ -128,7 +116,7 @@
 					<div class="tab2">
 						<div class="text-right marBo4">
 							<el-button class="light_btn" @click="toAudits">批量提交审核</el-button>
-							<el-button class="light_btn">刷新</el-button>
+							<el-button class="light_btn" @click.native.prevent="getMarket1()">刷新</el-button>
 						</div>
 						<el-table :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="newArticle" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55" align="center">
@@ -164,12 +152,12 @@
 							</el-table-column>
 						</el-table>
 					</div>
-					
+
 					<div style="margin-top:20px;">
 						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
 						</el-pagination>
 					</div>
-					
+
 				</el-tab-pane>
 			</el-tabs>
 			<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
@@ -226,19 +214,6 @@
           <el-button type="primary" @click="apps = false">确 定</el-button>
         </span>
 			</el-dialog>
-
-			<!-- 分页 -->
-			<!--<div style="margin-top:20px;">
-        <el-pagination class="text-center"
-          background
-          @current-change="handleCurrentChange"
-          :current-page="current_page"
-          :page-sizes="[10, 20, 30, 40]"
-          :page-size="this.per_page"
-          layout="prev, pager, next"
-          :total="this.total_pages * this.per_page">
-        </el-pagination>
-      </div>-->
 		</div>
 	</div>
 </template>
@@ -260,7 +235,7 @@
 				recommendRadio: 1,
 				dialogVisible: false,
 				dialogVisible1: false,
-				loading:false,
+				loading: false,
 				apps: false,
 				per_page: 10, //每页显示几条
 				total_pages: 100, // 总页数
@@ -271,7 +246,7 @@
 				per_page1: 5,
 				per_page2: 5,
 				total_pages1: 0,
-				classifyType:'',
+				classifyType: '',
 				upData: [{
 						title: '1马上就要过端午节了,公司发了粽子给大家,'
 					},
@@ -336,9 +311,9 @@
 				value1: '',
 				value2: '',
 				dataList: [],
-				topFlag:'',
-				timeStart:'',
-				timeEnd:'',
+				topFlag: '',
+				timeStart: '',
+				timeEnd: '',
 			}
 		},
 		computed: {
@@ -349,15 +324,17 @@
 		created() {
 			console.log(1111111111, getToken())
 			this.getMarket()
-			
+
 		},
-		  mounted() {
-    	this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
-    		console.log(res.data)
-    		this.classifyType = res.data
-    	})
-        // console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
-    },
+		mounted() {
+			this.$get('/industryCategory/findIndustryCategoryList', {
+				tokenId: this.$store.state.user.tokenId
+			}).then(res => {
+				console.log(res.data)
+				this.classifyType = res.data
+			})
+			// console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
+		},
 		methods: {
 			//实现置顶排序的方法
 			changeIndex(index, rows, dir) {
@@ -373,60 +350,63 @@
 					rows.splice(index, 1, b)
 				}
 			},
-			
-			
+
 			// 置顶排序
-			publishWaitTop(){
+			publishWaitTop() {
 				this.dialogVisible = true;
 				this.loading = true;
-				this.$get('/industry/findIndustryList',{tokenId:this.$store.state.user.tokenId,status:'5',topFlag:'1'}).then(res =>{
+				this.$get('/industry/findIndustryList', {
+					tokenId: this.$store.state.user.tokenId,
+					status: '5',
+					topFlag: '1'
+				}).then(res => {
 					this.loading = false;
 					console.log(res)
 					this.upData = res.data;
 				})
 			},
 			//提交置顶排序(弹框点击发布)
-			toPublish(){
+			toPublish() {
 				// console.log(this.upData)
-				var newsInfos =[];
+				var newsInfos = [];
 				this.upData.map((item, index) => {
-				//	newsInfos.push({id:item.id,orderNum:index+1})
+					//	newsInfos.push({id:item.id,orderNum:index+1})
 					newsInfos.push(item.id);
 				})
 				var params = {
-					tokenId:this.$store.state.user.tokenId,
+					tokenId: this.$store.state.user.tokenId,
 					// newsInfos:JSON.stringify(newsInfos)
-					ids:newsInfos.join(',')
+					ids: newsInfos.join(',')
 				}
 				console.log(params);
-				this.$post('/industry/publishOrederByIds',params).then(res => {
-					console.log(res)
+				this.$post('/industry/publishOrederByIds', params).then(res => {
+					this.$message({
+						message: res.msg,
+						type: 'success'
+					});
 				})
 				this.dialogVisible = false
+				this.getMarket()
+				//				alert(111)
 			},
-			
-			
-			
-			
-			
+
 			//列表
 			getMarket() {
-//				alert(Date.parse(this.value6[0]))
-//				alert(Date.parse(this.value6[1]))
+				//				alert(Date.parse(this.value6[0]))
+				//				alert(Date.parse(this.value6[1]))
 				this.$get('industry/list', {
 					tokenId: this.$store.state.user.tokenId,
 					limit: this.per_page1,
 					offset: this.currentPage1,
-					classifyType:this.value,
-					publishSource:this.value1,
-					timeType:this.value2,
-					title:this.inputs,
-//					开始也就是逗号前面的
-					timeStart:this.value6[0],
-//					结束也就是逗号后面的
-					timeEnd:this.value6[1],
+					classifyType: this.value,
+					publishSource: this.value1,
+					timeType: this.value2,
+					title: this.inputs,
+					//					开始也就是逗号前面的
+					timeStart: this.value6[0],
+					//					结束也就是逗号后面的
+					timeEnd: this.value6[1],
 
-				
 				}).then(res => {
 					console.log(res.data[0].rows)
 					this.tableData = res.data[0].rows
@@ -438,7 +418,7 @@
 				this.$get('industry/list', {
 					tokenId: this.$store.state.user.tokenId,
 					limit: this.per_page1,
-					offset: this.currentPage1,				
+					offset: this.currentPage1,
 				}).then(res => {
 					console.log(res.data[0].rows)
 					this.tableData = res.data[0].rows
@@ -495,7 +475,7 @@
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
-						topFlag:'0'
+						topFlag: '0'
 					}
 					this.$post('/industry/downTop', params).then(res => {
 						// console.log(res)
@@ -522,17 +502,17 @@
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
-						topFlag:'1'
+						topFlag: '1'
 					}
 					this.$post('/industry/onTop', params).then(res => {
 						// console.log(res)
-						if(res.code == '0'){
-						this.$message({
-							type: 'success',
-							message: '置顶成功!'
-						});
+						if(res.code == '0') {
+							this.$message({
+								type: 'success',
+								message: '置顶成功!'
+							});
 						}
-						if(res.code == '1'){
+						if(res.code == '1') {
 							this.$message({
 								message: res.msg,
 								type: 'warning'
@@ -547,7 +527,7 @@
 					});
 				});
 			},
-//			下线
+			//			下线
 			top_flag1(index, rows) {
 				this.$confirm('确定要下线吗?', '提示', {
 					confirmButtonText: '确定',
@@ -557,7 +537,7 @@
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
-						status:'6'
+						status: '6'
 					}
 					this.$post('/industry/save', params).then(res => {
 						// console.log(res)
@@ -574,7 +554,7 @@
 					});
 				});
 			},
-//					上线
+			//					上线
 			top_flag2(index, rows) {
 				this.$confirm('确定上线吗?', '提示', {
 					confirmButtonText: '确定',
@@ -584,7 +564,7 @@
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
-						status:'5'
+						status: '5'
 					}
 					this.$post('/industry/save', params).then(res => {
 						// console.log(res)
@@ -611,7 +591,7 @@
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
-						status:'2'
+						status: '2'
 					}
 					this.$post('/industry/save', params).then(res => {
 						// console.log(res)
@@ -619,7 +599,7 @@
 							type: 'success',
 							message: '提交成功!'
 						});
-						this.getMarket();
+						this.creatList();
 					})
 				}).catch(() => {
 					this.$message({

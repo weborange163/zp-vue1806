@@ -12,7 +12,7 @@
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
-				<el-button size="small" class="light_btn"  @click="creatNews('form1',1)">保存并提交审核</el-button>
+				<el-button size="small" class="light_btn"  @click="creatNews('form1','1')">保存并提交审核</el-button>
 			</div>
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
@@ -20,13 +20,6 @@
 						<el-input v-model="form1.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
-						<!-- <quill-editor v-model="form1.content"
-							ref="myQuillEditor"
-							:options="editorOption"
-							@blur="onEditorBlur($event)"
-							@focus="onEditorFocus($event)"
-							@ready="onEditorReady($event)">
-						</quill-editor> -->
 						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
 						:width="quill.width" :getContent="onEditorChange"
 						:has-border="quill.border" :zIndex="quill.zIndex"
@@ -71,13 +64,13 @@
 								<el-radio label="2">提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item label="封面图:" prop="">
+					<el-form-item label="封面图:" prop="" v-if="form1.imgType == 1" required>
 						<el-upload
 							:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
 							ref="upload" name="newsFile"
 							list-type="picture-card"
 							:auto-upload="false"
-							:on-change="valiImg"
+							:on-change="fileChange"
 							:on-preview="handlePictureCardPreview"
 							:on-remove="handleRemove">
 							<i class="el-icon-plus"></i>
@@ -136,17 +129,18 @@ import axios from 'axios'
 					sourceType:'1',
 					source:'',
 					author:'',
-					userId:'1',
+					userId:'',
 					imgType:'1',
 					newsFile:'',
 					tagLabels:'',
 					keyWords:''
 				},
 				cities:[],
+				hasFmt:false,
 				rules1: {
           title: [
             { required: true, message: '请输入标题', trigger: 'blur' },
-            { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
+            { min: 3, max: 45, message: '长度在 3 到 45 个字符', trigger: 'blur' }
           ],
           content: [
             { required: true, message: '请输入内容', trigger: 'change' }
@@ -201,48 +195,88 @@ import axios from 'axios'
 			getFullUrl(){
 				return (this.baceUrl+'/news/add')
 			},
+			aaa(){
+				var params = {
+					tokenId:this.$store.state.user.tokenId,
+					title:'111'
+				}
+				this.$post('news/add',params).then(res =>{
+						if(res.code == 0){
+							console.log(1111111,res)
+						}
+					})
+			},
+		
 			// 新建新闻
 			creatNews(formName,status){
 				this.$refs[formName].validate((valid) => {
           if (valid) {
-						console.log(valid)
+						// console.log(valid)
 						if(this.form1.sourceType == '2' && !this.form1.source){ // 选择转载时候,需要选择转载来源 (待)
-
+							this.$message.error('请选择转载来源!');
+							return;
 						}
-            this.uploadData={
-							tokenId:this.$store.state.user.tokenId,
-							// newsFile:this.form1.newsFile,
-							status:status,
-							title: this.form1.title,
-							content: this.form1.content,
-							sourceType:this.form1.sourceType,
-							source:this.form1.source,
-							author:this.form1.author,
-							userId:this.form1.userId,
-							imgType:this.form1.imgType,
-							tagLabels:this.form1.tagLabels,
-							keyWords:this.form1.keyWords,
-							publishSource:"1"
-						}
-						// this.uploadData = params;
-						console.log(this.uploadData)
-						setTimeout(() => {
-							this.$refs.upload.submit();
-							this.$message({
-								type: 'success',
-								message: '添加成功!'
-							});
+						if(this.form1.imgType == 2){	// 封面图的类型 
+							var reg = /src=/ig;
+							if(!!this.form1.content.match(reg)){
+								var params ={
+									tokenId:this.$store.state.user.tokenId,
+									title: this.form1.title,
+									content: this.form1.content,
+									sourceType:this.form1.sourceType,
+									source:this.form1.source,
+									author:this.form1.author,
+									userId:this.form1.userId,
+									imgType:this.form1.imgType,
+									tagLabels:this.form1.tagLabels,
+									keyWords:this.form1.keyWords,
+									status:status,
+									publishSource:"1"
+								}
+								console.log(params)
+								this.$post('news/add',params).then(res =>{
+									if(res.code == 0){
+										setTimeout(() => {
+											this.$router.push({name: 'news'});
+										}, 1000);
+									}
+								})
+							}else{
+								 this.$message.error('内容里没有图片!');
+							}
+						}else{
+							if(!this.hasFmt){
+								this.$message.error('请上传封面图!');
+								return;
+							}
+							this.uploadData={
+								tokenId:this.$store.state.user.tokenId,
+								newsFile:this.form1.newsFile,
+								status:status,
+								title: this.form1.title,
+								content: this.form1.content,
+								sourceType:this.form1.sourceType,
+								source:this.form1.source,
+								author:this.form1.author,
+								userId:this.form1.userId,
+								imgType:this.form1.imgType,
+								tagLabels:this.form1.tagLabels,
+								keyWords:this.form1.keyWords,
+								publishSource:"1"
+							}
+							// this.uploadData = params;
+							console.log(this.uploadData)
 							setTimeout(() => {
-								this.$router.push({name: 'news'});
-							}, 1000);
-						}, 0);
-						
-					// console.log(params)
-					/* this.$post('news/add',params).then(res =>{
-						if(res.code == 0){
-							console.log(1111111,res)
+								this.$refs.upload.submit();
+								this.$message({
+									type: 'success',
+									message: '添加成功!'
+								});
+								setTimeout(() => {
+									this.$router.push({name: 'news'});
+								}, 1000);
+							}, 0);
 						}
-					}) */
           } else {
             console.log('error submit!!');
             return false;
@@ -254,10 +288,12 @@ import axios from 'axios'
 				console.log(this.form1.source);
 			},
 			//图片的验证
-			valiImg(){
-				// this.$refs.upload.validate(valid => {
-
-				// })
+			fileChange(file,fileList){
+				this.form1.newsFile = file.raw;
+				console.log(fileList.length)
+				if(fileList.length>0){
+					this.hasFmt = true;
+				}
 			},
 			// 获取富文本的内容
 			onEditorBlur({quill, html,text}) {
@@ -275,7 +311,10 @@ import axios from 'axios'
 				// this.content = html
 			},
 			handleRemove(file, fileList) {
-        console.log(file, fileList);
+				console.log(file, fileList);
+				if(fileList.length == 0){
+					this.hasFmt =false;
+				}
       },
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;

@@ -190,6 +190,12 @@ p{
 .quill-editor{
   margin: 0;
 }
+.el-date-editor .el-range__icon{
+  line-height: 22px;
+}
+.el-date-editor .el-range-separator{
+  line-height: 20px;
+}
 @keyframes progress {
   0% {
     margin-left: -50%;

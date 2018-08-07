@@ -83,8 +83,12 @@
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
               <el-table-column label="操作" width="80" fixed="right">
                 <template slot-scope="scope">
-                   <router-link :to="{name:'news-second',params:{id:scope.row.id}}" > <el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;">审核</el-button></router-link>
-                    <router-link :to="{name:'news-lookes',params:{rowInfo:scope.row}}" ><el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button></router-link>
+                  <router-link :to="{name:'news-second',params:{id:scope.row.id}}" > 
+                    <el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" >审核</el-button>
+                  </router-link>
+                  <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" >
+                    <el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button>
+                  </router-link>
                 </template>
               </el-table-column>
             </el-table>
@@ -251,8 +255,9 @@
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
                 <template slot-scope="scope">
-                    <router-link :to="{name:'news-second',params:{id:scope.row.id}}" > <el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;">审核</el-button></router-link>
-                    <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" ><el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button></router-link>
+                    <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" >
+                      <el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button>
+                    </router-link>
                 </template>
               </el-table-column>
             </el-table>

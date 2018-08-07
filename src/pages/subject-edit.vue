@@ -1,5 +1,12 @@
 <template>
   <div class="page-body subject-add">
+  	<el-dialog center width="375px"  :visible.sync="bannerDialog" append-to-body id='div1'>
+			<el-form :data="subjectForm"  ref="subjectForm" label-width="110px" class="subjectForm">
+				<p id="p1" >{{subjectForm.title }}</p>
+				<p id="p2" v-html="subjectForm.description"></p>
+			</el-form>
+		</el-dialog>
+  	
     <div class="breadcrumb" style="padding:8px;">
       <el-breadcrumb separator-class="el-icon-arrow-right" >
 			<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
@@ -10,7 +17,7 @@
     <div class="box">
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn">预览</el-button>
+				<el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button>
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','3')">仅保存</el-button>
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','4')">保存并上线</el-button>
 			</div>
@@ -26,6 +33,7 @@
             :action="getFullUrl()" :on-success="onSuccess"
             list-type="picture-card"
             :auto-upload="false"
+            :file-list="fileList"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove">
             <i class="el-icon-plus"></i>
@@ -38,7 +46,7 @@
           <el-input v-model="subjectForm.tagLabels"></el-input>
         </el-form-item>
         <el-form-item label="关键字" prop="keyWords">
-          <el-input v-model="subjectForm.tagLabels"></el-input>
+          <el-input v-model="subjectForm.keyWords"></el-input>
         </el-form-item>
         <el-form-item label="关联文章" prop="linkArt">
           <el-row>
@@ -88,6 +96,9 @@ import { getBaceUrl } from '@/utils/auth'
 export default {
   data(){
     return{
+    	fileList:[],	// 预览图片
+    	imgFullSrc:'',
+				imgSrc:'',
       searchInput:'',
       uploadData:{},
       baceUrl:'',
@@ -99,6 +110,7 @@ export default {
       imageUrl: '',
       editorOption:{},
       searchAdd:false,
+      bannerDialog: false,
       subjectForm:{
         title:'',
         description:'',
@@ -109,7 +121,7 @@ export default {
       subjectRules:{
         title: [
             { required: true, message: '请输入专题名称', trigger: 'blur' },
-            { min: 3, max: 5, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+            { min: 3, max: 15, message: '长度在 3 到 5 个字符', trigger: 'blur' }
           ],
         description:[
           { required: true, message: '请输入专题描述', trigger: 'blur' }
@@ -128,13 +140,19 @@ export default {
 				id: this.$route.params.rowInfo.id
 			}).then(res => {
 				this.subjectForm=res.data[0]
+				this.imgSrc = this.subjectForm.coverImgId;
+					this.status = this.subjectForm.status;
+					this.imgFullSrc = this.baceUrl + this.imgSrc;
+					console.log(this.subjectForm)
+					this.fileList.push({url:this.imgFullSrc})
+				
 			})
 		},
   
   
   methods:{
     onSuccess(){
-      console.log(111)
+//    console.log(111)
     },
     // 模糊搜索添加文章关联
     searchMore(){
@@ -208,7 +226,7 @@ export default {
         })
       }
     },
-    // 新建专题
+    // 修改专题
 //  /specialInfo/add
     addSubject(formName,status){
       this.$refs[formName].validate((valid) => {
@@ -221,14 +239,16 @@ export default {
               title: this.subjectForm.title,
               description: this.subjectForm.description,
               tagLabels:this.subjectForm.tagLabels,
-              newsArticleIds:ids
+              newsArticleIds:ids,
+              keyWords:this.subjectForm.keyWords,
+              editStatus:1
 						}
 						// this.uploadData = params;
 						console.log(this.uploadData)
 //						alert(1111)
 						setTimeout(() => {
               this.$refs.upload.submit();
-//            this.$router.back(-1);
+              this.$router.back(-1);
 						}, 0);
 					// console.log(params)
 					/* this.$post('news/add',params).then(res =>{
@@ -303,6 +323,22 @@ export default {
 .subject-add .quill-editor .ql-container{
 		min-height: 150px;
   }
-
+#p1{
+		text-align: center;
+		font-size: 20px;
+	}
+	#p2{
+		 margin: 0 auto; width: 100%;height: auto;margin-top: 2px;text-indent:2em;overflow: hidden; overflow-y: auto;
+	}
+	#p2 img{
+		display: block;
+		margin: 0 auto;
+		margin-left: 2px;
+		margin-right: 2px;
+	}
+	#div1{
+		    height: 740px !important;
+   			 overflow-y: auto !important;
+	}
 </style>
 

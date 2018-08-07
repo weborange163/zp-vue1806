@@ -27,15 +27,15 @@
 		</el-dialog>
 		<!--修改-->
 		<el-dialog center width="30%" :visible.sync="bannerDialog" append-to-body>
-			<el-form :model="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
+			<el-form :data="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
 				<el-form-item label="原文标题">
-					<el-input v-model="bannerForm.title" :disabled="true"></el-input>
+					<el-input v-model="bannerForm.titleOriginal" :disabled="true"></el-input>
 				</el-form-item>
-				<el-form-item label="短标题" prop="title_short">
-					<el-input v-model="bannerForm.title_short"></el-input>
+				<el-form-item label="短标题" prop="titleShort">
+					<el-input v-model="bannerForm.titleShort"></el-input>
 				</el-form-item>
 				<el-form-item label="banner图片" label-width="110px" required>
-					<el-upload :action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1' ref="upload" name="newsFile" list-type="picture-card" :auto-upload="false" :on-exceed="handleExceed" :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
+					<el-upload :action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1' ref="upload" name="file" list-type="picture-card" :auto-upload="false" :file-list="fileList" :on-exceed="handleExceed" :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
 						<i class="el-icon-plus"></i>
 					</el-upload>
 					<el-dialog :visible.sync="dialogVisible2">
@@ -43,36 +43,43 @@
 					</el-dialog>
 				</el-form-item>
 				<el-form-item label="类型">
-					<el-input v-model="bannerForm.type" :disabled="true"></el-input>
+					<template slot-scope="scope">
+						<el-input v-if="bannerForm.bannerType=='1'" value="新闻" disabled></el-input>
+						<el-input v-if="bannerForm.bannerType=='2'" value="专题" disabled></el-input>
+					</template>
+				</el-form-item>
 				</el-form-item>
 				<el-form-item label="链接">
-					<el-input v-model="bannerForm.link" :disabled="true"></el-input>
+					<el-input v-model="bannerForm.linkId" :disabled="true"></el-input>
 				</el-form-item>
 			</el-form>
 			<span slot="footer" class="dialog-footer">
 						<el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
-						<el-button type="primary" @click="toBanner()" class="light_btn">保 存</el-button>
+						<el-button type="primary" @click.native.prevent="toBanner1()" class="light_btn">保 存</el-button>
 					</span>
 		</el-dialog>
 
 		<!--查看-->
-		<el-dialog center width="30%" :visible.sync="bannerDialog1" append-to-body>
+		<el-dialog center width="30%" :visible.sync="banner1" append-to-body style='z-index: 99999;'>
 			<el-form :data="bannerForm1" :rules="bannerRules" ref="bannerForm1" label-width="110px" class="bannerForm">
 				<el-form-item label="原文标题">
-					<el-input v-model="bannerForm1.title" :disabled="true"></el-input>
+					<el-input v-model="bannerForm1.titleOriginal" :disabled="true"></el-input>
 				</el-form-item>
 				<el-form-item label="短标题" prop="titleShort">
-					<el-input v-model="bannerForm1.titleShort"></el-input>
+					<el-input v-model="bannerForm1.titleShort" :disabled="true"></el-input>
 				</el-form-item>
 				<el-form-item label="banner图片">
 						<img class="imgs" :src="imgFullSrc" alt="封面图展示">
 					</el-form-item>
 			
 				<el-form-item label="类型">
-					<el-input v-model="bannerForm1.type" :disabled="true"></el-input>
+					<template slot-scope="scope">
+						<el-input v-if="bannerForm1.bannerType=='1'" value="新闻" disabled></el-input>
+						<el-input v-if="bannerForm1.bannerType=='2'" value="专题" disabled></el-input>
+					</template>
 				</el-form-item>
 				<el-form-item label="链接">
-					<el-input v-model="bannerForm1.link" :disabled="true"></el-input>
+					<el-input v-model="bannerForm1.linkId" :disabled="true"></el-input>
 				</el-form-item>
 			</el-form>
 		</el-dialog>
@@ -89,7 +96,12 @@
 			<div class="banner_show">
 				<el-table :data="banner_data" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
 					<el-table-column label="序号" type="index" width='50'></el-table-column>
-					<el-table-column label="原文标题" prop="title_original"></el-table-column>
+					<el-table-column label="原文标题">
+						<template slot-scope="scope">
+							<p v-if="scope.row.banner_type=='1'" >{{scope.row.title_original}}</p>
+							<p v-if="scope.row.banner_type=='2'" >{{scope.row.title_original1}}</p>
+						</template>
+					</el-table-column>
 					<el-table-column label="短标语" prop="title_short"></el-table-column>
 					<el-table-column label="发布状态" prop="status" width="80">
 						<template slot-scope="scope">
@@ -104,7 +116,11 @@
 							<p v-if="scope.row.banner_type=='2'">专题</p>
 						</template>
 					</el-table-column>
-					<el-table-column label="图片" prop="cover_img_id" width='100'></el-table-column>
+					<el-table-column label="图片" width='100'>
+						<template slot-scope="scope">
+							<img :src="scope.row.imgurl" alt="">
+						</template>
+					</el-table-column>
 					<el-table-column label="上线时间" prop="online_time" width='100'></el-table-column>
 					<el-table-column label="创建时间" prop="create_time" width='100'></el-table-column>
 					<el-table-column label="操作" width="260" fixed="right">
@@ -115,10 +131,10 @@
 
 							<el-button type="text" v-if="scope.row.status=='2' || scope.row.status=='0' " style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
 
-							<el-button type="text" @click="marketShow(scope.$index, scope.row)"><i class="iconfont icon-see"></i></el-button>
+							<el-button type="text" @click="bannerShow(scope.$index, scope.row)"><i class="iconfont icon-see"></i></el-button>
 
-							<el-button type="text" v-if="scope.row.status=='1'" :disabled="true" @click.native.prevent="update1(scope.$index, scope.row)"><i class="iconfont icon-edit"></i></el-button>
-							<el-button type="text" v-if="scope.row.status=='2' || scope.row.status=='0' " @click.native.prevent="update1(scope.$index, scope.row)"><i class="iconfont icon-edit"></i></el-button>
+							<el-button type="text" v-if="scope.row.status=='1'" :disabled="true"><i class="iconfont icon-edit"></i></el-button>
+							<el-button type="text" v-if="scope.row.status=='2' || scope.row.status=='0' " @click.native.prevent="bannerEdit(scope.$index, scope.row)"><i class="iconfont icon-edit"></i></el-button>
 
 							<el-button type="text" v-if="scope.row.status=='1'" :disabled="true" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 							<el-button type="text" v-if="scope.row.status=='2' || scope.row.status=='0' " @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
@@ -137,10 +153,13 @@
 </template>
 <script>
 	import { btnTable } from '@/utils/table-style.js'
-	import { HTMLDecode, getBaceUrl } from '@/utils/auth'
+	// import { getBaceUrl } from '@/utils/auth'
+	import { getBaceUrl } from '@/utils/auth'
 	export default {
 		data() {
 			return {
+				fileList:[],	// 预览图片
+				baceUrl:'',
 				search_info: '',
 				imgFullSrc:'',
 				btnTable: btnTable,
@@ -153,17 +172,11 @@
 				currentPage: 1, // 页面默认展示的当前页码
 				banner_data: [],
 				bannerDialog: false,
-				bannerDialog1: false,
+				banner1: false,
 				dialogVisible2: false,
 				dialogImageUrl: '',
 				uploadData: {},
-				bannerForm: {
-					title: '1111',
-					title_short: '111',
-					articleId: '1111',
-					type: '新闻',
-					link: '1111'
-				},
+				bannerForm: [],
 				bannerForm1: [],
 
 				bannerRules: {
@@ -181,34 +194,40 @@
 			}
 		},
 		created() {
+			this.baceUrl = getBaceUrl();
 			this.initParams();
 			this.getBannerlist();
 		},
 		methods: {
-			//修改
-			update1() {
-				this.bannerDialog = true;
+			
+				//修改添加
+			toBanner1() {
+//				this.$refs.bannerForm.validate((valid) => {
+//					if(valid) {
+						this.uploadData = {
+							tokenId: this.$store.state.user.tokenId,
+							titleShort: this.bannerForm.title_short,
+							bannerType: this.bannerForm.type,
+							linkId: this.bannerForm.link,
+							articleId: this.bannerForm.articleId,
+						}
+						setTimeout(() => {
+							this.$refs.upload.submit();
+							this.$message({
+								type: 'success',
+								message: '添加成功!'
+							});
+							setTimeout(() => {
+								this.getBannerlist();
+							}, 1000);
+							this.bannerDialog = false;
+						}, 0);
+//					}
+//				})
 
 			},
-				
-			marketShow(index, rows) {
-				this.bannerDialog1 = true;
-//				alert(rows.id)
-				var params = {
-						tokenId: this.$store.state.user.tokenId,
-						id: rows.id,
-				}
-				this.$get('/bannerInfo/show', params).then(res => {
-					
-					this.bannerForm1 = res.data[0];
-					this.imgSrc=this.bannerForm1.coverImgId
-//					alert(this.bannerForm1.id);
-					this.imgFullSrc = this.baceUrl + this.imgSrc
-				})
-				
-				
-				
-			},
+			
+			
 
 			//		下线
 			top_flag1(index, rows) {
@@ -228,7 +247,10 @@
 							type: 'success',
 							message: '下线成功!'
 						});
-						this.getBannerlist();
+						setTimeout(() => {
+								this.getBannerlist();
+							}, 1000);
+							this.banner1 = false;
 					})
 				}).catch(() => {
 					this.$message({
@@ -255,7 +277,7 @@
 							type: 'success',
 							message: '上线成功!'
 						});
-						this.getBannerlist();
+						this.getBannerlist1();
 					})
 				}).catch(() => {
 					this.$message({
@@ -263,6 +285,43 @@
 						message: '上线失败'
 					});
 				});
+			},
+			//修改
+			bannerEdit(index, rows) {
+				this.fileList=[];
+				this.bannerDialog = true;
+					var params = {
+						tokenId: this.$store.state.user.tokenId,
+						id: rows.id,
+				}
+				this.$get('/bannerInfo/show', params).then(res => {
+					
+					this.bannerForm = res.data[0];
+					this.imgSrc=this.bannerForm.coverImgId
+					this.imgFullSrc = this.baceUrl + this.imgSrc
+//						alert(this.imgFullSrc)
+					this.fileList.push({url:this.imgFullSrc})
+				})
+				
+			},
+				
+			bannerShow(index, rows) {
+				this.fileList=[];
+				console.log(index,rows)
+				var params = {
+						tokenId: this.$store.state.user.tokenId,
+						id: rows.id,
+				}
+				this.$get('/bannerInfo/show', params).then(res => {
+					console.log(res.data[0])
+					this.bannerForm1 = res.data[0];
+					this.imgSrc=this.bannerForm1.coverImgId
+					this.imgFullSrc = this.baceUrl + this.imgSrc  //http://192.168.1.91:8080/images/showImage?id=453610293595996160
+					console.log(this.imgFullSrc)
+				})
+				
+				
+				
 			},
 			handleRemove(file, fileList) {
 				console.log(file, fileList);
@@ -275,32 +334,7 @@
 			getFullUrl() {
 				return(this.baceUrl + '/bannerInfo/save')
 			},
-			//修改
-			toBanner() {
-				this.$refs.bannerForm.validate((valid) => {
-					if(valid) {
-						this.uploadData = {
-							tokenId: this.$store.state.user.tokenId,
-							titleShort: this.bannerForm.title_short,
-							bannerType: this.bannerForm.type,
-							linkId: this.bannerForm.link,
-							articleId: this.bannerForm.articleId,
-						}
-						setTimeout(() => {
-							this.$refs.upload.submit();
-							this.$message({
-								type: 'success',
-								message: '添加成功!'
-							});
-							setTimeout(() => {
-								this.newsList();
-							}, 1000);
-							this.bannerDialog = false;
-						}, 0);
-					}
-				})
-
-			},
+		
 
 			// 置顶排序
 			publishWaitTop() {
@@ -341,12 +375,16 @@
 						limit: this.per_page,
 						offset: this.currentPage,
 						simpleParameter: this.search_info
-
 					}
 				}
+				console.log(params)
 				this.$post('bannerInfo/list', params).then(res => {
 					console.log(res.data[0].rows);
-					this.banner_data = res.data[0].rows;
+					var listarr = res.data[0].rows;
+					listarr.map((item) => {
+						item.imgurl = this.baceUrl + item.cover_img_id
+					})
+					this.banner_data = listarr;
 					//      this.bannerForm=res.data[0].rows;
 					this.total_pages = res.data[0].total;
 				})
@@ -368,6 +406,7 @@
 					this.banner_data = res.data[0].rows;
 					this.total_pages = res.data[0].total;
 				})
+				this.banner1 = false
 			},
 			// 
 			initParams() {
@@ -465,5 +504,11 @@
 	}
 </script>
 <style>
-
+	.el-upload--picture-card{
+	width: 80px;
+	height: 80px;
+	line-height: 88px;
+}
+	
+	
 </style>
