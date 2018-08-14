@@ -19,7 +19,7 @@
 			</div>
 			<div class="main-1">
 				<img class="img-1" src="../assets/img/y2.png" />
-				<a class="main-a">注册用户总量</a>
+				<a class="main-a">新增注册用户</a>
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
@@ -34,7 +34,7 @@
 			</div>
 			<div class="main-1">
 				<img class="img-1" src="../assets/img/y3.png" />
-				<a class="main-a">注册用户总量</a>
+				<a class="main-a">新闻更新量</a>
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
@@ -49,7 +49,7 @@
 			</div>
 			<div class="main-1">
 				<img class="img-1" src="../assets/img/y4.png" />
-				<a class="main-a">注册用户总量</a>
+				<a class="main-a">新闻点击量</a>
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
@@ -64,7 +64,7 @@
 			</div>
 			<div class="main-1">
 				<img class="img-1" src="../assets/img/y5.png" />
-				<a class="main-a">注册用户总量</a>
+				<a class="main-a">启动用户</a>
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
@@ -79,7 +79,7 @@
 			</div>
 			<div class="main-1">
 				<img class="img-1" src="../assets/img/y6.png" />
-				<a class="main-a">注册用户总量</a>
+				<a class="main-a">启动次数</a>
 				<div class="main-div">
 					<dl class="dl1" @click="open5">
 						<dt>昨日</dt>

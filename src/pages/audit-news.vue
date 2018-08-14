@@ -31,7 +31,8 @@
     <div class="page-header">
       <el-row>
         <el-col :span="4">
-          <el-select v-model="value" placeholder="发布来源">
+          发布来源:
+          <el-select v-model="value" placeholder="发布来源" style="width:60%">
             <el-option
             v-for="item in options"
             :key="item.value"
@@ -278,7 +279,7 @@ export default {
   data(){
     return{
       loading:false,
-      per_page1:20,
+      per_page1:10,
       currentPage1:1,
       total_pages1:0,
      
@@ -319,15 +320,18 @@ export default {
 			formLabelWidth: '120px',
       btnTable:btnTable,
      options: [{
-      value: '1',
-      label: '后台发布'
-    }, {
-      value: '3',
-      label: 'App'
-    }, {
-      value: '2',
-      label: '数据爬取'
-    }],
+        value: '',
+        label: '全部'
+      },{
+        value: '1',
+        label: '后台发布'
+      }, {
+        value: '2',
+        label: 'App'
+      }, {
+        value: '3',
+        label: '数据爬取'
+      }],
     audit_no:[],
     ids:[],
     multipleSelection: [],

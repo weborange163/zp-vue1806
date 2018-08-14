@@ -2,12 +2,9 @@
 	<div class="page-body news">
 		<div class="page-header">
 			<el-row>
-				<el-col :span="3">
-					<!--<el-select v-model="value" placeholder="发布状态" style="width:45%">
-						<el-option v-for="item in options" :key="item.value" :label="item.label" :value="item.value">
-						</el-option>
-					</el-select>-->
-					<el-select v-model="value1" placeholder="发布来源" style="width:98%">
+				<el-col :span="4">
+					发布来源:
+					<el-select v-model="value1" placeholder="发布来源" style="width:60%">
 						<el-option v-for="item in optionss" :key="item.value1" :label="item.label" :value="item.value1">
 						</el-option>
 					</el-select>
@@ -68,7 +65,7 @@
 							<el-table-column label="发布来源"  width="120">
 								<template slot-scope="scope">
 									<p v-if="scope.row.publish_source=='1'">pc后台</p>
-									<p v-if="scope.row.publish_source=='2'">移动端</p>
+									<p v-if="scope.row.publish_source=='2'">APP</p>
 									<p v-if="scope.row.publish_source=='3'">数据爬取</p>
 								</template>
 							</el-table-column>
@@ -77,7 +74,7 @@
 								<template slot-scope="scope">
 									<el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
 									<el-button type="text" v-if="scope.row.status == '0'" @click="toAudit(scope.row)">提交审核</el-button>
-									<el-button type="text" v-if="scope.row.status =='4'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+									<el-button type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
 									<el-button type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
 									
 									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
@@ -85,7 +82,7 @@
 									</router-link>
 									<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
 									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
-										<el-button type="text" v-if="scope.row.status != '4'"><i class="iconfont icon-edit"></i></el-button>
+										<el-button type="text" v-if="scope.row.status != '4'&& scope.row.publish_source != '2'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
 									<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
@@ -264,14 +261,18 @@
 				params:{},
 				upData: [],
 				tableData: [],
-			optionss: [{
-					value1: '3',
+			optionss: [
+        {
+					value1: '',
+					label: '全部'
+				},{
+					value1: '2',
 					label: 'APP'
 				}, {
 					value1: '1',
 					label: '后台发布'
 				}, {
-					value1: '2',
+					value1: '3',
 					label: '数据爬取'
 				}],
 				optionsss: [{
@@ -296,7 +297,8 @@
 				ids:[],
 				baceUrl:'',
 				dialogImageUrl:'',
-				uploadData:{}
+        uploadData:{},
+        hasFmt:false,
 			}
 		},
 		created(){
@@ -336,13 +338,16 @@
         }).catch(() => {
           this.$message({
             type: 'info',
-            message: res.msg
+            message: '操作已取消'
           });          
         });
 				console.log(row)
 			},
 			handleRemove(file, fileList) {
         console.log(file, fileList);
+				if(fileList.length == 0){
+					this.hasFmt =false;
+				}
       },
       handlePictureCardPreview(file) {
 				console.log(file)
@@ -523,29 +528,29 @@
         
 			},
 			toBanner1(){
-					this.$refs.bannerForm.validate((valid) => {
-						if(valid){
-							 let param = new FormData();
-								param.append('file',this.bannerForm.file,this.bannerForm.filename);
-								param.append('tokenId',this.$store.state.user.tokenId);
-								param.append('titleShort',this.bannerForm.title_short);
-								param.append('bannerType','1');
-								param.append('linkId',this.bannerForm.link);
-								param.append('articleId',this.bannerForm.articleId);
-							console.log(param)
-							this.$post('bannerInfo/save',param).then(res =>{
-								console.log(res)
-								this.$message({
-									type: 'success',
-									message: '添加成功!'
-								});
-								setTimeout(() => {
-								//	this.newsList();
-								}, 1000);
-								this.bannerDialog = false;
-							})
-						}
-					})
+        this.$refs.bannerForm.validate((valid) => {
+          if(valid){
+              let param = new FormData();
+              param.append('file',this.bannerForm.file,this.bannerForm.filename);
+              param.append('tokenId',this.$store.state.user.tokenId);
+              param.append('titleShort',this.bannerForm.title_short);
+              param.append('bannerType','1');
+              param.append('linkId',this.bannerForm.link);
+              param.append('articleId',this.bannerForm.articleId);
+            console.log(param)
+            this.$post('bannerInfo/save',param).then(res =>{
+              console.log(res)
+              this.$message({
+                type: 'success',
+                message: '添加成功!'
+              });
+              setTimeout(() => {
+              //	this.newsList();
+              }, 1000);
+              this.bannerDialog = false;
+            })
+          }
+        })
         
 			},
 		//图片的验证
@@ -576,14 +581,14 @@
 						ids:this.ids.join(',')
 					}
 					console.log(params)
-					/* this.$post('news/batchWaitCheck',params).then(res => {
+					this.$post('news/batchWaitCheck',params).then(res => {
 						console.log(res)
 						this.creatList();
 						this.$message({
 							type: 'success',
 							message: '提交成功!'
 						});
-					}) */
+					})
         }).catch(() => {
           this.$message({
             type: 'info',
@@ -821,10 +826,6 @@
 	
 	.el-table th {
 		font-size: 14px;
-	}
-	
-	.el-table th {
-		text-align: center;
 	}
 	
 	.el-table_1_column_7 .iconfont {

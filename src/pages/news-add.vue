@@ -1,5 +1,11 @@
 <template>
 	<div class="page-body" style="min-width:980px;">
+    <el-dialog center width="375px"  :visible.sync="showNews" append-to-body id='div1'>
+			<el-form :data="form1"  ref="form1" label-width="110px" class="form1">
+				<p id="p1" >{{form1.title }}</p>
+				<p id="p2" v-html="form1.content"></p>
+			</el-form>
+		</el-dialog>
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
@@ -11,6 +17,7 @@
 		<div class="box" >
 			<div class="text-right">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+        <el-button size="small" class="light_btn" @click="showNews = true;" >预览</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1','1')">保存并提交审核</el-button>
 			</div>
@@ -100,6 +107,7 @@ import axios from 'axios'
 		},
 		data(){
 			return{
+        showNews:false,
 				pkg:'',
       quill: {
         width: 420,

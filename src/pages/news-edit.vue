@@ -81,7 +81,7 @@
 							list-type="picture-card"
 							:auto-upload="false"
 							:file-list="fileList"
-							:file-change="fileChange"
+							:on-change="fileChange"
 							:on-preview="handlePictureCardPreview"
 							:on-remove="handleRemove">
 							<i class="el-icon-plus"></i>

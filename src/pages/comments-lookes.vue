@@ -8,7 +8,11 @@
 			</el-breadcrumb>
 		</div>
     <div class="box">
-      <div class="el-table__body-wrapper is-scrolling-none info_table">
+      	<div class="text-right">
+				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+				<el-button size="small" class="light_btn" >屏蔽</el-button>
+			</div>
+      <div class="el-table__body-wrapper is-scrolling-none info_table marT20">
         <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
           <colgroup>
             <col name="el-table_1_column_1" width="25%">
@@ -17,39 +21,39 @@
           <tbody>
             <tr class="el-table__row">
               <td><div class="cell">评论对象</div></td>
-              <td><div class="cell">王小虎</div></td>
+              <td><div class="cell">{{comDetail.commentObj}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">评论ID</div></td>
-              <td><div class="cell">123</div></td>
+              <td><div class="cell">{{comDetail.id}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">评论内容</div></td>
-              <td><div class="cell">666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶666,顶顶顶</div></td>
+              <td><div class="cell" >{{comDetail.content}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">评论人</div></td>
-              <td><div class="cell">王大虎</div></td>
+              <td><div class="cell">{{comDetail.nickName}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">会员ID</div></td>
-              <td><div class="cell">111</div></td>
+              <td><div class="cell">{{comDetail.userUniqueCode}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">评论时间</div></td>
-              <td><div class="cell">2018-10-09</div></td>
+              <td><div class="cell" >comDetail.createTime</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">状态</div></td>
-              <td><div class="cell">正常</div></td>
+              <td><div class="cell">{{comDetail.status}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">审核人</div></td>
-              <td><div class="cell">王虎</div></td>
+              <td><div class="cell">{{comDetail.checkPerson}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">审核时间</div></td>
-              <td><div class="cell">2018-10-09</div></td>
+              <td><div class="cell">{{comDetail.auditTime}}</div></td>
             </tr>
           </tbody>
         </table>
@@ -63,10 +67,61 @@ import {btnTable} from '@/utils/table-style.js'
 export default {
    data(){
      return{
-       btnTable:btnTable,
-       tableData:[]
+        btnTable:btnTable,
+        tableData:[],
+        idDetail:'',
+        comDetail:{
+          commentObj:'',  //评论对象
+          id:'',        // 评论id
+          articleId:'',  // 评论对象id
+          content:'',   // 评论内容
+          nickName:'',  // 评论人
+          userUniqueCode:'',  // 会员id
+          createTime:'',      // 评论时间
+          status: '',     // 评论状态
+          checkPerson:'',   // 审核人
+          auditTime:'',     // 审核时间
+          type:''           // 评论类型
+        }
      }
-   } 
+   },
+   created(){
+     this.getParams();
+     this.showDetail();
+   },
+   methods:{
+     // 获取评论详情
+    showDetail(){
+      var params = {
+        tokenId:this.$store.state.user.tokenId,
+        id:this.idDetail
+      }
+      this.$post('comment/show',params).then(res => {
+        if(res.code == 0){
+          console.log(res.data[0]);
+          this.comDetail = res.data[0];
+          if(this.comDetail.status == 0){
+            this.comDetail.status = '未屏蔽'
+          }else{
+            this.comDetail.status = '已屏蔽'
+          }
+          console.log(this.comDetail)
+        }
+      });
+    },
+    getParams () {
+      // 取到路由带过来的参数 
+      let routerParams = this.$route.params.id
+      // 将数据放在当前组件的数据内
+      // this.form1 = routerParams
+      this.idDetail = routerParams
+      // console.log(this.idDetail)
+    },
+   },
+   	watch: {
+    // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
+      '$route': 'getParams'
+    } 
 }
 </script>
 <style>

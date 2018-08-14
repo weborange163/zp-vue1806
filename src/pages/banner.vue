@@ -54,9 +54,9 @@
 				</el-form-item>
 			</el-form>
 			<span slot="footer" class="dialog-footer">
-						<el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
-						<el-button type="primary" @click.native.prevent="toBanner1()" class="light_btn">保 存</el-button>
-					</span>
+        <el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
+        <el-button type="primary" @click.native.prevent="toBanner1()" class="light_btn">保 存</el-button>
+      </span>
 		</el-dialog>
 
 		<!--查看-->
@@ -143,7 +143,7 @@
 
 					</el-table-column>
 				</el-table>
-				<div style="margin-top:20px;">
+				<div class="marT20">
 					<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
 					</el-pagination>
 				</div>
@@ -153,7 +153,6 @@
 </template>
 <script>
 	import { btnTable } from '@/utils/table-style.js'
-	// import { getBaceUrl } from '@/utils/auth'
 	import { getBaceUrl } from '@/utils/auth'
 	export default {
 		data() {
@@ -165,9 +164,9 @@
 				btnTable: btnTable,
 				dialogVisible: false,
 				loading: false,
-				upData: [],
+        upData: [],
+        params: {},
 				per_page: 2,
-				params: {},
 				total_pages: 0,
 				currentPage: 1, // 页面默认展示的当前页码
 				banner_data: [],
@@ -204,31 +203,28 @@
 			toBanner1() {
 //				this.$refs.bannerForm.validate((valid) => {
 //					if(valid) {
-						this.uploadData = {
-							tokenId: this.$store.state.user.tokenId,
-							titleShort: this.bannerForm.title_short,
-							bannerType: this.bannerForm.type,
-							linkId: this.bannerForm.link,
-							articleId: this.bannerForm.articleId,
-						}
-						setTimeout(() => {
-							this.$refs.upload.submit();
-							this.$message({
-								type: 'success',
-								message: '添加成功!'
-							});
-							setTimeout(() => {
-								this.getBannerlist();
-							}, 1000);
-							this.bannerDialog = false;
-						}, 0);
+        this.uploadData = {
+          tokenId: this.$store.state.user.tokenId,
+          titleShort: this.bannerForm.title_short,
+          bannerType: this.bannerForm.type,
+          linkId: this.bannerForm.link,
+          articleId: this.bannerForm.articleId,
+        }
+        setTimeout(() => {
+          this.$refs.upload.submit();
+          this.$message({
+            type: 'success',
+            message: '添加成功!'
+          });
+          setTimeout(() => {
+            this.getBannerlist();
+          }, 1000);
+          this.bannerDialog = false;
+        }, 0);
 //					}
 //				})
 
 			},
-			
-			
-
 			//		下线
 			top_flag1(index, rows) {
 				this.$confirm('确定要下线吗?', '提示', {
@@ -241,7 +237,7 @@
 						id: rows.id,
 						status: '2'
 					}
-					this.$post('/bannerInfo/isOnline', params).then(res => {
+					this.$post('bannerInfo/isOnline', params).then(res => {
 						// console.log(res)
 						this.$message({
 							type: 'success',
@@ -271,7 +267,7 @@
 						id: rows.id,
 						status: '1'
 					}
-					this.$post('/bannerInfo/isOnline', params).then(res => {
+					this.$post('bannerInfo/isOnline', params).then(res => {
 						// console.log(res)
 						this.$message({
 							type: 'success',
@@ -294,7 +290,7 @@
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
 				}
-				this.$get('/bannerInfo/show', params).then(res => {
+				this.$get('bannerInfo/show', params).then(res => {
 					
 					this.bannerForm = res.data[0];
 					this.imgSrc=this.bannerForm.coverImgId
@@ -312,7 +308,7 @@
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
 				}
-				this.$get('/bannerInfo/show', params).then(res => {
+				this.$get('bannerInfo/show', params).then(res => {
 					console.log(res.data[0])
 					this.bannerForm1 = res.data[0];
 					this.imgSrc=this.bannerForm1.coverImgId
@@ -340,7 +336,7 @@
 			publishWaitTop() {
 				this.dialogVisible = true;
 				this.loading = true;
-				this.$get('/bannerInfo/getIsOnline', {
+				this.$get('bannerInfo/getIsOnline', {
 					tokenId: this.$store.state.user.tokenId
 				}).then(res => {
 					this.loading = false;
@@ -362,7 +358,7 @@
 					ids: newsInfos.join(',')
 				}
 				console.log(params);
-				this.$post('/industry/publishOrederByIds', params).then(res => {
+				this.$post('industry/publishOrederByIds', params).then(res => {
 					console.log(res)
 				})
 				this.dialogVisible = false
@@ -379,7 +375,7 @@
 				}
 				console.log(params)
 				this.$post('bannerInfo/list', params).then(res => {
-					console.log(res.data[0].rows);
+					console.log(res);
 					var listarr = res.data[0].rows;
 					listarr.map((item) => {
 						item.imgurl = this.baceUrl + item.cover_img_id

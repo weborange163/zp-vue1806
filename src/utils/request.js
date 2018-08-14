@@ -1,5 +1,7 @@
 import axios from 'axios'
 import { Message, MessageBox } from 'element-ui'
+import NProgress from 'nprogress' // progress bar
+import 'nprogress/nprogress.css'// progress bar style
 //import store from '@/store'
 //读取token
 import { getToken } from '@/utils/auth'
@@ -17,6 +19,7 @@ const service = axios.create({
 
 // request interceptor 请求拦截
 service.interceptors.request.use(config => {
+  NProgress.start()
   // POST传参序列化
   if(config.method  === 'post'&& config.data.constructor !== FormData) {
     config.data = qs.stringify(config.data)
@@ -64,8 +67,10 @@ service.interceptors.response.use(
 //       }
 //       return Promise.reject(res.msg)
 //     } else { // code: 200
+NProgress.done()
 	console.log(response)
     return response.data
+   
 //     }
   },
 	error => { // Status Code:500 502
@@ -75,7 +80,9 @@ service.interceptors.response.use(
       type: 'error',
       duration: 5 * 1000
     })
+    NProgress.done()
     return Promise.reject(error)
+    
 })
 
 export default service

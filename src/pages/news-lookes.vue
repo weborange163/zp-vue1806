@@ -1,5 +1,5 @@
 <template>
-	<div class="page-body news_lookes" style="min-width:980px;">
+	<div class="page-body news_lookes" style="min-width:1200px;">
 		<el-dialog center width="375px"  :visible.sync="bannerDialog" append-to-body id='div1'>
 			<el-form :data="form1"  ref="form1" label-width="110px" class="form1">
 				<p id="p1" >{{form1.title }}</p>
@@ -86,6 +86,77 @@
 					<el-form-item label="关键词:">
 						<el-input  v-model="form1.keyWords" :disabled="true"></el-input>
 					</el-form-item>
+          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
+            <colgroup>
+              <col name="el-table_1_column_1" width="25%">
+              <col name="el-table_1_column_2" width="75%">
+            </colgroup>
+            <tbody>
+              <tr class="el-table__row">
+                <td><div class="cell">发布来源</div></td>
+                <td><div class="cell">
+                  <span v-if="form1.publishSource == '1'">PC后台</span><span v-if="form1.publishSource == '2'">数据爬取</span><span v-if="form1.publishSource == '3'">APP端</span>
+                  </div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">文章ID</div></td>
+                <td><div class="cell">{{form1.articleId}}</div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">状态</div></td>
+                <td><div class="cell">
+                  <span v-if="form1.status == '0'">新建</span><span v-if="form1.status == '1'">待审核</span><span v-if="form1.status == '3'">审核中</span>
+                  <span v-if="form1.status == '4'">已上线</span><span v-if="form1.status == '5'">已下线</span>
+                  </div></td>
+              </tr>
+            </tbody>
+          </table>
+          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border marT20">
+            <colgroup>
+              <col name="el-table_1_column_1" width="18%">
+              <col name="el-table_1_column_1" width="40%">
+              <col name="el-table_1_column_1" width="20%">
+              <col name="el-table_1_column_2" width="22%">
+            </colgroup>
+            <tbody>
+              <tr class="el-table__row">
+                <td><div class="cell"></div></td>
+                <td><div class="cell">时间</div></td>
+                <td><div class="cell">操作账号</div></td>
+                <td><div class="cell">备注</div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">创建时间</div></td>
+                <td><div class="cell">{{form1.createTime}}</div></td>
+                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">上线时间</div></td>
+                <td><div class="cell">{{form1.onlineTime}}</div></td>
+                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">下线时间</div></td>
+                <td><div class="cell">{{form1.offlineTime}}</div></td>
+                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">修改时间</div></td>
+                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">审核时间</div></td>
+                <td><div class="cell">{{form1.checkTime}}</div></td>
+                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+            </tbody>
+          </table>
 				</div>
 			</el-form>
 		</div>
@@ -358,4 +429,8 @@ import axios from 'axios'
 	.el-dialog--center .el-dialog__body{
 		padding: 0 !important;
 	}
+  .news_lookes .el-table td, 
+  .news_lookes .el-table th{
+    padding: 4px 0;
+  }
 </style>

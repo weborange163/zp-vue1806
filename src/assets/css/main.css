@@ -167,17 +167,41 @@ p{
 .marBo4{
   margin-bottom: 4px;
 }
+.marL10{
+  margin-left: 10px;
+}
 .marLe4{
   margin-left: 4px;
 }
 .padLe4{
   padding-left: 4px;
 }
+.marT20{
+  margin-top: 20px;
+}
+#p1{
+  text-align: center;
+  font-size: 20px;
+}
+#p2{
+   margin: 0 auto; height: 500px;margin-top: 2px;text-indent:2em; overflow-y: auto !important;
+}
+#p2 img{
+  display: block;
+  margin: 0 auto;
+  width: 320px !important;
+  
+}
 .miniTable td{
   padding: 6px 0;
 }
 .miniTable{
   line-height: 36px;
+}
+table img{
+  width: 100%;
+  vertical-align: middle;
+  height: 44px;
 }
 .btnTable td,
 .miniTable th,
@@ -193,8 +217,18 @@ p{
 .el-date-editor .el-range__icon{
   line-height: 22px;
 }
-.el-date-editor .el-range-separator{
+.el-date-editor .el-range-separator,
+.el-date-editor .el-range__close-icon{
   line-height: 20px;
+}
+.el-upload--picture-card{
+  width: 80px;
+  height: 80px;
+  line-height: 88px;
+}
+.el-upload-list--picture-card .el-upload-list__item{
+  width: 80px;
+  height: 80px;
 }
 @keyframes progress {
   0% {

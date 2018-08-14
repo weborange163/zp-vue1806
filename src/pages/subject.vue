@@ -109,7 +109,7 @@
 				</el-table-column>
         <el-table-column label="专题封面" prop="cover_img_id">
 					<template slot-scope="scope">
-						<img :src="scope.row.imgurl" alt="">
+						<img :src="scope.row.imgsrc" alt="">
 					</template>
 				</el-table-column>
         <el-table-column label="发布状态" width="80">
@@ -127,7 +127,7 @@
 					<template slot-scope="scope">
 						<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
 						<el-button type="text" v-if="scope.row.status=='4' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
-						<el-button type="text" v-if="scope.row.status=='3'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
+						<el-button type="text" v-if="scope.row.status!='4'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
 						<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
 						<router-link :to="{name:'subject-edit',params:{rowInfo:scope.row}}">
 							<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
@@ -209,31 +209,30 @@ export default {
   },
   methods:{
 		// 点击 推荐到banner 保存按钮
-			toBanner(){
-					this.$refs.bannerForm.validate((valid) => {
-						if(valid){
-							this.uploadData={
-								tokenId:this.$store.state.user.tokenId,
-								titleShort:this.bannerForm.title_short,
-								bannerType:'2',
-								linkId:this.bannerForm.link,
-								articleId:this.bannerForm.articleId,
-							}
-							setTimeout(() => {
-								this.$refs.upload.submit();
-								this.$message({
-									type: 'success',
-									message: '添加成功!'
-								});
-								setTimeout(() => {
-									this.getSubjectList();
-								}, 1000);
-								this.bannerDialog = false;
-							}, 0);
-						}
-					})
-        
-			},
+    toBanner(){
+      this.$refs.bannerForm.validate((valid) => {
+        if(valid){
+          this.uploadData={
+            tokenId:this.$store.state.user.tokenId,
+            titleShort:this.bannerForm.title_short,
+            bannerType:'2',
+            linkId:this.bannerForm.link,
+            articleId:this.bannerForm.articleId,
+          }
+          setTimeout(() => {
+            this.$refs.upload.submit();
+            this.$message({
+              type: 'success',
+              message: '添加成功!'
+            });
+            setTimeout(() => {
+              this.getSubjectList();
+            }, 1000);
+            this.bannerDialog = false;
+          }, 0);
+        }
+      })
+    },
 		// 确定推荐到置顶/banner
 			sureReco(){
 				if(this.recommendRadio == '1'){	// 推荐到置顶
@@ -513,7 +512,7 @@ export default {
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
-						status:'5'
+						status:'4'
 					}
 					this.$post('/specialInfo/isOnline', params).then(res => {
 						// console.log(res)

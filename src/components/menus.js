@@ -36,10 +36,12 @@ const menus = [
     icon: 'iconfont icon-setting',
     label: '系统管理',
     submenu: [
-      {id: 'd1', name: 'rules', label: '规则管理'},
-      {id: 'd2', name: 'version', label: '版本管理'},
-      {id: 'd3', name: 'permissions', label: '角色与权限'},
-      {id: 'd4', name: 'accounts', label: '后台用户管理'}
+      {id: 'd1', name: 'rules1', label: '行业信息分类设置'},
+      {id: 'd2', name: 'rules2', label: '转载来源设置'},
+      {id: 'd3', name: 'rules3', label: '区域管理'},
+      {id: 'd4', name: 'version', label: '版本管理'},
+      {id: 'd5', name: 'permissions', label: '角色与权限'},
+      {id: 'd6', name: 'accounts', label: '后台用户管理'}
     ]
   },
   {
