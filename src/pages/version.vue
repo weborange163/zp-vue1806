@@ -41,7 +41,7 @@
       </el-table>
       	  <!-- 分页 -->
       <div style="margin-top:20px;">
-        <el-pagination class="text-center"
+        <el-pagination class="text-right"
           background
           @current-change="handleCurrentChange"
           :current-page="currentPage_bidding"

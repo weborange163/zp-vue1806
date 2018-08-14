@@ -4,7 +4,7 @@ import Vue from 'vue'
 import 'babel-polyfill'
 import ElementUI from 'element-ui'
 import Axios from '@/utils/http'
-import { post, get } from '@/api/index'
+import { post, get } from '@/api/index' //引入封装的ajax请求
 import NProgress from 'nprogress'
 import VueQuillEditor from 'vue-quill-editor'
 import MQuillEditor from 'vue-m-quill-editor'
@@ -90,7 +90,7 @@ router.afterEach(transition => {
 window.APP_INFO = process.env.APP_INFO
 
 Vue.config.productionTip = false
-Vue.prototype.$get = get
+Vue.prototype.$get = get //全局生成$get
 Vue.prototype.$post = post
 /* eslint-disable no-new */
 var app = new Vue({

@@ -1,6 +1,6 @@
 <template>
 	<div class="big">
-		<p id="title-1"><a>{{nickname}}，早上好！</a><span>上次登录时间：2018.04.25   12:30</span></p>
+		<p id="title-1"><a>{{nickname}}，您好！</a><span>上次登录时间：2018.04.25   12:30</span></p>
 		<div class="main">
 			<div class="main-1">
 				<img class="img-1" src="../assets/img/y1.png" />
@@ -8,11 +8,11 @@
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
-						<dd>1200</dd>
+						<dd>{{totalYesterdayNum}}</dd>
 					</dl>
 					<dl class="dl2">
 						<dt>今日</dt>
-						<dd>1200</dd>
+						<dd>{{totalNum}}</dd>
 					</dl>
 					<p class="gap_vertical"></p>
 				</div>
@@ -23,11 +23,11 @@
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
-						<dd>1200</dd>
+						<dd>{{registerNum}}</dd>
 					</dl>
 					<dl class="dl2">
 						<dt>今日</dt>
-						<dd>1200</dd>
+						<dd>{{registerYesterdayNum}}</dd>
 					</dl>
 					<p class="gap_vertical"></p>
 				</div>
@@ -38,11 +38,11 @@
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
-						<dd>1200</dd>
+						<dd>{{newsNum}}</dd>
 					</dl>
 					<dl class="dl2">
 						<dt>今日</dt>
-						<dd>1200</dd>
+						<dd>{{newsYesterdayNum}}</dd>
 					</dl>
 					<p class="gap_vertical"></p>
 				</div>
@@ -81,7 +81,7 @@
 				<img class="img-1" src="../assets/img/y6.png" />
 				<a class="main-a">启动次数</a>
 				<div class="main-div">
-					<dl class="dl1" @click="open5">
+					<dl class="dl1">
 						<dt>昨日</dt>
 						<dd>1200</dd>
 					</dl>
@@ -110,16 +110,30 @@
   export default {
     data() {
       return {
-				nickname:this.$store.state.user.nickname
-
+        nickname:this.$store.state.user.nickname,
+        totalNum:0,
+        totalYesterdayNum:0,
+        registerNum:0,
+        registerYesterdayNum:0,
+        newsNum:0,
+        newsYesterdayNum:0
       }
     },
-      methods: {
-      open5() {
-        this.$alert('<strong>这是 <i>HTML</i> 片段</strong><br><strong>这是 <i>HTML</i> 片段</strong><br><strong>这是 <i>HTML</i> 片段</strong><br>', 'HTML 片段', {
-          dangerouslyUseHTMLString: true,
-          center:true
-        });
+    created() {
+      this.getInfo();
+    },
+    methods: {
+      getInfo(){
+        this.$post('main/statistics',{tokenId:this.$store.state.user.tokenId}).then(res => {
+          console.log(res)
+          this.totalNum = res.data[0].totalNum;
+          this.totalYesterdayNum = res.data[0].totalYesterdayNum;
+          this.registerNum = res.data[0].registerNum;
+          this.registerYesterdayNum = res.data[0].registerYesterdayNum;
+          this.newsNum = res.data[0].newsNum;
+          this.newsYesterdayNum = res.data[0].newsYesterdayNum;
+
+        })
       }
     }
   }
