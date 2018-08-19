@@ -33,7 +33,7 @@
     <div class="page-header">
       <el-row>
         <el-col :span="4">
-          <el-select v-model="value" placeholder="发布来源">
+          <el-select v-model="value" placeholder="发布来源" size="mini">
             <el-option
             v-for="item in options"
             :key="item.value"
@@ -44,12 +44,12 @@
         </el-col>
         <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >创建时间</span></el-col>
         <el-col :span="6">
-           <el-date-picker style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+           <el-date-picker style="width:90%;" size="mini" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
 					</el-date-picker>
         </el-col>
         <el-col :span="6" :offset="6">
-            <el-input v-model="inputs" placeholder="请输入内容" style="width:70%"></el-input>
-            <el-button class="light_btn" @click.native.prevent="getAuditAll()" >搜索</el-button>
+            <el-input v-model="inputs" size="mini" placeholder="请输入内容" style="width:70%"></el-input>
+            <el-button class="light_btn" size="mini" @click.native.prevent="getAuditAll()" >搜索</el-button>
         </el-col>
       </el-row>
     </div>

@@ -73,7 +73,7 @@
     <div class="page-header">
       <el-row>
         <el-col :span="3">
-          <el-select v-model="value" placeholder="发布来源">
+          <el-select v-model="value" placeholder="发布来源" size="mini">
             <el-option
             v-for="item in options"
             :key="item.value"
@@ -84,20 +84,20 @@
         </el-col>
        <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >上线时间</span></el-col>
         <el-col :span="6">
-           <el-date-picker style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+           <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
 					</el-date-picker>
         </el-col>
         <el-col :span="7" :offset="6">
-          <el-input v-model="inputs" style="width:70%" placeholder="标题、专题ID" ></el-input>
-          <el-button class="light_btn" @click.native.prevent="getSubjectList()">搜索</el-button>
+          <el-input v-model="inputs" style="width:70%" placeholder="标题、专题ID" size="mini"></el-input>
+          <el-button class="light_btn" @click.native.prevent="getSubjectList()" size="mini">搜索</el-button>
         </el-col>
       </el-row>
     </div>
     <div class="box">
       <div class="text-right marBo4">
-        <router-link :to="{name:'subject-add'}" ><el-button class="light_btn">新建专题</el-button></router-link>
-        <el-button class="light_btn" @click="publishWaitTop()">置顶排序</el-button>
-        <el-button class="light_btn" @click.native.prevent="getSubjectList1()">刷新</el-button>
+        <router-link :to="{name:'subject-add'}" ><el-button class="light_btn" size="mini">新建专题</el-button></router-link>
+        <el-button class="light_btn" @click="publishWaitTop()" size="mini">置顶排序</el-button>
+        <el-button class="light_btn" @click.native.prevent="getSubjectList1()" size="mini">刷新</el-button>
       </div>
       <el-table :data="subjectList" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
         <el-table-column label="序号" type="index" width='50'></el-table-column>

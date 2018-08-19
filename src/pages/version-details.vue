@@ -1,5 +1,5 @@
 <template>
-	<div class="details">
+	<div class="version-details">
 		<el-breadcrumb separator-class="el-icon-arrow-right" style="margin-top: 8px;margin-bottom: 8px;margin-left: 22px;">
 			<el-breadcrumb-item :to="{ path: '/' }">系统管理</el-breadcrumb-item>
 			<el-breadcrumb-item>版本管理</el-breadcrumb-item>
@@ -9,8 +9,9 @@
 	
 		<div style="margin-left: 22px;margin-right: 22px;margin-bottom: 20px;overflow: hidden;background:rgba(255,255,255,1);border-radius:4px;box-shadow:0px 0px 0px rgba(54,88,167,0.07);">
 						<div style="margin-top: 20px;margin-right: 88px; text-align: right;">
-				    	<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				    	<el-button size="small" class="light_btn">编辑插件</el-button>
+             <el-button size="small" class="light_btn router_btn"><router-link :to="{name:'version-list',params:{id:plug.appId}}">返回</router-link></el-button>
+				    	<!-- <el-button size="small" @click="routeChange" class="light_btn">返回</el-button> -->
+				    	<!-- <el-button size="small" class="light_btn">编辑插件</el-button> -->
 				    </div>
 				    	<p class="title-p">应用信息</p>
 				  <div class="el-table__body-wrapper is-scrolling-none info_table">
@@ -24,16 +25,16 @@
 					<tbody>
 						<tr class="el-table__row">
 							<td>
-								<div class="cell">应用包名</div>
+								<div class="cell">插件名称</div>
 							</td>
 							<td>
-								<div class="cell">王小虎</div>
+								<div class="cell">{{plug.pluginName}}</div>
 							</td>
 							<td>
 								<div class="cell">版本号</div>
 							</td>
 							<td>
-								<div class="cell">上海市普陀区金沙江路 1518 弄</div>
+								<div class="cell">{{plug.versionName}}</div>
 							</td>
 						</tr>
 						<tr class="el-table__row">
@@ -41,13 +42,13 @@
 								<div class="cell">下载地址</div>
 							</td>
 							<td>
-								<div class="cell">王小虎</div>
+								<div class="cell">{{plug.downloadUrl}}</div>
 							</td>
 							<td>
 								<div class="cell">code版本</div>
 							</td>
 							<td>
-								<div class="cell">上海市普陀区金沙江路 1518 弄</div>
+								<div class="cell">{{plug.versionCode}}</div>
 							</td>
 						</tr>
 						<tr class="el-table__row">
@@ -55,13 +56,13 @@
 								<div class="cell">MD5</div>
 							</td>
 							<td>
-								<div class="cell">王小虎</div>
+								<div class="cell">{{plug.fileMdFive}}</div>
 							</td>
 							<td>
-								<div class="cell">应用大小</div>
+								<div class="cell">插件大小</div>
 							</td>
 							<td>
-								<div class="cell">上海市普陀区金沙江路 1518 弄</div>
+								<div class="cell">{{plug.fileSize}}</div>
 							</td>
 						</tr>
 						<tr class="el-table__row">
@@ -69,13 +70,13 @@
 								<div class="cell">升级模式</div>
 							</td>
 							<td>
-								<div class="cell">王小虎</div>
+								<div class="cell">{{plug.upgradeMode}}</div>
 							</td>
 							<td>
-								<div class="cell">应用平台</div>
+								<div class="cell">所属应用包</div>
 							</td>
 							<td>
-								<div class="cell">上海市普陀区金沙江路 1518 弄</div>
+								<div class="cell">{{plug.appId}}</div>
 							</td>
 						</tr>
 						<tr class="el-table__row">
@@ -83,13 +84,13 @@
 								<div class="cell">状态</div>
 							</td>
 							<td>
-								<div class="cell">王小虎</div>
+								<div class="cell">{{plug.status}}</div>
 							</td>
 							<td rowspan="2">
 								<div class="cell">版本提示</div>
 							</td>
 							<td rowspan="2">
-								<div class="cell">上海市普陀区金沙江路 1518 弄</div>
+								<div class="cell">{{plug.upgradeContent}}</div>
 							</td>
 						</tr>
 						<tr class="el-table__row">
@@ -97,27 +98,27 @@
 								<div class="cell">延时生效</div>
 							</td>
 							<td>
-								<div class="cell">王小虎</div>
+								<div class="cell">{{plug.delayTime}}</div>
 							</td>
-							<td>
+							<!-- <td>
 								<div class="cell">11111</div>
 							</td>
 							<td>
 								<div class="cell">1111112</div>
-							</td>
+							</td> -->
 						</tr>
 							<tr class="el-table__row">
 							<td>
 								<div class="cell">创建时间</div>
 							</td>
 							<td>
-								<div class="cell">王小虎</div>
+								<div class="cell">{{plug.createTime}}</div>
 							</td>
 							<td>
 								<div class="cell">修改时间</div>
 							</td>
 							<td>
-								<div class="cell">22222</div>
+								<div class="cell">{{plug.updateTime}}</div>
 							</td>
 						</tr>
 							<tr class="el-table__row">
@@ -125,13 +126,13 @@
 								<div class="cell">更新时间</div>
 							</td>
 							<td>
-								<div class="cell">王小虎</div>
+								<div class="cell">{{plug.onlineTime}}</div>
 							</td>
 							<td>
 								<div class="cell">操作人</div>
 							</td>
 							<td>
-								<div class="cell">33333</div>
+								<div class="cell">{{plug.updateUserId}}</div>
 							</td>
 						</tr>
 					</tbody>
@@ -146,6 +147,7 @@
 	export default{
 		data(){
 			return{
+        idDetail:'',
 				content:'111',
 				editorOption:{},
 				dialogImageUrl: '',
@@ -163,7 +165,8 @@
 					desc: '',
 					author:'',
 					img:''
-				},
+        },
+        plug:{},
 				rules: {
           name: [
             { required: true, message: '请输入活动名称', trigger: 'blur' },
@@ -189,31 +192,39 @@
           ]
         }
 			}
-		},
+    },
+    created() {
+      this.getParams();
+      this.getInfo();
+    },
 		methods:{
-			test(){
-				console.log(this.form.resource);
+			getInfo(){
+				var params = {
+          tokenId: this.$store.state.user.tokenId,
+          id:this.idDetail
+        }
+        this.$post('pluginUpgrade/get',params).then(res => {
+          console.log(res)
+          this.plug = res.data[0].appUpgrade;
+          console.log(this.plug)
+        });
 			},
-			onEditorBlur(quill) {
-				console.log('editor blur!', quill)
-				console.log(this.content)
+      getParams () {
+        // 取到路由带过来的参数 
+				let routerParams = this.$route.params.id;
+        // 将数据放在当前组件的数据内
+				// this.form1 = routerParams
+				this.idDetail = routerParams;
+				console.log(this.$route.params)
       },
-      onEditorFocus(quill) {
-        console.log('editor focus!', quill)
-      },
-      onEditorReady(quill) {
-        console.log('editor ready!', quill)
-      },
-      onEditorChange({ quill, html, text }) {
-        console.log('editor change!', quill, html, text)
-				this.content = html
-			},
-			handleRemove(file, fileList) {
-        console.log(file, fileList);
-      },
-      handlePictureCardPreview(file) {
-        this.dialogImageUrl = file.url;
-        this.dialogVisible = true;
+      routeChange(){
+        console.log(this.idDetail)
+        this.$router.push({
+            name:'version-list',
+           /*  params:{
+              id:this.idDetail
+            } */
+          }); 
       }
 		}
 	}
@@ -243,7 +254,7 @@
 	.info_table .el-table .cell {
 		color: #333;
 	}
-	.details .title-p {
+	.version-details .title-p {
 		border-left: 4px solid rgba(54, 88, 167, 1);
 		padding-left: 18px;
 		line-height: 24px;
@@ -251,5 +262,9 @@
 		font-family: MicrosoftYaHei;
 		color: rgba(51, 51, 51, 1);
 		margin-top: 6px;
-	}
+  }
+  .version-details .cell{
+    overflow: auto;
+    white-space: normal;
+  }
 </style>

@@ -7,8 +7,6 @@
 			</el-form>
 		</el-dialog>
 		
-		
-		
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>

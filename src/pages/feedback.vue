@@ -2,14 +2,14 @@
     <div class="page-body feedback">
       <div class="page-header">
           <el-date-picker style="width:360px;"
-              v-model="user_msg"
+              v-model="user_msg" size="mini"
               type="daterange"
               range-separator="-"
               start-placeholder="开始时间"
               end-placeholder="结束时间">
             </el-date-picker>
-            <el-button class="light_btn">搜索</el-button>
-            <el-button class="light_btn">导出</el-button>
+            <el-button class="light_btn" size="mini">搜索</el-button>
+            <el-button class="light_btn" size="mini">导出</el-button>
       </div>
       <div class="box">
           <el-table :row-class-name="miniTable()" :header-row-class-name="miniTable()" v-loading="loading"
@@ -67,9 +67,6 @@ export default {
 }
 </script>
 <style>
-.feedback .el-date-editor .el-range-separator,
-.feedback .el-date-editor .el-range__icon{
-  /* line-height: 20px; */
-}
+
 </style>
 

@@ -5,7 +5,7 @@
         <el-col :span='10'>
           <el-row :gutter="6" style="margin-bottom:8px;">
             <el-col :span='7'>
-              <el-select v-model="value" placeholder="时间类型" @change="tofilter">
+              <el-select size="mini" v-model="value" placeholder="时间类型" @change="tofilter">
                 <el-option
                   v-for="item in options"
                   :key="item.value"
@@ -15,15 +15,15 @@
               </el-select>
             </el-col>
             <el-col :span='7'>
-              <el-date-picker type="date" placeholder="选择日期" v-model="value1" style="width: 100%;"></el-date-picker>
+              <el-date-picker size="mini" type="date" placeholder="选择日期" v-model="value1" style="width: 100%;"></el-date-picker>
             </el-col>
             <el-col :span='7'>
-              <el-date-picker type="date" placeholder="选择日期" v-model="value2" style="width: 100%;"></el-date-picker>
+              <el-date-picker size="mini" type="date" placeholder="选择日期" v-model="value2" style="width: 100%;"></el-date-picker>
             </el-col>
           </el-row>
           <el-row :gutter="6">
             <el-col :span='7'>
-              <el-select v-model="value3" placeholder="性别" @change="tofilter">
+              <el-select size="mini" v-model="value3" placeholder="性别" @change="tofilter">
                 <el-option
                   v-for="item in options1"
                   :key="item.value"
@@ -33,20 +33,20 @@
               </el-select>
             </el-col>
             <el-col :span='7'>
-              <el-input placeholder="请输入起始年龄"></el-input>
+              <el-input size="mini" placeholder="请输入起始年龄"></el-input>
             </el-col>
             <el-col :span='7'>
-              <el-input placeholder="请输入结束年龄"></el-input>
+              <el-input size="mini" placeholder="请输入结束年龄"></el-input>
             </el-col>
           </el-row>
         </el-col>
         <el-col :span='10' :offset="4" style="margin-top:26px;">
           <el-row :gutter="6" type="flex" justify="end">
             <el-col :span='14'>
-              <el-input v-model="value6" placeholder="请输入内容"></el-input>
+              <el-input size="mini" v-model="value6" placeholder="请输入内容"></el-input>
             </el-col>
             <el-col :span='3'>
-              <el-button class="light_btn">搜索</el-button>
+              <el-button class="light_btn" size="mini">搜索</el-button>
             </el-col>
           </el-row>
         </el-col>
@@ -55,8 +55,8 @@
     </div>
     <div class="member_table">
       <div class="text-right marBo4">
-        <el-button class="light_btn" @click="innerMemDia = true">创建小号</el-button>
-        <el-button class="light_btn">刷新</el-button>
+        <el-button class="light_btn" @click="innerMemDia = true" size="mini">创建小号</el-button>
+        <el-button class="light_btn" size="mini">刷新</el-button>
       </div>
       <el-table :row-class-name="miniTable" :header-row-class-name="miniTable"
           :data="tableData" v-loading="loading" border  stripe  style="width: 100%">
@@ -357,13 +357,6 @@ export default {
 }
 </script>
 <style>
-  .member .el-input__inner{
-    height: 26px;
-    line-height: 26px;
-    font-size: 12px;
-    color:#999;
-    border-radius: 0;
-  }
   .member .member_table{
     padding: 15px;
   }

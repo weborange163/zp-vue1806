@@ -3,7 +3,7 @@
   	 	<el-dialog title="审核页面" :visible.sync="dialogFormVisible">
 			<el-form :model="form">
 				<el-form-item label="审核原因" :label-width="formLabelWidth">
-					<el-select v-model="form.region" placeholder="请选择区域">
+					<el-select v-model="form.region" placeholder="请选择区域" size="mini">
 						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
 						<el-option label="您发布的内容排版、错字过于混乱" value="您发布的内容排版、错字过于混乱"></el-option>
 						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
@@ -11,7 +11,7 @@
 					</el-select>
 				</el-form-item>
 				<el-form-item label="审核信息" :label-width="formLabelWidth">
-					<el-input v-model="form.name" auto-complete="off"></el-input>
+					<el-input v-model="form.name" auto-complete="off" size="mini"></el-input>
 				</el-form-item>
 
 			</el-form>
@@ -24,16 +24,16 @@
 				<el-radio v-model="recommendRadio" label="2" class="marBo4">不通过</el-radio><br/>
 				<el-radio v-model="recommendRadio" label="1">通过</el-radio>
 				<span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible1 = false;recommendRadio=''" class="light_btn">取 消</el-button>
-          <el-button type="primary" @click="toAudits()" class="light_btn">确 定</el-button>
+          <el-button @click="dialogVisible1 = false;recommendRadio=''" class="light_btn" size="mini">取 消</el-button>
+          <el-button type="primary" @click="toAudits()" class="light_btn" size="mini">确 定</el-button>
         </span>
 			</el-dialog>
     <div class="page-header">
       <el-row>
         <el-col :span="4">
           发布来源:
-          <el-select v-model="value" placeholder="发布来源" style="width:60%">
-            <el-option
+          <el-select v-model="value" placeholder="发布来源" style="width:60%" size="mini">
+            <el-option 
             v-for="item in options"
             :key="item.value"
             :label="item.label"
@@ -43,12 +43,12 @@
         </el-col>
        <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >创建时间</span></el-col>
         <el-col :span="6">
-           <el-date-picker style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+           <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
 					</el-date-picker>
         </el-col>
         <el-col :span="6" :offset="6">
-            <el-input v-model="search_pra" placeholder="请输入内容" style="width:70%"></el-input>
-            <el-button class="light_btn" @click.native.prevent="getAuditlist">搜索</el-button>
+            <el-input v-model="search_pra" placeholder="请输入内容" style="width:70%" size="mini"></el-input>
+            <el-button class="light_btn" @click.native.prevent="getAuditlist" size="mini">搜索</el-button>
         </el-col>
       </el-row>
     </div>

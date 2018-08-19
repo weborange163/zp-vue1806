@@ -42,12 +42,11 @@
           </el-pagination>
         </div>
       </div>
-      <el-dialog center
-        width="30%"
-        :visible.sync="newDialog"
-        append-to-body>
+      <el-dialog center :before-close="beforeClose"
+        width="30%" :close-on-click-modal="false"
+        :visible.sync="newDialog" append-to-body>
         <el-form :model="classForm" :rules="classRules" ref="classForm" label-width="110px" class="classForm">
-          <el-form-item label="分类标题" prop="title">
+          <el-form-item label="分类标题" prop="title" size="mini">
             <el-input v-model="classForm.title" style="width:70%;"></el-input>
           </el-form-item>
           <el-form-item label="上传icon" label-width="110px" ref="icon" prop="icon">
@@ -72,7 +71,7 @@
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
-          <el-button @click="newDialog = false;fileList=[];" class="light_btn">取 消</el-button>
+          <el-button @click="beforeClose()" class="light_btn">取 消</el-button>
           <el-button type="primary" @click="createClass" class="light_btn">保 存</el-button>
         </span>
       </el-dialog>
@@ -111,14 +110,14 @@ export default {
       },
       classRules:{
         title: [
-          { required: true, message: '请输入标题', trigger: 'blur' },
-          { min: 2, max: 4, message: '长度在 2 到 4 个字', trigger: 'blur' }
-        ],
-       icon:[
-          {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
-       ]
-      },
-      hasFmt:false
+            { required: true, message: '请输入标题', trigger: 'blur' },
+            { min: 2, max: 4, message: '长度在 2 到 4 个字', trigger: 'blur' }
+          ],
+        icon:[
+            {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
+        ]
+        },
+        hasFmt:false
     }
   },
   created() {
@@ -261,6 +260,15 @@ export default {
           this.total_pages = res.data[0].total;
         }
       })
+    },
+    beforeClose(){
+      this.newDialog = false;
+      this.fileList=[];
+      this.isEdit=false;
+      thisclassForm={
+        title:'',
+        radio:'1'
+      }
     },
     handleCurrentChange(val) {
       this.currentPage = val;

@@ -4,24 +4,24 @@
 			<el-row>
 				<el-col :span="4">
 					发布来源:
-					<el-select v-model="value1" placeholder="发布来源" style="width:60%">
+					<el-select v-model="value1" placeholder="发布来源" style="width:60%" size="mini">
 						<el-option v-for="item in optionss" :key="item.value1" :label="item.label" :value="item.value1">
 						</el-option>
 					</el-select>
 				</el-col>
 				<el-col :span="3">
-					<el-select v-model="value2" placeholder="时间类型">
+					<el-select v-model="value2" placeholder="时间类型" size="mini">
 						<el-option v-for="item in optionsss" :key="item.value2" :label="item.label" :value="item.value2">
 						</el-option>
 					</el-select>
 				</el-col>
 				<el-col :span="6" class="padLe4">
-					<el-date-picker style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+					<el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
 					</el-date-picker>
 				</el-col>
 				<el-col :span="6" :offset="4">
-					<el-input v-model="inputs" placeholder="标题、发布账号、文章ID" style="width:70%;margin-right:5%;"></el-input>
-					<el-button class="light_btn" style="width:20%;" @click.native.prevent="newsList()">搜索</el-button>
+					<el-input size="mini" v-model="inputs" placeholder="标题、发布账号、文章ID" style="width:70%;margin-right:5%;"></el-input>
+					<el-button class="light_btn" style="width:20%;" size="mini" @click.native.prevent="newsList()">搜索</el-button>
 				</el-col>
 			</el-row>
 		</div>
@@ -31,10 +31,10 @@
 					<div class="tab1">
 						<div class="text-right marBo4">
 							<router-link :to="{name:'news-add'}">
-								<el-button class="light_btn">添加新闻</el-button>
+								<el-button class="light_btn" size="mini">添加新闻</el-button>
 							</router-link>
-							<el-button class="light_btn" @click="publishWaitTop">置顶排序</el-button>
-							<el-button class="light_btn" @click="newsList()">刷新</el-button>
+							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
+							<el-button class="light_btn" size="mini" @click="newsList()">刷新</el-button>
 						</div>
 						<el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
 							<!--<el-table-column label="#" type="index"></el-table-column>-->
@@ -805,18 +805,6 @@
 	
 	.name_wrapper {
 		display: inline-block;
-	}
-	
-	.yshx {
-		color: #00C621;
-	}
-	
-	.dshx {
-		color: #FEB210;
-	}
-	
-	.yxx {
-		color: #999;
 	}
 	
 	.el-table,

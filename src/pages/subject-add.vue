@@ -16,7 +16,7 @@
 			</div>
       <el-form :model="subjectForm" :rules="subjectRules" ref="subjectForm" label-width="100px" style="max-width:800px;">
         <el-form-item label="专题标题" prop="title">
-          <el-input v-model="subjectForm.title"></el-input>
+          <el-input v-model="subjectForm.title" size="mini"></el-input>
         </el-form-item>
         <el-form-item label="专题描述" prop="description">
           <el-input type="textarea" v-model="subjectForm.description"></el-input>
@@ -35,12 +35,12 @@
           </el-dialog>
         </el-form-item>
         <el-form-item label="tag标签" prop="tag">
-          <el-input v-model="subjectForm.tagLabels"></el-input>
+          <el-input v-model="subjectForm.tagLabels" size="mini"></el-input>
         </el-form-item>
         <el-form-item label="关联文章" prop="linkArt">
           <el-row>
             <el-col :span="18">
-              <el-input v-model="subjectForm.ariId"></el-input>
+              <el-input v-model="subjectForm.ariId" size="mini"></el-input>
             </el-col>
             <el-col :span="6" class="text-center">
               <el-button class="light_btn" @click="addById()">添加</el-button>

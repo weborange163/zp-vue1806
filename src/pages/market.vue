@@ -3,28 +3,28 @@
 		<div class="page-header">
 			<el-row>
 				<el-col :span="5">
-					<el-select v-model="value" name="classifyType" placeholder="分类" style="width:49%">
+					<el-select size="mini" v-model="value" name="classifyType" placeholder="分类" style="width:49%">
 						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
 						</el-option>
 					</el-select>
-					<el-select v-model="value1" placeholder="发布来源" style="width:49%">
+					<el-select size="mini" v-model="value1" placeholder="发布来源" style="width:49%">
 						<el-option v-for="item in optionss" :key="item.value1" :label="item.label" :value="item.value1">
 						</el-option>
 					</el-select>
 				</el-col>
 				<el-col :span="3">
-					<el-select v-model="value2" placeholder="时间类型">
+					<el-select size="mini" v-model="value2" placeholder="时间类型">
 						<el-option v-for="item in optionsss" :key="item.value2" :label="item.label" :value="item.value2">
 						</el-option>
 					</el-select>
 				</el-col>
 				<el-col :span="4" class="padLe4">
-					<el-date-picker style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+					<el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
 					</el-date-picker>
 				</el-col>
 				<el-col :span="6" :offset="4">
-					<el-input v-model="inputs" placeholder="标题、发布账号、文章ID" style="width:70%;margin-right:5%;"></el-input>
-					<el-button class="light_btn" style="width:20%;" @click.native.prevent="getMarket()">搜索</el-button>
+					<el-input size="mini" v-model="inputs" placeholder="标题、发布账号、文章ID" style="width:70%;margin-right:5%;"></el-input>
+					<el-button size="mini" class="light_btn" style="width:20%;" @click.native.prevent="getMarket()">搜索</el-button>
 				</el-col>
 			</el-row>
 		</div>
@@ -34,10 +34,10 @@
 					<div class="tab1">
 						<div class="text-right marBo4">
 							<router-link :to="{name:'market-add'}">
-								<el-button class="light_btn">添加行情</el-button>
+								<el-button class="light_btn" size="mini">添加行情</el-button>
 							</router-link>
-							<el-button class="light_btn" @click="publishWaitTop()">置顶排序</el-button>
-							<el-button class="light_btn" @click.native.prevent="getMarket1()">刷新</el-button>
+							<el-button class="light_btn" @click="publishWaitTop()" size="mini">置顶排序</el-button>
+							<el-button class="light_btn" @click.native.prevent="getMarket1()" size="mini">刷新</el-button>
 						</div>
 						<el-table :data="tableData" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
 							<!--<el-table-column label="#" type="index"></el-table-column>-->

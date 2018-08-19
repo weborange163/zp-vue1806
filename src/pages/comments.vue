@@ -4,7 +4,7 @@
       <el-row>
         <el-col :span="3">
           状态:
-          <el-select v-model="value" placeholder="状态" style="width:70%">
+          <el-select v-model="value" placeholder="状态" style="width:70%" size="mini">
             <el-option
             v-for="item in options"
             :key="item.value"
@@ -15,12 +15,12 @@
         </el-col>
         <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >评论时间:</span></el-col>
         <el-col :span="8">
-          <el-date-picker style="width:90%;" v-model="value2" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+          <el-date-picker style="width:90%;" size="mini" v-model="value2" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
           </el-date-picker>
         </el-col>
         <el-col :span="6" :offset="5">
-          <el-input v-model="inputs" style="width:80%" placeholder="评论会员、会员ID、评论对象ID、评论内容" ></el-input>
-          <el-button class="light_btn" @click.native.prevent="getComList()">搜索</el-button>
+          <el-input v-model="inputs" size="mini" style="width:80%" placeholder="评论会员、会员ID、评论对象ID、评论内容" ></el-input>
+          <el-button class="light_btn" size="mini" @click.native.prevent="getComList()">搜索</el-button>
         </el-col>
       </el-row>
     </div>

@@ -17,7 +17,7 @@ div{
 }
 a{
   text-decoration: none;
-  color: #0366d6;
+  color: #3658A7;
 }
 pre,code{
   font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace, "Microsoft YaHei";
@@ -65,7 +65,8 @@ code{
   border:1px solid #3658A7;
   color: #3658A7;
 }
-.light_btn:hover{
+.light_btn:hover,
+.router_btn:hover a{
   background: #3658A7;
   color: #fff;
 }
@@ -149,10 +150,8 @@ p{
   float: left;
   animation: progress 1s linear infinite;
 }
-.el-input__inner {
-  height: 28px;
-  line-height: 28px;
-  font-size: 12px;
+.el-input--mini .el-input__inner {
+  /* font-size: 12px; */
   color: #999;
   border-radius: 0;
 }
@@ -229,6 +228,17 @@ table img{
 .el-upload-list--picture-card .el-upload-list__item{
   width: 80px;
   height: 80px;
+}
+.yshx {
+  color: #00C621;
+}
+
+.dshx {
+  color: #FEB210;
+}
+
+.yxx {
+  color: #999;
 }
 @keyframes progress {
   0% {

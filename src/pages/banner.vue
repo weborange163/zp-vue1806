@@ -85,13 +85,13 @@
 		</el-dialog>
 
 		<div class="page-header clearfix">
-			<el-input v-model="search_info" placeholder="请输入内容" style="width:220px;margin:0 20px;"></el-input>
-			<el-button class="light_btn" @click.native.prevent="getBannerlist()">搜索</el-button>
+			<el-input v-model="search_info" size="mini" placeholder="请输入内容" style="width:220px;margin:0 20px;"></el-input>
+			<el-button class="light_btn" @click.native.prevent="getBannerlist()" size="mini">搜索</el-button>
 		</div>
 		<div class="box">
 			<div style="text-align:right;margin-bottom:4px;">
-				<el-button class="light_btn" @click="publishWaitTop()">发布</el-button>
-				<el-button class="light_btn" @click.native.prevent="getBannerlist1()">刷新</el-button>
+				<el-button class="light_btn" @click="publishWaitTop()" size="mini">发布</el-button>
+				<el-button class="light_btn" @click.native.prevent="getBannerlist1()" size="mini">刷新</el-button>
 			</div>
 			<div class="banner_show">
 				<el-table :data="banner_data" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
