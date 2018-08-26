@@ -15,7 +15,7 @@
 		</el-breadcrumb>
     </div>
     <div class="box">
-			<div class="text-right">
+			<div class="text-right marBo4">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button>
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','3')">仅保存</el-button>
@@ -73,7 +73,7 @@
       </el-form>
       <el-dialog :visible.sync="searchAdd">
         <div style="margin-bottom:20px">
-          <el-input v-model="searchInput" style="width:80%"></el-input>
+          <el-input v-model="searchInput" style="width:80%" size="mini"></el-input>
           <el-button class="light_btn" @click="searchMore">搜索</el-button>
         </div>
         <el-table :data="searchLinkArt" border :row-class-name="miniTable" :header-row-class-name="miniTable">
@@ -132,21 +132,24 @@ export default {
   },
   created(){
     this.baceUrl = getBaceUrl();
-    // console.log(this.baceUrl)http://localhost:8089/specialInfo/add
-  },
-  mounted() {
-				this.$get('/specialInfo/show', {
+    this.$get('/specialInfo/show', {
 				tokenId: this.$store.state.user.tokenId,
 				id: this.$route.params.rowInfo.id
 			}).then(res => {
 				this.subjectForm=res.data[0]
 				this.imgSrc = this.subjectForm.coverImgId;
 					this.status = this.subjectForm.status;
-					this.imgFullSrc = this.baceUrl + this.imgSrc;
-					console.log(this.subjectForm)
+          this.imgFullSrc = this.baceUrl + this.imgSrc;
+          this.artData = this.subjectForm.specialNews;
+          console.log(this.subjectForm);
+          console.log(this.searchLinkArt);
 					this.fileList.push({url:this.imgFullSrc})
 				
 			})
+    // console.log(this.baceUrl)http://localhost:8089/specialInfo/add
+  },
+  mounted() {
+				
 		},
   
   
@@ -337,8 +340,8 @@ export default {
 		margin-right: 2px;
 	}
 	#div1{
-		    height: 740px !important;
-   			 overflow-y: auto !important;
+    height: 740px !important;
+    overflow-y: auto !important;
 	}
 </style>
 

@@ -9,7 +9,7 @@
         </div>
         <div class="box">
             <div class="text-right">
-                <el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+                <el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
                 <el-button size="small" class="light_btn" @click="toAudit1('form2',1)">仅保存</el-button>
                 <el-button size="small" class="light_btn" @click="toAudit('form2',2)">保存并提交审核</el-button>
             </div>
@@ -44,12 +44,23 @@
 					    </el-option>
 					  </el-select>
 					</el-form-item>
-                    <el-form-item label="发布账号:" prop="userId" label-width="82">
-                        <el-select v-model="form2.userId" placeholder="请选择发布账号">
-                            <el-option label="小号1" value="1"></el-option>
-                            <el-option label="小号2" value="2"></el-option>
-                        </el-select>
-                    </el-form-item>
+					
+				
+					
+                   <el-form-item class="fabuStyle" label="发布账号:" prop="userId" label-width="82">
+						<el-select v-model="form2.userId" placeholder="请选择发布账号">
+							<el-option 
+                v-for="item in accounts"
+                :key="item.userId"
+                :label="item.nickName"
+                :value="item.userId"
+              ></el-option>
+						</el-select>
+					</el-form-item>
+                    
+                    
+                    
+                    
                     <el-form-item label="附加选项:" prop="imgType" label-width="82">
                         <el-radio-group v-model="form2.imgType">
                             <el-radio label="1">上传缩略图</el-radio>
@@ -59,7 +70,7 @@
                     <!--上传图片-->
                     <el-form-item label="封面图" required>
                         <el-upload ref="upload" :action="getFullUrl()" name="newsFile" :data="uploadData" :multiple="false" :limit='1' 
-												list-type="picture-card" :auto-upload="false"  :on-preview="handlePictureCardPreview" :on-exceed="fileOver" :on-remove="handleRemove">
+												list-type="picture-card" :auto-upload="false"   :on-preview="handlePictureCardPreview" :on-exceed="fileOver" :on-remove="handleRemove">
                             <i class="el-icon-plus"></i>
                         </el-upload>
                         <el-dialog :visible.sync="dialogVisible">
@@ -82,11 +93,12 @@ import { getBaceUrl } from '@/utils/auth'
 export default {
     data() {
         return {
+        	 accounts:[],
         	  quill: {
         width: 420,
 				border: true,
 				height:150,
-				zIndex:10000,
+				zIndex:101,
         content: 'wellcome ~',
         syncOutput: true,
         theme: 'snow', //bubble snow
@@ -104,11 +116,13 @@ export default {
             dialogImageUrl: '',
             dialogVisible: false,
             classifyType:'',
+            classifyType1:'',
+            
             form2: {
                 title: '',
                 content: '',
                 classifyTypes: '行情',
-                userId: '1',
+                userId: '',
                 imgType: '1',
                 tagLabel: '',
                 resource: '',
@@ -181,7 +195,12 @@ export default {
     	this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
     		console.log(res.data)
     		this.classifyType = res.data
-    	})
+    	});
+    	 this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
+        console.log(res)
+        this.accounts = res.data;
+      })
+    	
         // console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
     },
     methods: {
@@ -300,6 +319,16 @@ export default {
 					});
 					return true;
 			},
+				//图片的验证
+//			fileChange(file,fileList){
+//      this.$refs['icon'].clearValidate(); // 图片验证
+//      this.form1.filename = file.name;
+//      this.form1.newsFile = file.raw;
+//				// console.log(file)
+//				if(fileList.length>0){
+//					this.hasFmt = true;
+//				}
+//			},
 			
 			
 			onEditorBlur(quill) {
@@ -326,7 +355,15 @@ export default {
 					this.dialogVisible = true;
 					console.log(this.dialogImageUrl);
 					alert('放大');
-			}
+			},
+			 fanhui(){
+        this.$confirm('返回已编辑内容将重置是否继续？')
+          .then(_ => {
+            this.$router.back();
+            done();
+          })
+          .catch(_ => {});
+      }
     }
 };
 </script>

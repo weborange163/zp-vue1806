@@ -2,9 +2,8 @@
   <div class="page-body comments">
     <div class="page-header">
       <el-row>
-        <el-col :span="3">
-          状态:
-          <el-select v-model="value" placeholder="状态" style="width:70%" size="mini">
+        <el-col :span="2">
+          <el-select v-model="value" placeholder="状态" style="width:90%" size="mini">
             <el-option
             v-for="item in options"
             :key="item.value"
@@ -13,12 +12,23 @@
             </el-option>
           </el-select>
         </el-col>
-        <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >评论时间:</span></el-col>
-        <el-col :span="8">
-          <el-date-picker style="width:90%;" size="mini" v-model="value2" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+        <el-col :span="9">
+          <el-date-picker style="width:90%;" size="mini" v-model="value2" type="datetimerange" 
+          start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd HH-mm-ss"
+           :default-time="['00:00:00', '00:00:00']">
           </el-date-picker>
         </el-col>
-        <el-col :span="6" :offset="5">
+        <el-col :span="2">
+          <el-select v-model="value3" placeholder="分类" style="width:90%" size="mini">
+            <el-option
+            v-for="item in options3"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value">
+            </el-option>
+          </el-select>
+        </el-col>
+        <el-col :span="8" :offset="3">
           <el-input v-model="inputs" size="mini" style="width:80%" placeholder="评论会员、会员ID、评论对象ID、评论内容" ></el-input>
           <el-button class="light_btn" size="mini" @click.native.prevent="getComList()">搜索</el-button>
         </el-col>
@@ -44,7 +54,7 @@
 						<p v-if="scope.row.status=='1'" >已屏蔽</p>
           </template>
         </el-table-column>
-        <el-table-column prop="checkPerson"  label="审核人" width="180">
+        <el-table-column prop="checkPerson"  label="审核人" width="120">
           <template slot-scope="scope">
             <p v-if="scope.row.checkPerson==''" >机器审核</p>
 						<p v-else>{{scope.row.checkPerson}}</p>
@@ -62,7 +72,9 @@
         </el-table-column>
       </el-table>
       <div class="marT20">
-        <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
+        <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" 
+        :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange" :total="this.total_pages">
         </el-pagination>
       </div>
     </div>
@@ -85,9 +97,10 @@ export default {
       type:'',
       value:'',
       value2:'',
+      value3:'',
       inputs:'',
-      options: [{
-        value: '',
+      options: [
+        {value: '2',
         label: '全部'
         },{
         value: '1',
@@ -96,6 +109,23 @@ export default {
         value: '0',
         label: '未屏蔽'
         }],
+        
+      options3: [
+        {value: '0',
+        label: '全部'
+        },{
+        value: '1',
+        label: '新闻'
+        },{
+        value: '2',
+        label: '行情'
+        },{
+        value: '3',
+        label: '专题'
+        },{
+        value: '4',
+        label: '评论'
+        },],
       tableData: []
     }
   },
@@ -141,15 +171,26 @@ export default {
     // 获取评论list
     getComList(){
       this.loading = true;
+      // console.log(this.value2);
       // NProgress.start();
       var params = {
         tokenId: this.$store.state.user.tokenId,
         limit: this.per_page,
         offset: this.currentPage,
         status:this.value,
-        startTime: this.value2[0],
-        endTime:this.value2[1],
+        type:this.value3,
         simpleParameter:this.inputs
+      }
+      if(this.value2){
+        params.startTime = this.value2[0];
+        params.endTime = this.value2[1];
+        console.log(this.value2[0])
+      }
+      if(this.value == '2'){
+        params.status = ''
+      }
+      if(this.value3 == '0'){
+        params.type  = ''
       }
       this.$post('comment/list', params).then(res => {
         if(res.code == 0){
@@ -167,6 +208,10 @@ export default {
     },
     handleClick(row) {
       console.log(row);
+    },
+    handleSizeChange(val){
+      this.per_page = val;
+      this.getComList();
     }
   }
 }

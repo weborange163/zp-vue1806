@@ -13,7 +13,9 @@
           <el-table-column prop="area"  label="区"></el-table-column>
         </el-table>
         <div class="marT20">
-          <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total">
+          <el-pagination class="text-right" background @current-change="handleCurrentChange" 
+          :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" 
+          layout="total, sizes, prev, pager, next, jumper" :total="this.total" @size-change="handleSizeChange">
           </el-pagination>
         </div>
       </div>
@@ -45,7 +47,7 @@ export default {
         offset: this.currentPage,
       }
       this.$post('area/findArea',params).then(res => {
-        console.log(res)
+        // console.log(res)
         if(res.code == 0){
           this.tableData = res.data[0].rows;
           this.total = res.data[0].total;
@@ -55,6 +57,11 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.getList();
+    },
+    handleSizeChange(val) {
+      // console.log(`每页 ${val} 条`);
+      this.per_page = val;
       this.getList();
     },
   }

@@ -2,6 +2,7 @@ html,
 body{
   background-color: #fff;
 }
+
 body{
   padding: 0;
   margin: 0;
@@ -100,7 +101,9 @@ p{
   margin-bottom: 15px;
   color: #585A5F;
 }
-
+body .el-table th.gutter{
+  display: table-cell !important;
+}
 .page-body h1{
   font-size: 2rem;
   font-weight: 400;
@@ -134,7 +137,9 @@ p{
   font-weight: 100;
   margin: 0;
 }
-
+.el-table{
+  font-size: 12px;
+}
 .progress-bg{
   margin: 0 auto;
   width: 60%;
@@ -178,6 +183,12 @@ p{
 .marT20{
   margin-top: 20px;
 }
+.marR10{
+  margin-right: 10px;
+}
+.marR100{
+  margin-right: 100px;
+}
 #p1{
   text-align: center;
   font-size: 20px;
@@ -190,6 +201,9 @@ p{
   margin: 0 auto;
   width: 320px !important;
   
+}
+.editor img{
+  max-width: 100%;
 }
 .miniTable td{
   padding: 6px 0;
@@ -247,4 +261,12 @@ table img{
   100% {
     margin-left: 100%;
   }
+}
+@media screen and (max-width: 1000px) {
+  .app-side {
+      width:0px !important;
+  }
+  /* .side-switch{
+    display: none !important;
+  } */
 }

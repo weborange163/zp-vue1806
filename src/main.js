@@ -44,8 +44,8 @@ import MBackTop from '@/m/back-top'
 import MLoader from '@/m/loader'
 import MContainer from '@/m/container'
 
-//Vue.use(VueAxios, axios)
-//Axios.defaults.baseURL = process.env.API_ROOT // 需要结合webpack.dev.conf.js去配置。。。。还需要研究
+// Vue.use(VueAxios, axios)
+// Axios.defaults.baseURL = process.env.API_ROOT  需要结合webpack.dev.conf.js去配置
 console.log(process.env)
 
 Vue.use(ElementUI)
@@ -90,7 +90,7 @@ router.afterEach(transition => {
 window.APP_INFO = process.env.APP_INFO
 
 Vue.config.productionTip = false
-Vue.prototype.$get = get //全局生成$get
+Vue.prototype.$get = get  //全局生成$get
 Vue.prototype.$post = post
 /* eslint-disable no-new */
 var app = new Vue({

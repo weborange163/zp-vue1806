@@ -3,8 +3,8 @@
     <div class="page-header">
       <div class="text-right">
         <el-button size="mini" class="light_btn" @click="$router.back()">返回</el-button>
-        <el-button size="small" class="light_btn">身份设置</el-button>
-        <el-button size="small" class="light_btn">权限设置</el-button>
+        <el-button size="small" @click="setIdentity" class="light_btn" v-if="data1.identity!='内部小号'">身份设置</el-button>
+        <el-button size="small" @click="setPower" class="light_btn" v-if="data1.identity!='内部小号'">权限设置</el-button>
       </div>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="基本信息" name="first">
@@ -12,8 +12,8 @@
             <p class="info_title">基本信息</p>
             <el-row>
               <el-col :span="4">
-                <div class="avatar" style="background:#bfa;height:217px;">
-                  <img src="../assets/img/log-user.png">
+                <div class="avatar" style="height:217px;">
+                  <img :src="data1.fullUrl" style="width:100%;height:100%">
                 </div>
               </el-col>
               <el-col :span="20">
@@ -34,7 +34,7 @@
                       </tr>
                       <tr class="el-table__row">
                         <td><div class="cell">用户ID</div></td>
-                        <td><div class="cell">{{data1.userId}}</div></td>
+                        <td><div class="cell">{{data1.userCode}}</div></td>
                         <td><div class="cell">城市</div></td>
                         <td><div class="cell">{{data1.cityId}}</div></td>
                       </tr>
@@ -185,13 +185,41 @@
         </el-tab-pane>
       </el-tabs>
     </div>
-    
+    <!-- 权限弹窗 -->
+    <el-dialog title="修改用户权限" :visible.sync="powerDia" width="30%" center>
+      <div>
+        <el-checkbox-group v-model="checkList" id="checkList">
+           <el-checkbox v-for="i in checkOp" :label="i.prohibitCode" :key="i.id">{{i.prohibitName}}</el-checkbox>
+        </el-checkbox-group>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="powerDia = false" class="light_btn">取 消</el-button>
+        <el-button type="primary" @click="changePower" class="light_btn">确 定</el-button>
+      </div>
+    </el-dialog>
+    <!-- 身份弹窗 -->
+    <el-dialog title="选择会员身份" :visible.sync="identityDia" width="30%" center>
+      <div class="text-center">
+        <el-radio v-model="radio" label="100001">普通会员</el-radio>
+        <el-radio v-model="radio" label="100003">认证会员(带V身份标识）</el-radio>
+      </div>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="identityDia = false" class="light_btn">取 消</el-button>
+        <el-button type="primary" @click="changeIdentity" class="light_btn">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 <script>
+import { getBaceUrl } from '@/utils/auth'
 export default {
   data() {
       return {
+        radio:'',
+        powerDia:false,
+        identityDia:false,
+        checkOp:[],
+        checkList: [],
         idDetail:'',
         num1:0,num2:0,num3:0,num4:0,num5:0,num6:0,num7:0,
         flag1:true,
@@ -199,14 +227,16 @@ export default {
         flag3:true,
         data1:{
           nickName:'',sex:'',userId:'',cityId:'',phone:'',birthday:'',idCard:'',
-          userDesc:'',createTime:'',loginTime:'',mobileModel:''
+          userDesc:'',createTime:'',loginTime:'',mobileModel:'',fullUrl:''
         },
-        data3:{},
+        data3:{mobileOs:''},
         activeName: 'first',
-        tableData: []
+        tableData: [],
+        baceUrl:''
       };
     },
     created(){
+      this.baceUrl = getBaceUrl();
       this.getParams();
       this.baseInfo();
     },
@@ -219,7 +249,10 @@ export default {
         }
         this.$post('members/getBaseInfo',params).then(res => {
           // console.log(res.data);
-          this.data1 = res.data[0];
+          if(res.data){
+            this.data1 = res.data[0];
+            this.data1.fullUrl = this.baceUrl + res.data[0].headImg
+          }
           // console.log(this.data1)
         })
       },
@@ -229,6 +262,77 @@ export default {
         // 将数据放在当前组件的数据内
         this.idDetail = routerParams
         // console.log(this.$route.params)
+      },
+      //设置身份
+      setIdentity(){
+        this.identityDia = true;
+        if(this.data1.identity == '认证会员'){
+          this.radio = '100003';
+        }else{
+          this.radio = '100001';
+        }
+      },
+      // 设置权限
+      setPower(){
+        this.powerDia = true;
+        // this.userId =  row.userId;
+        this.$post('members/prohibit/findList',{tokenId:this.$store.state.user.tokenId,status:'1'}).then(res => {
+          // console.log(res.data)
+          this.checkOp = res.data;
+          var params = {
+            tokenId:this.$store.state.user.tokenId,
+            userId: this.idDetail
+          }
+          this.$post('members/getPermissions',params).then(res => {
+            // console.log(res);
+            if(res.data[0]){
+              this.checkList= (res.data[0].prohibitCodes).split(','); // "100003,100005"
+            }
+          });
+        })
+      },
+      // 确定更改身份
+      changeIdentity(){
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          levelCode:this.radio,
+          userId:this.idDetail,
+        };
+        this.$post('members/updateLevel',params).then(res => {
+          if(res.code == 0){
+            this.identityDia = false;
+            this.userId='';
+            this.showList();
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+          }
+        })
+      },
+      // 确认设置权限
+      changePower(){
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          prohibitCodes: this.checkList.join(','),
+          userId:this.idDetail
+        }
+        this.$post('members/setPermissions',params).then(res => {
+          console.log(res)
+          if(res.code == 0){
+            // this.powerDia = true;
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+            this.powerDia=false;
+          }else{
+            this.$message({
+              message: '设置失败请重试!',
+              type: 'error'
+            });
+          }
+        })
       },
       handleClick(tab, event) {
         if(tab.index == '1' && this.flag1){
@@ -245,7 +349,7 @@ export default {
           tokenId:this.$store.state.user.tokenId,
           userId:this.idDetail
         }
-        this.$post('members/getUserDate',params).then(res => {
+        this.$post('members/getUserData',params).then(res => {
           // console.log(res.data);
           (res.data).map(item => {
             if(item.title == 'news'){
@@ -331,4 +435,11 @@ export default {
 .info_table .el-table .cell{
   color:#333;
 }
+.member_info .el-checkbox {
+  width: 50%;
+  text-align: left;
+}
+.member_info .el-checkbox+.el-checkbox{
+    margin-left:0; 
+  }
 </style>

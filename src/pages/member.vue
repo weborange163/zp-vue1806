@@ -56,7 +56,7 @@
     <div class="member_table">
       <div class="text-right marBo4">
         <el-button class="light_btn" @click="innerMemDia = true" size="mini">创建小号</el-button>
-        <el-button class="light_btn" size="mini">刷新</el-button>
+        <el-button class="light_btn" size="mini" @click="showList()">刷新</el-button>
       </div>
       <el-table :row-class-name="miniTable" :header-row-class-name="miniTable"
           :data="tableData" v-loading="loading" border  stripe  style="width: 100%">
@@ -103,7 +103,7 @@
           <template slot-scope="scope">
             <div v-if="scope.row.identity != '内部小号'">
               <router-link :to="{name:'member-info',params:{id:scope.row.userId}}"><el-button type="text"  size="mini"
-                @click="handleInfo(scope.$index, scope.row)">详情</el-button>
+                >详情</el-button>
               </router-link>
               <el-button type="text"
                 size="mini" class="marL10"
@@ -113,8 +113,8 @@
                 @click="setIdentity(scope.$index, scope.row)">身份</el-button>
             </div>
             <div v-else>
-              <router-link :to="{name:'member-info'}"><el-button type="text"  size="mini" 
-                  @click="handleInfo(scope.$index, scope.row)">详情</el-button>
+              <router-link :to="{name:'member-info',params:{id:scope.row.userId}}"><el-button type="text"  size="mini" 
+                 >详情</el-button>
                 </router-link>
                 <el-button type="text"
                   size="mini" class="marL10" disabled>权限</el-button>
@@ -124,26 +124,28 @@
         </el-table-column>
       </el-table>
       <div class="marT20">
-        <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
-        </el-pagination>
+        <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" 
+          :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange" :total="this.total_pages">
+				</el-pagination>
       </div>
     </div>
     <!-- 创建小号的弹窗 -->
     <el-dialog title="创建内部小号" :visible.sync="innerMemDia" width="30%" center>
-      <el-form :model="form">
-        <el-form-item label="手机号:" label-width="80px">
-          <el-input v-model="form.tel" auto-complete="off"></el-input>
+      <el-form :model="form" ref="form" :rules="rules">
+        <el-form-item label="手机号:" label-width="80px" prop="tel">
+          <el-input v-model="form.tel" auto-complete="off" size="mini" placeholder="请输入4-12位数字"></el-input>
         </el-form-item>
-        <el-form-item label="用户名:" label-width="80px">
-          <el-input v-model="form.name"></el-input>
+        <el-form-item label="用户名:" label-width="80px" prop="name">
+          <el-input v-model="form.name" size="mini" placeholder="请输入4-15个字"></el-input>
         </el-form-item>
-        <el-form-item label="简介:" label-width="80px">
-          <el-input v-model="form.shortDes" type="textarea"></el-input>
+        <el-form-item label="简介:" label-width="80px" prop="shortDes">
+          <el-input v-model="form.shortDes" type="textarea" size="mini" placeholder="请输入简介"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="innerMemDia = false">取 消</el-button>
-        <el-button type="primary" @click="createInner">确 定</el-button>
+        <el-button @click="innerMemDia = false" size="mini">取 消</el-button>
+        <el-button type="primary" @click="createInner" size="mini">确 定</el-button>
       </div>
     </el-dialog>
     <!-- 身份弹窗 -->
@@ -177,11 +179,26 @@ export default {
       return {
         radio:'100001',
         checkOp:[],
-        checkList: ['选中且禁用','复选框 A'],
+        checkList: [],
         form:{
           tel:'',
           name:'',
           shortDes:''
+        },
+        rules:{
+          tel: [
+            { required: true, message: '请输入手机号', trigger: 'blur' },
+            {pattern: /^[0-9]*$/,message:'手机号只能输入数字', trigger: 'blur'},
+            { min: 4, max: 12, message: '长度在 4 到 12 个字符', trigger: 'blur' },
+          ],
+          name:[
+            { required: true, message: '请输入用户名', trigger: 'blur' },
+            { min: 2, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' },
+          ],
+          shortDes:[
+            // { required: true, message: '请输入简介', trigger: 'blur' },
+            { min: 1, max: 25, message: '长度在 1 到 25 个字符', trigger: 'blur' }
+          ]
         },
         innerMemDia:false,
         identityDia:false,
@@ -241,6 +258,7 @@ export default {
           //  console.log(res)
           //  console.log(res.data[0].rows);
             this.tableData = res.data[0].rows;
+
             this.total_pages = res.data[0].total;
             this.loading=false;
           }
@@ -252,6 +270,8 @@ export default {
         console.log(index,row)
         if(row.identity == '认证会员'){
           this.radio = '100003';
+        }else{
+          this.radio = '100001';
         }
         this.userId = row.userId;
       },
@@ -288,7 +308,9 @@ export default {
           }
           this.$post('members/getPermissions',params).then(res => {
             // console.log(res);
-            this.checkList= (res.data[0].prohibitCodes).split(','); // "100003,100005"
+            if(res.data[0]){
+              this.checkList= (res.data[0].prohibitCodes).split(','); // "100003,100005"
+            }
           });
         })
       },
@@ -302,11 +324,12 @@ export default {
         this.$post('members/setPermissions',params).then(res => {
           console.log(res)
           if(res.code == 0){
-            this.powerDia = true;
+            // this.powerDia = true;
             this.$message({
               message: res.msg,
               type: 'success'
             });
+            this.powerDia=false;
           }else{
             this.$message({
               message: '设置失败请重试!',
@@ -330,6 +353,7 @@ export default {
               message: res.msg,
               type: 'success'
             });
+            this.showList();
           }else{
             this.$message({
               message: '添加失败请重试!',
@@ -340,6 +364,10 @@ export default {
       },
       handleCurrentChange(val){
         this.currentPage = val;
+        this.showList();
+      },
+      handleSizeChange(val){
+        this.per_page = val;
         this.showList();
       },
       tofilter(val){

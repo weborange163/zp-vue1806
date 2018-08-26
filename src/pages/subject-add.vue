@@ -21,11 +21,11 @@
         <el-form-item label="专题描述" prop="description">
           <el-input type="textarea" v-model="subjectForm.description"></el-input>
         </el-form-item>
-        <el-form-item label="封面缩略图" ref="imgItem">
-          <el-upload name="file" :data="uploadData" ref="upload" :multiple="false" :limit='1'
-            :action="getFullUrl()" :on-success="onSuccess"
-            list-type="picture-card"
-            :auto-upload="false"
+        <el-form-item label="封面缩略图" ref="icon" prop="icon">
+          <el-upload name="file" ref="upload" :multiple="false" :limit='1'
+            action="" list-type="picture-card"
+            :file-list="fileList" :on-change="fileChange"
+            :auto-upload="false" :on-exceed="handleExceed"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove">
             <i class="el-icon-plus"></i>
@@ -84,7 +84,15 @@
 import { getBaceUrl } from '@/utils/auth'
 export default {
   data(){
+    var valiIcon = (rule, value, callback) => { // 图片验证
+        if (!this.hasFmt) {
+          callback(new Error('请上传图片'));
+        } else {
+          callback();
+        }
+      };
     return{
+      hasFmt:false,
       searchInput:'',
       uploadData:{},
       baceUrl:'',
@@ -103,13 +111,18 @@ export default {
         newsArticleIds:'',
         ariId:''
       },
+      fileList:[],
       subjectRules:{
         title: [
             { required: true, message: '请输入专题名称', trigger: 'blur' },
-            { min: 3, max: 15, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+            { min: 1, max: 30, message: '长度在 1 到 30 个字符', trigger: 'blur' }
           ],
         description:[
-          { required: true, message: '请输入专题描述', trigger: 'blur' }
+          { required: true, message: '请输入专题描述', trigger: 'blur' },
+          { min: 1, max: 500, message: '长度在 1 到 500 个字符', trigger: 'blur' }
+        ],
+        icon:[
+          {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
         ]
         
       }
@@ -199,37 +212,30 @@ export default {
     addSubject(formName,status){
       this.$refs[formName].validate((valid) => {
           if (valid) {
-            console.log(valid)
+            let param = new FormData();
             var ids = [];
             this.artData.map(item => {
               ids.push(item.articleId);
-            }) 
-            this.uploadData={
-							tokenId:this.$store.state.user.tokenId,
-              status:status,
-              title: this.subjectForm.title,
-              description: this.subjectForm.description,
-              tagLabels:this.subjectForm.tagLabels,
-              newsArticleIds:ids.join(',')
-						}
-						// this.uploadData = params;
-						console.log(this.uploadData)
-						setTimeout(() => {
-              this.$refs.upload.submit();
-              this.$message({
-								type: 'success',
-								message: '添加成功!'
-							});
-							setTimeout(() => {
-								this.$router.push({name: 'subject'});
-							}, 1000);
-						}, 0);
-					// console.log(params)
-					/* this.$post('news/add',params).then(res =>{
-						if(res.code == 0){
-							console.log(1111111,res)
-						}
-					}) */
+            });
+            param.append('tokenId',this.$store.state.user.tokenId);
+            param.append('status',status);
+            param.append('description',this.subjectForm.description);
+            param.append('title',this.subjectForm.title);
+            param.append('tagLabels',this.subjectForm.tagLabels);
+            param.append('newsArticleIds',ids.join(','));
+            param.append('file',this.subjectForm.file,this.subjectForm.filename);
+            this.$post('specialInfo/add',param).then(res => {
+              if(res.code == 0){
+                setTimeout(() => {
+                  this.$message({
+                  type: 'success',
+                  message: '添加成功!'
+                });
+                  this.$router.push({name: 'subject'});
+                }, 1000);
+              }
+            })          
+						
           } else {
             console.log('error submit!!');
             return false;
@@ -283,9 +289,21 @@ export default {
           });          
         });
     },
+    fileChange(file,fileList){
+      this.$refs['icon'].clearValidate(); // 图片验证
+      this.subjectForm.filename = file.name;
+      this.subjectForm.file = file.raw;
+      console.log(file.raw)
+      if(fileList.length>0){
+        this.hasFmt = true;
+      }
+    },
     handleRemove(file, fileList) {
-        console.log(file, fileList);
-      },
+      console.log(file, fileList);
+    },
+    handleExceed(files, fileList){
+      this.$message.warning('当前限制选择 1 个文件');
+    },
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;

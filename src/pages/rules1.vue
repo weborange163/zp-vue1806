@@ -38,7 +38,9 @@
           </el-table-column>
         </el-table>
         <div class="marT20">
-          <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
+          <el-pagination class="text-right" background @current-change="handleCurrentChange" 
+          :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" 
+          layout="prev, pager, next" :total="this.total_pages">
           </el-pagination>
         </div>
       </div>
@@ -265,7 +267,7 @@ export default {
       this.newDialog = false;
       this.fileList=[];
       this.isEdit=false;
-      thisclassForm={
+      this.classForm={
         title:'',
         radio:'1'
       }

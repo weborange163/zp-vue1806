@@ -17,7 +17,7 @@
 		</div>
 		<div class="box">
 			<div class="text-right">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button>
 				<el-button size="small" class="light_btn" type="text" v-if="status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2()">上线</el-button>
 				<!-- <el-button size="small" class="light_btn" type="text" v-if="status=='5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1()">下线</el-button> -->
@@ -337,7 +337,15 @@ import { getBaceUrl } from '@/utils/auth'
 			watch: {
 				// 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
 				'$route': 'getParams'
-			}
+			},
+			 fanhui(){
+        this.$confirm('你确定要返回吗？')
+          .then(_ => {
+            this.$router.back();
+            done();
+          })
+          .catch(_ => {});
+      }
 		}
 	};
 </script>
@@ -366,7 +374,7 @@ import { getBaceUrl } from '@/utils/auth'
 	}
 	
 	.up_form .quill-editor .ql-container {
-		height: 550px;
+		min-height: 550px;
 		overflow-y: auto;
 	}
 	
@@ -388,8 +396,6 @@ import { getBaceUrl } from '@/utils/auth'
 		width: 320px !important;
 		
 	}
-	.el-dialog--center .el-dialog__body{
-		padding: 0 !important;
-	}
+	
 
 </style>

@@ -16,11 +16,11 @@
 					</el-select>
 				</el-col>
 				<el-col :span="6" class="padLe4">
-					<el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+					<el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
 					</el-date-picker>
 				</el-col>
 				<el-col :span="6" :offset="4">
-					<el-input size="mini" v-model="inputs" placeholder="标题、发布账号、文章ID" style="width:70%;margin-right:5%;"></el-input>
+					<el-input size="mini" v-model="inputs" placeholder="标题、创建人、文章ID" style="width:70%;margin-right:5%;"></el-input>
 					<el-button class="light_btn" style="width:20%;" size="mini" @click.native.prevent="newsList()">搜索</el-button>
 				</el-col>
 			</el-row>
@@ -52,63 +52,158 @@
 									<p style="display:inline-block;">{{ scope.row.title }}</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="创建人" prop="author" width="80"></el-table-column>
+							<el-table-column label="创建人" prop="createUser" width="200"></el-table-column>
 							<el-table-column label="发布状态" width="80">
 								<template slot-scope="scope">
 									<p v-if="scope.row.status=='0'" >新建</p>
 									<p v-if="scope.row.status=='4'" class="yshx">已上线</p>
 									<p v-if="scope.row.status=='5'" class="yxx">已下线</p>
 									<p v-if="scope.row.status=='1'" class="dshx">待审核</p>
-									<p v-if="scope.row.status=='3'" class="yxx">已审核</p>
+									<p v-if="scope.row.status=='3'" class="yxx">审核不通过</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="发布来源"  width="120">
+							<el-table-column label="发布来源"  width="80">
 								<template slot-scope="scope">
 									<p v-if="scope.row.publish_source=='1'">pc后台</p>
-									<p v-if="scope.row.publish_source=='2'">APP</p>
-									<p v-if="scope.row.publish_source=='3'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">APP端</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="文章ID" prop="article_id"></el-table-column>
-							<el-table-column label="操作" width="300" fixed="right">
+							<el-table-column label="上线时间" prop="online_time" width="140"></el-table-column>
+							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
+							<el-table-column label="操作" width="200" fixed="right">
 								<template slot-scope="scope">
-									<el-button type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
-									<el-button type="text" v-if="scope.row.status == '0'" @click="toAudit(scope.row)">提交审核</el-button>
-									<el-button type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
-									<el-button type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
-									
+									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status == '0'" @click="toAudit(scope.row)">提交审核</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'&&scope.rowrecommend != '1'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
 									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
-										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
-									<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
 									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
-										<el-button type="text" v-if="scope.row.status != '4'&& scope.row.publish_source != '2'"><i class="iconfont icon-edit"></i></el-button>
+										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button class="marR10" type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
 							</el-table-column>
 						</el-table>
 					</div>
 					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="prev, pager, next" :total="this.total_pages1">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange1" :total="this.total_pages1">
 						</el-pagination>
 					</div>
 				</el-tab-pane>
-				<el-tab-pane label="新建" name="second">
-					<div class="tab2">
+        <el-tab-pane label="已上线" name="second">
+          <div class="tab2">
+            <el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
+							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
+							<el-table-column label="标题" prop="title">
+								<template slot-scope="scope">
+									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+									<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
+									<p style="display:inline-block;">{{ scope.row.title }}</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
+							<el-table-column label="发布状态" width="80">
+                <template slot-scope="scope">
+									<p class="yshx">已上线</p>
+                </template>
+							</el-table-column>
+							<el-table-column label="发布来源"  width="120">
+								<template slot-scope="scope">
+									<p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">APP端</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="文章ID" prop="article_id"  width="80"></el-table-column>
+							<el-table-column label="操作" width="200" fixed="right">
+								<template slot-scope="scope">
+									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'&&scope.rowrecommend != '1'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
+                  <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
+										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
+									<el-button class="marR10" type="text" disabled><i class="iconfont icon-delete unclick"></i></el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+          </div>
+          <div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange1" :total="this.total_pages1">
+						</el-pagination>
+					</div>
+        </el-tab-pane>
+        <el-tab-pane label="已下线" name="third">
+          <div class="tab3">
+            <el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
+							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
+							<el-table-column label="标题" prop="title">
+								<template slot-scope="scope">
+									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+									<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
+									<p style="display:inline-block;">{{ scope.row.title }}</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
+							<el-table-column label="发布状态" width="80">
+                <template slot-scope="scope">
+									<p class="yxx">已下线</p>
+                </template>
+							</el-table-column>
+							<el-table-column label="发布来源"  width="80">
+								<template slot-scope="scope">
+									<p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">APP端</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="文章ID" prop="article_id" width="120"></el-table-column>
+							<el-table-column label="操作" width="160" fixed="right">
+								<template slot-scope="scope">
+									<el-button type="text" class="marR10" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
+									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
+										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
+									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
+										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
+									</router-link>
+									<el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+          </div>
+          <div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange1" :total="this.total_pages1">
+						</el-pagination>
+					</div>
+        </el-tab-pane>
+				<el-tab-pane label="新建" name="fourth">
+					<div class="tab4">
 						<div class="text-right marBo4">
-							<el-button class="light_btn" @click="toAudits">批量提交审核</el-button>
-							<el-button class="light_btn">刷新</el-button>
+							<el-button class="light_btn" size="mini" @click="toAudits">批量提交审核</el-button>
+							<el-button class="light_btn" size="mini" @click="newsList">刷新</el-button>
 						</div>
-						<el-table :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="newArticle" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
+						<el-table :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55" align="center">
 							</el-table-column>
 							<el-table-column type="index" label="序号" width="50">
 							</el-table-column>
 							<el-table-column prop="title" label="标题">
 							</el-table-column>
-							<el-table-column prop="author" label="创建人" width="100">
+							<el-table-column prop="createUser" label="创建人" width="100">
 							</el-table-column>
 							<el-table-column label="状态" width="50">
 								<template slot-scope="scope">
@@ -118,23 +213,27 @@
 							<el-table-column label="发布来源"  width="100">
 								<template slot-scope="scope">
 									<p v-if="scope.row.publish_source=='1'">pc后台</p>
-									<p v-if="scope.row.publish_source=='2'">移动端</p>
-									<p v-if="scope.row.publish_source=='3'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">移动端</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="文章ID" prop="article_id"></el-table-column>
-							<el-table-column label="操作" width="300" fixed="right">
+							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
+							<el-table-column label="操作" width="200" fixed="right">
 								<template slot-scope="scope">
-									<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
-									<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
-									<el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" @click="toAudit(scope.row,2)">提交审核</el-button>
+									<el-button class="marR10" type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
+									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
+                    <el-button class="marR10" type="text" ><i class="iconfont icon-edit"></i></el-button>
+									</router-link>
+									<el-button class="marR10" type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button class="marR10" type="text" @click="toAudit(scope.row)">提交审核</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
 					</div>
 					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange1" :total="this.total_pages1">
 						</el-pagination>
 					</div>
 				</el-tab-pane>
@@ -180,10 +279,10 @@
 					append-to-body>
 					<el-form :model="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
 						<el-form-item label="原文标题">
-							<el-input v-model="bannerForm.title" :disabled="true"></el-input>
+							<el-input size="mini" v-model="bannerForm.title" :disabled="true"></el-input>
 						</el-form-item>
 						<el-form-item label="短标题" prop="title_short">
-							<el-input v-model="bannerForm.title_short"></el-input>
+							<el-input size="mini" v-model="bannerForm.title_short"></el-input>
 						</el-form-item>
 						<el-form-item label="banner图片" label-width="110px" required>
 							<el-upload 
@@ -201,15 +300,15 @@
 							</el-dialog>
 						</el-form-item>
 						<el-form-item label="类型">
-							<el-input v-model="bannerForm.type" :disabled="true"></el-input>
+							<el-input size="mini" v-model="bannerForm.type" :disabled="true"></el-input>
 						</el-form-item>
 						<el-form-item label="链接">
-							<el-input v-model="bannerForm.link" :disabled="true"></el-input>
+							<el-input size="mini" v-model="bannerForm.articleId" :disabled="true"></el-input>
 						</el-form-item>
 					</el-form>
 					<span slot="footer" class="dialog-footer">
 						<el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
-						<el-button type="primary" @click="toBanner1" class="light_btn">保 存</el-button>
+						<el-button type="primary" @click="toBanner" class="light_btn">保 存</el-button>
 					</span>
 				</el-dialog>
 			<!-- 分页 -->
@@ -241,38 +340,31 @@
 				bannerDialog:false,
 				loading:false,
 				multipleSelection: [],
-				newArticle: [{
-					num: 1,
-					title: 'test7mkaiemlaoapuemske93osksks',
-					author: 'web'
-				}],
 				activeTab: 'first',
 				recommendRadio: '', // 推荐到banner/置顶的radio值
 				recoIndex:0,	// 点击推荐到时的表格的index
 				dialogVisible: false,
 				dialogVisible1: false,
-				dialogVisible2: false,
-				per_page1: 5,
-				per_page2:5,
+        dialogVisible2: false,
+        status:'',
+				per_page1: 10,
 				total_pages1: 0,
-				total_pages2:0,
 				currentPage1: 1, // 页面默认展示的当前页码
-				currentPage2: 1,
 				params:{},
 				upData: [],
-				tableData: [],
+        tableData: [],
 			optionss: [
         {
 					value1: '',
 					label: '全部'
 				},{
-					value1: '2',
+					value1: '3',
 					label: 'APP'
 				}, {
 					value1: '1',
 					label: '后台发布'
 				}, {
-					value1: '3',
+					value1: '2',
 					label: '数据爬取'
 				}],
 				optionsss: [{
@@ -302,7 +394,6 @@
 			}
 		},
 		created(){
-			this.initParams();
 			this.newsList(this.params);
 			this.baceUrl = getBaceUrl();
 		},
@@ -390,7 +481,7 @@
 				this.dialogVisible = false
 			},
 			//提交审核
-			toAudit(row,tab){
+			toAudit(row){
 				this.$confirm('是否提交到审核列表?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -401,11 +492,7 @@
 						ids:row.id
 					}
 					this.$post('news/batchWaitCheck',params).then(res => {
-						if(tab){
-							this.creatList();
-						}else{
-							this.newsList();
-						}
+						this.newsList();
 						this.$message({
 							type: 'success',
 							message: '操作成功!'
@@ -431,24 +518,15 @@
 					console.log(res)
 				})
 			},
-			initParams(){
-				this.params = {
-					tokenId:this.$store.state.user.tokenId,
-					queryType:'LineAndCreate',
-					limit:this.per_page1,
-					offset:this.currentPage1
-				}
-			},
 			//新闻列表
-			newsList(params){
-				if(!params){
+			newsList(){
+				// if(!params){
 					//console.log(params)
 						var params={
 						tokenId:this.$store.state.user.tokenId,
-						queryType:'LineAndCreate',
 						limit:this.per_page1,
-						offset:this.currentPage1,
-//						status:this.value,
+            offset:this.currentPage1,
+            status:this.status,
 						publishSource:this.value1,
 						timeType:this.value2,
         		simpleParameter:this.inputs,
@@ -457,86 +535,33 @@
 	////					结束也就是逗号后面的
 						endTime:this.value6[1],
 					}
-				}
+				// }
 				// console.log(params)
 				this.$post('/news/list',params).then(res => {
-					console.log(res.data[0].rows)
+					// console.log(res.data[0].rows)
 					this.tableData = res.data[0].rows;
 					this.total_pages1 = res.data[0].total;
 				});
 			},
-			//新建的新闻列表
-			creatList(params){
-				if(!params){
-					//console.log(params)
-					var params={
-						tokenId:this.$store.state.user.tokenId,
-						queryType:'create',
-						limit:this.per_page2,
-						offset:this.currentPage2
-					}
-				}
-				this.$post('/news/list',params).then(res => {
-					this.newArticle = res.data[0].rows;
-					this.total_pages2 = res.data[0].total;
-				})
-			},
 			//tab1 分页
 			handleCurrentChange1(val) {
+        // console.log(val);
 				this.currentPage1 = val;
-				this.initParams()
-				console.log(this.params)
-				this.newsList(this.params);
-			},
-			//tab2 分页
-			handleCurrentChange2(val) {
-				this.currentPage2 = val;
-				var params={
-						tokenId:this.$store.state.user.tokenId,
-						queryType:'create',
-						limit:this.per_page2,
-						offset:this.currentPage2
-					}
-				this.creatList(params);
-
-			},
-			// 点击 推荐到banner 保存按钮
+				// console.log(this.params)
+				this.newsList();
+      },
+     
+     // 推荐到banner的确定按钮事件
 			toBanner(){
-					this.$refs.bannerForm.validate((valid) => {
-						if(valid){
-							this.uploadData={
-								tokenId:this.$store.state.user.tokenId,
-								titleShort:this.bannerForm.title_short,
-								bannerType:'1',
-								linkId:this.bannerForm.link,
-								articleId:this.bannerForm.articleId,
-							}
-							console.log(this.uploadData)
-							setTimeout(() => {
-								this.$refs.upload.submit();
-								this.$message({
-									type: 'success',
-									message: '添加成功!'
-								});
-								setTimeout(() => {
-									this.newsList();
-								}, 1000);
-								this.bannerDialog = false;
-							}, 0);
-						}
-					})
-        
-			},
-			toBanner1(){
         this.$refs.bannerForm.validate((valid) => {
           if(valid){
-              let param = new FormData();
-              param.append('file',this.bannerForm.file,this.bannerForm.filename);
-              param.append('tokenId',this.$store.state.user.tokenId);
-              param.append('titleShort',this.bannerForm.title_short);
-              param.append('bannerType','1');
-              param.append('linkId',this.bannerForm.link);
-              param.append('articleId',this.bannerForm.articleId);
+            let param = new FormData();
+            param.append('file',this.bannerForm.file,this.bannerForm.filename);
+            param.append('tokenId',this.$store.state.user.tokenId);
+            param.append('titleShort',this.bannerForm.title_short);
+            param.append('bannerType','1');
+            param.append('linkId',this.bannerForm.link);
+            param.append('articleId',this.bannerForm.articleId);
             console.log(param)
             this.$post('bannerInfo/save',param).then(res =>{
               console.log(res)
@@ -545,7 +570,7 @@
                 message: '添加成功!'
               });
               setTimeout(() => {
-              //	this.newsList();
+              	this.newsList();
               }, 1000);
               this.bannerDialog = false;
             })
@@ -583,7 +608,7 @@
 					console.log(params)
 					this.$post('news/batchWaitCheck',params).then(res => {
 						console.log(res)
-						this.creatList();
+						this.newsList();
 						this.$message({
 							type: 'success',
 							message: '提交成功!'
@@ -607,17 +632,25 @@
 			},
 			// tab切换
 			handleClick(tab, event) {
-				console.log(tab.name, event);
-				if(tab.name == 'second'){ 	
-					var params = {
-						tokenId:this.$store.state.user.tokenId,
-						queryType:'create',
-						limit:this.per_page2,
-						offset:this.currentPage2
-					}
-					this.creatList(params)
-				}
-				//this.newsList(params);
+        // console.log(tab.name, event);
+        this.currentPage1=1;
+        this.value1='';
+        this.value2='';
+        this.inputs='';
+        this.value6='';
+				if(tab.name == 'fourth'){ 	
+					this.status='0';
+        }
+        if(tab.name == 'second'){ 	
+					this.status='4';
+        }
+        if(tab.name == 'third'){ 	
+					this.status='5'
+        }
+        if(tab.name=='first'){
+          this.status='';
+        }
+        this.newsList();
 			},
 			// 确定推荐到置顶/banner
 			sureReco(){
@@ -644,12 +677,27 @@
 								message: res.msg,
 								type: 'warning'
 							});
-						}
-						this.newsList();
+						}else if(res.code == '0'){
+              this.$message({
+                type: 'success',
+                message: '操作成功!'
+              });
+              setTimeout(() => {
+                this.newsList();
+              }, 1000);
+            }
 					})
 					this.dialogVisible1 = false;
 				}else if(this.recommendRadio == '2'){	// 推荐到banner
-					console.log('推荐到banner');
+          // console.log('推荐到banner');
+          if(this.tableData[this.recoIndex].recommend !='0'){   // 判断是否是已经推荐到了banner列表,
+            this.$message({
+              message: '本条消息已经推荐到了banner,请去banner列表查看',
+              type: 'warning'
+            });
+            this.dialogVisible1 = false;
+            return;
+          }
 					// this.tableData[this.recoIndex].title,
 					this.bannerForm.title = this.tableData[this.recoIndex].title;
 					this.bannerForm.link = this.tableData[this.recoIndex].id;
@@ -668,7 +716,12 @@
 						message: '本条消息已经置顶,需取消置顶才能操作',
 						type: 'warning'
 					});
-				}else{
+				}else if(row.recommend == '1'){
+          this.$message({
+						message: '本条消息已经被推荐到了banner并上线,请去banner列表查看',
+						type: 'warning'
+					});
+        }else{
 					this.dialogVisible1 = true;
 					this.recoIndex = index;	// 保存当前的index
 					console.log(row,this.recoIndex);
@@ -768,7 +821,12 @@
 				return 'btnTable'
 			},
 			handleExceed(files, fileList) {
-        this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+        this.$message.warning(`当前限制选择 1 个文件`);
+      },
+      handleSizeChange1(val) {
+        // console.log(`每页 ${val} 条`);
+        this.per_page1 = val;
+        this.newsList();
       },
 		}
 	}
@@ -826,5 +884,8 @@
 		line-height: 8px;
 		padding-top: 9px;
 		padding-bottom: 9px;
-	}
+  }
+  body .el-table th.gutter{
+    display: table-cell !important;
+}
 </style>

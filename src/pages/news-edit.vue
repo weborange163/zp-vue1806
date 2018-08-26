@@ -1,6 +1,6 @@
 <template>
-	<div class="page-body news_lookes" style="min-width:980px;">
-		<el-dialog center width="375px"  :visible.sync="bannerDialog" append-to-body id='div1'>
+	<div class="page-body news_edit" style="min-width:1080px;">
+		<el-dialog center width="375px"  :visible.sync="bannerDialog" id='div1'>
 			<el-form :data="form1" :model="form1" ref="form1" label-width="110px" class="form1">
 				<p id="p1" >{{form1.title }}</p>
 				<p id="p2" v-html="form1.content"></p>
@@ -16,8 +16,8 @@
 		</div>
 		
 		<div class="box" >
-			<div class="text-right">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+			<div class="text-right marR100">
+				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="bannerDialog = true;" >预览</el-button>
 				<el-button size="small" class="light_btn" @click="editNews('form1',0)">保存</el-button>
 			</div>
@@ -34,12 +34,12 @@
 						:theme="quill.theme"
 						:disabled="quill.disabled"
 						:fullscreen="quill.full"
-						@upload="uploadImg" @change="onEditorBlur($event)"
+						@upload="uploadImg" @blur="onEditorBlur($event)"
 						></m-quill-editor>
 					</el-form-item>
 					<!-- <div id="test" class="ql-editor"></div> -->
 				</div>
-				<div style="width: 35%;float:left;padding:15px;">
+				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
 					<el-form-item label="发布到:">
 						<el-input v-model="type" disabled></el-input>
 					</el-form-item>
@@ -62,8 +62,12 @@
 					</el-form-item>
 					<el-form-item label="发布账号:" prop="userId" label-width="82">
 						<el-select v-model="form1.userId">
-							<el-option label="小号1" value="shanghai"></el-option>
-							<el-option label="小号2" value="beijing"></el-option>
+							<el-option 
+                v-for="item in accounts"
+                :key="item.userId"
+                :label="item.nickName"
+                :value="item.userId"
+              ></el-option>
 						</el-select>
 					</el-form-item>
 					<el-form-item label="附加选项:" prop="imgType" label-width="82">
@@ -72,14 +76,14 @@
 								<el-radio label="2">提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item v-if="form1.imgType=='1'">
+					<el-form-item prop="icon" ref="icon" label="封面图" v-if="form1.imgType=='1'">
 						<el-upload
-							:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
+							action="" :data="uploadData" :multiple="false" :limit='1'
 							ref="upload" name="newsFile"
+              :file-list="fileList"
 							list-type="picture-card"
 							:auto-upload="false"
-							:file-list="fileList"
-							:on-change="fileChange"
+							:on-change="fileChange" :on-exceed="handleExceed"
 							:on-preview="handlePictureCardPreview"
 							:on-remove="handleRemove">
 							<i class="el-icon-plus"></i>
@@ -88,12 +92,58 @@
 							<img width="100%" :src="dialogImageUrl" alt="">
 						</el-dialog>
 					</el-form-item>
-					<el-form-item label="Tag标签:">
-						<el-input  v-model="form1.tagLabels" ></el-input>
+					<el-form-item label="Tag标签:" prop="tagLabels">
+						<el-input placeholder="用'，'隔开，单个标签小于12字节"  v-model="form1.tagLabels" ></el-input>
 					</el-form-item>
-					<el-form-item label="关键词:">
+					<!-- <el-form-item label="关键词:">
 						<el-input  v-model="form1.tagLabels" ></el-input>
-					</el-form-item>
+					</el-form-item> -->
+          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border marT20">
+            <colgroup>
+              <col name="el-table_1_column_1" width="18%">
+              <col name="el-table_1_column_1" width="36%">
+              <col name="el-table_1_column_1" width="36%">
+              <!-- <col name="el-table_1_column_2" width="22%"> -->
+            </colgroup>
+            <tbody>
+              <tr class="el-table__row">
+                <td><div class="cell"></div></td>
+                <td><div class="cell">时间</div></td>
+                <td><div class="cell">操作账号</div></td>
+                <!-- <td><div class="cell">备注</div></td> -->
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">创建时间</div></td>
+                <td><div class="cell">{{form1.createTime}}</div></td>
+                <td><div class="cell">{{form1.createUser}}</div></td>
+                <!-- <td><div class="cell"></div></td> -->
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">上线时间</div></td>
+                <td><div class="cell">{{form1.onlineTime}}</div></td>
+                <td><div class="cell">{{form1.onlineUser}}</div></td>
+                <!-- <td><div class="cell"></div></td> -->
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">下线时间</div></td>
+                <td><div class="cell">{{form1.offlineTime}}</div></td>
+                <td><div class="cell">{{form1.offlineUser}}</div></td>
+                <!-- <td><div class="cell"></div></td> -->
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">修改时间</div></td>
+                <td><div class="cell">{{form1.updateTime}}</div></td>
+                <td><div class="cell">{{form1.updateUser}}</div></td>
+                <!-- <td><div class="cell"></div></td> -->
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">审核时间</div></td>
+                <td><div class="cell">{{form1.checkTime}}</div></td>
+                <td><div class="cell">{{form1.checkPerson}}</div></td>
+                <!-- <td><div class="cell"></div></td> -->
+              </tr>
+            </tbody>
+          </table>
 				</div>
 			</el-form>
 		</div>
@@ -108,6 +158,28 @@ import axios from 'axios'
 		//	MQuillEditor
 		},
 		data(){
+      var valiIcon = (rule, value, callback) => { // 图片验证
+        if (!this.hasFmt) {
+          callback(new Error('请上传封面图'));
+        } else {
+          callback();
+        }
+      };
+      var valiTag=(rule,value,callback) => {
+        if (value === '') {
+          callback();
+        } else {
+          var v = value.replace(/，/ig,',');
+          var arr = v.split(',');
+          arr.map(item => {
+            if(item.replace(/[^\x00-\xff]/g,"aa").length>12){
+              callback(new Error('单个tag标签不能超过12字节!'))
+            }else{
+              callback();
+            }
+          })
+        }
+      };
 			return{
 				fileList:[],	// 预览图片
 				imgFullSrc:'',
@@ -132,7 +204,8 @@ import axios from 'axios'
       quill: {
         width: 420,
 				border: true,
-				height:150,
+        height:150,
+        zIndex:101,
         content: 'wellcome ~',
         syncOutput: false,
         theme: 'snow', //bubble snow
@@ -145,15 +218,19 @@ import axios from 'axios'
       },
       bannerDialog: false,
 			idDetail:'',
-			hasFmt:false,
+			hasFmt:true,
 				uploadData:{},
-				baceUrl:'',
+        baceUrl:'',
+        accounts:[],
 				// content:'111',
 				editorOption:{},
 				dialogImageUrl: '',
         dialogVisible: false,
 				cities:[],
 				rules1: {
+          icon:[
+            {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
+          ],
           title: [
             { required: true, message: '请输入标题', trigger: 'blur' },
             { min: 3, max: 45, message: '长度在 3 到 45 个字符', trigger: 'blur' }
@@ -171,7 +248,10 @@ import axios from 'axios'
             {required: true, message: '请选择图片', trigger: 'change' }
           ],
           source: [
-            { required: true, message: '请选择活动资源', trigger: 'change' }
+            { required: true, message: '请选择转载来源', trigger: 'change' }
+          ],
+          tagLabels:[
+            { validator: valiTag, trigger: 'blur' }
           ]
         }
 			}
@@ -179,20 +259,26 @@ import axios from 'axios'
 		created(){
 			this.baceUrl = getBaceUrl();
 			this.getParams();
-			this.showNews();
+		
 			// console.log(this.baceUrl)
 		},
 		mounted() {
+      this.showNews();
 			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
     		console.log(res.data)
     		this.cities = res.data
-    	})
+      });
+      this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
+        console.log(res)
+        this.accounts = res.data;
+      });
 		//	var test =  document.getElementById('test');
 			//test.innerHTML=this.form1.content;
 		},
 		methods:{
 			//图片的验证
 			fileChange(file,fileList){
+        this.$refs['icon'].clearValidate(); // 图片验证
 				this.form1.newsFile = file.raw;
 				console.log(fileList.length)
 				if(fileList.length>0){
@@ -340,7 +426,10 @@ import axios from 'axios'
       onEditorChange(val) {
         console.log('editor change!', val)
 				// this.content = html
-			},
+      },
+      handleExceed(files, fileList){
+        this.$message.warning('当前限制选择 1 个文件');
+      },
 			handleRemove(file, fileList) {
 				console.log(file, fileList);
 				if(fileList.length == 0){
@@ -350,7 +439,15 @@ import axios from 'axios'
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
-			}
+      },
+      fanhui(){
+        this.$confirm('返回已编辑内容将重置是否继续？')
+          .then(_ => {
+            this.$router.back();
+            done();
+          })
+          .catch(_ => {});
+      }
 		},
 		watch: {
     // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
@@ -372,7 +469,7 @@ import axios from 'axios'
 		max-width: 300px;
 	}
 	.up_form .quill-editor .ql-container{
-		height: 550px;
+		min-height: 550px;
 		overflow-y: auto;
 	}
 .imgs {
@@ -393,7 +490,7 @@ import axios from 'axios'
 		width: 320px !important;
 		
 	}
-	.el-dialog--center .el-dialog__body{
-		padding: 0 !important;
+	.news_edit .el-dialog--center .el-dialog__body{
+		padding: 0;
 	}
 </style>

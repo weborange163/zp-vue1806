@@ -9,7 +9,9 @@
 	
 		<div style="margin-left: 22px;margin-right: 22px;margin-bottom: 20px;overflow: hidden;background:rgba(255,255,255,1);border-radius:4px;box-shadow:0px 0px 0px rgba(54,88,167,0.07);">
 						<div style="margin-top: 20px;margin-right: 88px; text-align: right;">
-             <el-button size="small" class="light_btn router_btn"><router-link :to="{name:'version-list',params:{id:plug.appId}}">返回</router-link></el-button>
+              <router-link :to="{name:'version-list',params:{id:plug.appId}}">
+                <el-button size="small" class="light_btn router_btn">返回</el-button>
+              </router-link>
 				    	<!-- <el-button size="small" @click="routeChange" class="light_btn">返回</el-button> -->
 				    	<!-- <el-button size="small" class="light_btn">编辑插件</el-button> -->
 				    </div>
@@ -239,7 +241,7 @@
 	.up_form .quill-editor .ql-container{
 		min-height: 550px;
 	}
-	.info_table .el-table__body,
+.version-details .info_table .el-table__body,
 	.info_table .el-table--border td,
 	.info_table .el-table td {
 		border-color: #EAEAEA;

@@ -5,12 +5,13 @@
 		<el-dialog title="审核页面" :visible.sync="dialogFormVisible">
   <el-form :model="form">
   	 <el-form-item label="审核原因" :label-width="formLabelWidth">
-      <el-select v-model="form.region" placeholder="请选择区域">
-        <el-option label="区域一" value="1"></el-option>
-        <el-option label="区域二" value="2"></el-option>
-        <el-option label="区域三" value="3"></el-option>
-      </el-select>
-    </el-form-item>
+					<el-select v-model="form.region" placeholder="请选择区域">
+						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
+						<el-option label="您发布的内容排版、错字过于混乱" value="您发布的内容排版、错字过于混乱"></el-option>
+						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
+						<el-option label="您发布的内容不符合栏目属性" value="您发布的内容不符合栏目属性"></el-option>
+					</el-select>
+				</el-form-item>
     <el-form-item label="审核信息" :label-width="formLabelWidth">
       <el-input v-model="form.name" auto-complete="off"></el-input>
     </el-form-item>
@@ -355,7 +356,7 @@
 		max-width: 300px;
 	}
 	.up_form .quill-editor .ql-container{
-		height: 550px;
+		min-height: 550px;
 		overflow-y: auto;
 	}
 </style>

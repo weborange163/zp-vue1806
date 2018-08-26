@@ -9,8 +9,9 @@
 		</div>
     <div class="box">
       	<div class="text-right">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn" >屏蔽</el-button>
+				<el-button size="mini"  @click="$router.back()" class="light_btn">返回</el-button>
+				<el-button size="mini" class="light_btn" v-if="comDetail.status=='0'" @click="isBlock(idDetail,comDetail.type,1)">屏蔽</el-button>
+				<el-button size="mini" class="light_btn" v-else @click="isBlock(idDetail,comDetail.type,0)">取消屏蔽</el-button>
 			</div>
       <div class="el-table__body-wrapper is-scrolling-none info_table marT20">
         <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
@@ -24,8 +25,8 @@
               <td><div class="cell">{{comDetail.commentObj}}</div></td>
             </tr>
             <tr class="el-table__row">
-              <td><div class="cell">评论ID</div></td>
-              <td><div class="cell">{{comDetail.id}}</div></td>
+              <td><div class="cell">评论对象ID</div></td>
+              <td><div class="cell">{{comDetail.articleId}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">评论内容</div></td>
@@ -41,11 +42,11 @@
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">评论时间</div></td>
-              <td><div class="cell" >comDetail.createTime</div></td>
+              <td><div class="cell" >{{comDetail.createTime}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">状态</div></td>
-              <td><div class="cell">{{comDetail.status}}</div></td>
+              <td><div class="cell">{{comDetail.statusText}}</div></td>
             </tr>
             <tr class="el-table__row">
               <td><div class="cell">审核人</div></td>
@@ -79,6 +80,7 @@ export default {
           userUniqueCode:'',  // 会员id
           createTime:'',      // 评论时间
           status: '',     // 评论状态
+          statusText:'',
           checkPerson:'',   // 审核人
           auditTime:'',     // 审核时间
           type:''           // 评论类型
@@ -101,13 +103,56 @@ export default {
           console.log(res.data[0]);
           this.comDetail = res.data[0];
           if(this.comDetail.status == 0){
-            this.comDetail.status = '未屏蔽'
+            this.comDetail.statusText = '正常'
           }else{
-            this.comDetail.status = '已屏蔽'
+            this.comDetail.statusText = '已屏蔽'
           }
           console.log(this.comDetail)
         }
       });
+    },
+    // 屏蔽
+    isBlock(id,type,num){
+      var text;
+      if(num == 1){
+        text = '屏蔽';
+      }else{
+        text = '取消屏蔽';
+      }
+      this.$confirm(`此操作将${text}当前评论, 是否继续?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+          var params = {
+            tokenId: this.$store.state.user.tokenId,
+            id:id,
+            status:num,
+            type:type
+          }
+          this.$post('comment/isBlock', params).then(res => {
+            console.log(res);
+            // this.getComList();
+            if(num==1){
+              this.comDetail.status ='1';
+              this.comDetail.statusText='已屏蔽';
+            }else{
+              this.comDetail.status ='0';
+              this.comDetail.statusText='正常';
+            }
+            console.log(this.comDetail)
+            this.$message({
+              type: 'success',
+              message: '操作成功!'
+            });
+            this.showDetail();
+          })
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消操作'
+          });          
+        });
     },
     getParams () {
       // 取到路由带过来的参数 
@@ -125,7 +170,7 @@ export default {
 }
 </script>
 <style>
-.comments_lookes .cell{
+.comments_lookes .info_table .cell{
   white-space:normal;
 }
 </style>

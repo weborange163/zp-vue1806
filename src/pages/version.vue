@@ -9,12 +9,12 @@
         :value="item.value">
         </el-option>
       </el-select>
-      <el-button class="light_btn" size="mini">搜 索</el-button>
+      <el-button class="light_btn" size="mini" @click="getList">搜 索</el-button>
     </div>
     <div class="box">
       <el-row class="marBo4">
         <el-col :span="2" :offset="22">
-          <el-button class="light_btn text-right" @click="newDialog = true;">上传应用</el-button>
+          <el-button class="light_btn text-right" size="mini" @click="newDialog = true;">上传应用</el-button>
         </el-col>
       </el-row>
       <el-table :data="versionData" :row-class-name="btnTable"
@@ -30,7 +30,7 @@
         </el-table-column>
         <el-table-column prop="file_size" label="应用大小"></el-table-column>
         <el-table-column prop="package_name" label="应用包名" width='260'></el-table-column>
-        <el-table-column prop="update_time" label="修改时间" width='160'></el-table-column>
+        <el-table-column prop="update_time" label="修改时间" width='140'></el-table-column>
         <el-table-column label="状态" width='80'>
           <template slot-scope="scope">
             <p v-if="scope.row.status=='1'" class="dshx">新建</p>
@@ -38,13 +38,15 @@
             <p v-if="scope.row.status=='3'" class="yyx">已下线</p>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="300" fixed="right">
+        <el-table-column label="操作" width="240" fixed="right">
           <template slot-scope="scope">
             <el-button type="text" v-if="scope.row.platform_type == '1'" @click="downBag(scope.row.download_url)">下载</el-button>
             <el-button type="text" v-else disabled>下载</el-button>
             <el-button type="text" v-if="scope.row.status == '2'" @click="onOff('3',scope.row.id)">下线</el-button>
             <el-button type="text" v-else @click="onOff('2',scope.row.id)" >上线</el-button>
-             <el-button type="text"><router-link :to="{name:'version-list',params:{id:scope.row.id}}">查看</router-link></el-button>
+            <router-link :to="{name:'version-list',params:{id:scope.row.id}}">
+              <el-button type="text">查看</el-button>
+            </router-link>
                  <!--<el-button class="light_btn">添加新闻</el-button>-->
             <el-button type="text" v-if="scope.row.status == '1'" @click="editBag(scope.row)"><i class="iconfont icon-edit"></i></el-button>
             <el-button type="text" @click="deleteBag(scope.row.id)"><i class="iconfont icon-delete"></i></el-button>
@@ -53,31 +55,32 @@
       </el-table>
       	  <!-- 分页 -->
       <div class="marT20">
-        <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
+        <el-pagination class="text-right" background @current-change="handleCurrentChange" 
+        :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" 
+        layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages" @size-change="handleSizeChange">
         </el-pagination>
       </div>
     </div>
+
      <!-- 新增/修改应用包 -->
     <el-dialog center :close-on-click-modal="false"
         width="30%" :before-close="beforeClose"
         :visible.sync="newDialog"
         >
-          <div class="el-form-item">
-            <div class="el-form-item__label" style="width: 110px;">
-              应用平台
-            </div>
-            <div class="el-form-item__content">
-              <el-select size="mini" v-model="plat" placeholder="请选择应用平台" :disabled="isEdit"
-                 @change="selectChange">
-                  <el-option label="安卓" value="1"></el-option>
-                  <el-option label="IOS" value="2"></el-option>
-              </el-select>
-            </div>
+        <div class="el-form-item1">
+          <label class="el-form-item__label1" style="width: 110px;line-height:28px">
+            应用平台
+          </label>
+          <div class="el-form-item__content1">
+            <el-select size="mini" v-model="plat" placeholder="请选择应用平台" :disabled="isEdit"
+                @change="selectChange">
+                <el-option label="安卓" value="1"></el-option>
+                <el-option label="IOS" value="2"></el-option>
+            </el-select>
           </div>
-            
+        </div>
         <el-form :model="bagForm" :rules="bagRules" ref="bagForm" label-width="110px" class="bagForm">
-          
-          <el-form-item class="hei74" v-show="plat == '1'" label="上传应用包" label-width="110px" ref="icon" prop="icon">
+          <el-form-item class="hei74" v-if="plat == '1'" label="上传应用包" label-width="110px" ref="icon" prop="icon">
             <el-upload action="" class="upload-demo"
               :multiple="false" :limit='1'
               ref="upload" name="file"
@@ -92,7 +95,7 @@
               <img width="100%" :src="dialogImageUrl" alt="">
             </el-dialog>
           </el-form-item>
-          <el-form-item v-show="plat == '2'" label="上传路径">
+          <el-form-item v-if="plat == '2'" label="上传路径" prop="url">
             <el-input size="mini" v-model="bagForm.url" style="width:70%;"></el-input>
           </el-form-item>
           <el-form-item label="版本号" prop="num">
@@ -107,10 +110,11 @@
           <el-form-item label="版本提示" prop="desc" style="height:60px;" class="hei74">
             <el-input type="textarea" :rows="3" v-model="bagForm.desc" style="width:70%;height:60px;"></el-input>
           </el-form-item>
-          <el-form-item label="升级模式" required style="margin-top:36px;">
+          <el-form-item label="升级模式" prop="radio" style="margin-top:36px;">
             <el-radio v-model="bagForm.radio" label="0">可选升级</el-radio>
             <el-radio v-model="bagForm.radio" label="1">强制升级</el-radio>
           </el-form-item>
+          <!-- <el-button @click="$refs.bagForm.resetFields()">重置</el-button> -->
           <!-- <el-form-item label="延时生效" required>
             <el-select size="mini" v-model="bagForm.delay" placeholder="请选择延时生效时间" style="width:70%;">
               <el-option label="立即生效" value="0"></el-option>
@@ -144,17 +148,17 @@ export default {
       };
     return{
       newDialog:false,
+      newDialog1:false,
       imgDialog:false,
       loading2:false,
       plat:'1',
       dialogImageUrl:'',
       bagForm:{
-        plat:'1',
         radio:'0'
       },
       bagRules:{
         icon:[
-          {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
+         {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
         ],
         num: [
           { required: true, message: '请输入版本号', trigger: 'blur' },
@@ -166,7 +170,7 @@ export default {
         ],
         bagname:[
           {required: true, message: '请输入应用报名', trigger: 'blur' },
-          // {pattern:/^[a-zA-Z0-9.]+$/,message:'只允许输入英文数字和.', trigger: 'blur'}
+          {pattern:/^[a-zA-Z0-9.]+$/,message:'只允许输入英文数字和.', trigger: 'blur'}
         ],
         desc:[
            {required: true, message: '请输入code版本', trigger: 'blur' },
@@ -195,15 +199,15 @@ export default {
       isEdit:false,
       sources:[
         {
-          value:'all',
+          value:'0',
           label:'全部'
         },
         {
-          value:'ios',
+          value:'2',
           label:'ios'
         },
         {
-          value:'android',
+          value:'1',
           label:'android'
         },
       ] 
@@ -215,21 +219,24 @@ export default {
   },
   methods:{
     downBag(url){
-       this.$confirm('确定要下载此应用包吗?', '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'info'
-        }).then(() => {
-          window.location.href=url;
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消下载'
-          });          
-        });
+      this.$confirm('确定要下载此应用包吗?', '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }).then(() => {
+        window.location.href=url;
+      }).catch(() => {
+        this.$message({
+          type: 'info',
+          message: '已取消下载'
+        });          
+      });
     },
     selectChange(val){
       console.log(val);
+      if(val=='2'){
+        this.$refs['icon'].clearValidate();
+      }
       this.$refs['bagForm'].resetFields();
     },
     editBag(row){
@@ -249,9 +256,17 @@ export default {
     },
     // 创建包
     createBag(){
-      this.$refs.bagForm.validate((valid) => {
+      this.$refs['bagForm'].validate((valid) => {
+        console.log(valid)
+        if(this.plat=='2'){
+          if(this.bagForm.num&&this.bagForm.bagcode&&this.bagForm.bagname&&this.bagForm.desc){
+            console.log(111)
+            // valid=true;
+          }
+        }
         if(valid){
           this.loading2 = true;
+          console.log(valid)
           let param = new FormData();
           param.append('tokenId',this.$store.state.user.tokenId);
           param.append('appType',1);  
@@ -396,6 +411,10 @@ export default {
         tokenId: this.$store.state.user.tokenId,
         limit: this.per_page,
         offset: this.currentPage,
+        platformType:this.source
+      }
+      if(this.source=='0'){
+        params.platformType = '';
       }
       this.$get('appUpgrade/list',params).then(res => {
         console.log(res)
@@ -414,6 +433,11 @@ export default {
     },
     handleCurrentChange(val) {
       this.currentPage = val;
+      this.getList();
+    },
+    handleSizeChange(val) {
+      // console.log(`每页 ${val} 条`);
+      this.per_page = val;
       this.getList();
     },
     handlePictureCardPreview(file) {
@@ -459,6 +483,28 @@ export default {
 }
 .version .el-dialog--center .el-dialog__body{
  padding-bottom: 0;
+}
+.el-form-item1 {
+  margin-bottom: 22px;
+}
+ .el-form-item__label1{
+   height: 28px;
+  line-height: 28px;
+  text-align: right;
+  float: left;
+  font-size: 14px;
+  color: #606266;
+  line-height: 40px;
+  padding: 0 12px 0 0;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+}
+ .el-form-item__content1 {
+  height: 28px;
+  line-height: 28px;
+  position: relative;
+  font-size: 14px;
+  margin-left: 110px;
 }
 </style>
 

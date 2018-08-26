@@ -104,7 +104,7 @@ export default {
     border-bottom: 1px solid #e7ecee;
   }
   .m-list-group-item input{
-    background:#f6f7fb;
+    /* background:#f6f7fb; */
     color: #999;
   }
   .m-list-group-item .iconfont{

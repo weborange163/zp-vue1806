@@ -62,7 +62,7 @@
 							<el-input v-model="bannerForm.type" :disabled="true"></el-input>
 						</el-form-item>
 						<el-form-item label="链接">
-							<el-input v-model="bannerForm.link" :disabled="true"></el-input>
+							<el-input v-model="bannerForm.articleId" :disabled="true"></el-input>
 						</el-form-item>
 					</el-form>
 					<span slot="footer" class="dialog-footer">
@@ -83,11 +83,14 @@
           </el-select>
         </el-col>
        <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >上线时间</span></el-col>
-        <el-col :span="6">
-           <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+        <el-col :span="9">
+          <!-- value-format="yyyy-MM-dd hh:mm:ss"  -->
+           <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" 
+           value-format="yyyy-MM-dd HH-mm-ss"
+           start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
 					</el-date-picker>
         </el-col>
-        <el-col :span="7" :offset="6">
+        <el-col :span="6" :offset="4">
           <el-input v-model="inputs" style="width:70%" placeholder="标题、专题ID" size="mini"></el-input>
           <el-button class="light_btn" @click.native.prevent="getSubjectList()" size="mini">搜索</el-button>
         </el-col>
@@ -97,17 +100,18 @@
       <div class="text-right marBo4">
         <router-link :to="{name:'subject-add'}" ><el-button class="light_btn" size="mini">新建专题</el-button></router-link>
         <el-button class="light_btn" @click="publishWaitTop()" size="mini">置顶排序</el-button>
-        <el-button class="light_btn" @click.native.prevent="getSubjectList1()" size="mini">刷新</el-button>
+        <el-button class="light_btn" @click.native.prevent="getSubjectList()" size="mini">刷新</el-button>
       </div>
-      <el-table :data="subjectList" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
+      <el-table :data="subjectList" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()" v-loading="loading2">
         <el-table-column label="序号" type="index" width='50'></el-table-column>
         <el-table-column label="专题标题" prop="title" >
 					<template slot-scope="scope">
 						<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-						<p style="display:inline-block;">{{ scope.row.title }}</p>
+            <i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
+            <p style="display:inline-block;">{{ scope.row.title }}</p>
 					</template>
 				</el-table-column>
-        <el-table-column label="专题封面" prop="cover_img_id">
+        <el-table-column label="专题封面" prop="cover_img_id" width="80">
 					<template slot-scope="scope">
 						<img :src="scope.row.imgsrc" alt="">
 					</template>
@@ -115,32 +119,35 @@
         <el-table-column label="发布状态" width="80">
           <template slot-scope="scope">
               <p v-if="scope.row.status=='0'" >新建</p>
-              <p v-if="scope.row.status=='3'" >待上线</p>
-              <p v-if="scope.row.status=='4'" >已上线</p>
-              <p v-if="scope.row.status=='5'" >已下线</p>
+              <p v-if="scope.row.status=='3'" class="dshx">待上线</p>
+              <p v-if="scope.row.status=='4'" class="yshx">已上线</p>
+              <p v-if="scope.row.status=='5'" class="yxx">已下线</p>
           </template>
         </el-table-column>
         <el-table-column label="上线时间" prop="online_time" width="160"></el-table-column>
         <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
-        <el-table-column label="专题ID" prop="article_id" width="140"></el-table-column>
+        <el-table-column label="专题ID" prop="article_id" width="100"></el-table-column>
         <el-table-column label="操作" width="220" fixed="right">
 					<template slot-scope="scope">
 						<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-						<el-button type="text" v-if="scope.row.status=='4' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
-						<el-button type="text" v-if="scope.row.status!='4'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
+						<el-button type="text" v-if="scope.row.status=='4' && scope.row.top_flag!='1'&&scope.row.recommend == '0'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
+						<el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
+            <el-button type="text" v-if="scope.row.status!='4'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
 						<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
-						<router-link :to="{name:'subject-edit',params:{rowInfo:scope.row}}">
+						<router-link v-if="scope.row.status !='4'" :to="{name:'subject-edit',params:{rowInfo:scope.row}}">
 							<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 						</router-link>
+            <el-button v-else disabled type="text"><i class="iconfont icon-edit"></i></el-button>
 						<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 						<el-button type="text" v-else disabled><i class="iconfont icon-delete"></i></el-button>
 					</template>
 				</el-table-column>
       </el-table>
       <div style="margin-top:20px;">
-      <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" 
-          :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
-      </el-pagination>
+        <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" 
+          :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange" :total="this.total_pages">
+				</el-pagination>
       </div>
     </div>
   </div>
@@ -188,14 +195,15 @@ export default {
       value: '5',
       label: '已下线'
     }],
-    		value:'',
-				 value6:'',
-				 inputs:'',
-				 topFlag:'',
-				 dialogVisible: false,
-				dialogVisible1: false,
-				loading:false,
-				upData:[],
+    value:'',
+    value6:'',
+    inputs:'',
+    topFlag:'',
+    dialogVisible: false,
+    dialogVisible1: false,
+    loading:false,
+    loading2:false,
+    upData:[],
     }
   },
   computed: {
@@ -223,7 +231,7 @@ export default {
             this.$refs.upload.submit();
             this.$message({
               type: 'success',
-              message: '添加成功!'
+              message: '推荐banner成功!'
             });
             setTimeout(() => {
               this.getSubjectList();
@@ -244,7 +252,7 @@ export default {
 					}
 					this.$post('/specialInfo/top',params).then(res => {
 						console.log(res,res.code);
-						if(res.code == '2'){
+						if(res.code == '2' || res.code == '0'){
 							this.$message({
 								message: res.msg,
 								type: 'warning'
@@ -254,7 +262,15 @@ export default {
 					})
 					 this.dialogVisible1=false;
 				}else if(this.recommendRadio == '2'){	// 推荐到banner
-					console.log('推荐到banner');
+          // console.log('推荐到banner');
+          if(this.subjectList[this.recoIndex].recommend !='0'){   // 判断是否是已经推荐到了banner列表,
+            this.$message({
+              message: '本条消息已经推荐到了banner,请去banner列表查看',
+              type: 'warning'
+            });
+            this.dialogVisible1 = false;
+            return;
+          }
 					// this.subjectList[this.recoIndex].title,
 					this.bannerForm.title = this.subjectList[this.recoIndex].title;
 					this.bannerForm.link = this.subjectList[this.recoIndex].id;
@@ -333,30 +349,34 @@ export default {
 		},
     //专题列表
     getSubjectList(){
+      this.loading2=true;
       var params = {
         tokenId:this.$store.state.user.tokenId,
         limit:this.per_page,
         offset:this.currentPage,
         status:this.value,
         simpleParameter:this.inputs,
-////					开始也就是逗号前面的
-					timeStart:this.value6[0],
-////					结束也就是逗号后面的
-					timeEnd:this.value6[1],
+      }
+      if(this.value6){
+        params.startTime=this.value6[0];
+        params.endTime=this.value6[1];
       }
       this.$post('specialInfo/list',params).then(res => {
-				console.log(res.data[0].rows);
-				var listarr = res.data[0].rows;
-				listarr.map(item => {
-					item.imgsrc = this.baceUrl + item.cover_img_id;
+				if(res.code == 0){
+          console.log(res.data[0].rows);
+          var listarr = res.data[0].rows;
+          listarr.map(item => {
+            item.imgsrc = this.baceUrl + item.cover_img_id;
 
-				})
-        this.subjectList = res.data[0].rows;
-        this.total_pages = res.data[0].total;
+          });
+          this.subjectList = res.data[0].rows;
+          this.total_pages = res.data[0].total;
+          this.loading2=false;
+        }
       })
-      this.inputs='';
-      this.value6='';
-      this.value='';
+      // this.inputs='';
+      // this.value6='';
+      // this.value='';
     },
     //刷新列表
     getSubjectList1(){
@@ -471,7 +491,7 @@ export default {
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						id: rows.id,
-						status:'6'
+						status:'5'
 					}
 					this.$post('/specialInfo/isOnline', params).then(res => {
 						// console.log(res)
@@ -493,6 +513,10 @@ export default {
 			},
 			handleRemove(file, fileList) {
         console.log(file, fileList);
+      },
+      handleSizeChange(val){
+        this.per_page = val;
+        this.getSubjectList();
       },
       handlePictureCardPreview(file) {
 				console.log(file)
@@ -539,9 +563,9 @@ export default {
 		height: 80px;
 		line-height: 88px;
 	}
-  .el-date-editor .el-range__icon,
+  /* .el-date-editor .el-range__icon,
   .el-date-editor .el-range-separator{
     line-height: 20px;
-  }
+  } */
 </style>
 

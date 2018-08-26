@@ -1,14 +1,11 @@
 <template>
 	<div class="page-body news_lookes" style="min-width:1200px;">
-		<el-dialog center width="375px"  :visible.sync="bannerDialog" append-to-body id='div1'>
-			<el-form :data="form1"  ref="form1" label-width="110px" class="form1">
+		<el-dialog center width="375px"  :visible.sync="detailDialog" id='div1'>
+			<el-form :data="form1" ref="form1" label-width="110px" class="form1">
 				<p id="p1" >{{form1.title }}</p>
 				<p id="p2" v-html="form1.content"></p>
 			</el-form>
 		</el-dialog>
-		
-		
-		
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
@@ -18,21 +15,21 @@
 		</div>
 		
 		<div class="box" >
-			<div class="text-right">
+			<div class="text-right marR100">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn" @click="bannerDialog = true;" >预览</el-button>
-				<el-button size="small" v-if="status == '0'" class="light_btn" @click="toAudit()">提交审核</el-button>
-				<el-button size="small" class="light_btn" v-if="status == '5'" @click="onOff('4','上线')">上线</el-button>
-				<!-- <el-button size="small" class="light_btn" v-if="status == '4'" @click="onOff('5','下线')">下线</el-button> -->
+				<el-button size="small" class="light_btn" @click="detailDialog = true;" >预览</el-button>
+				<el-button size="small" v-if="form1.status == '0'" class="light_btn" @click="toAudit()">提交审核</el-button>
+				<el-button size="small" class="light_btn" v-if="form1.status == '5'" @click="onOff('4','上线')">上线</el-button>
+				<el-button size="small" class="light_btn" v-if="status == '4'" @click="onOff('5','下线')">下线</el-button>
 			</div>
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
-						<el-input v-model="form1.title" :disabled="true"></el-input>
+						<el-input type="textarea" autosize v-model="form1.title" :disabled="true"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
-						
-						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
+						<div id="content" class="ql-editor" v-html="form1.content"></div>
+					<!-- 	<m-quill-editor ref="myQuillEditor" v-model="form1.content"
 						:width="quill.width" :getContent="onEditorChange"
 						:has-border="quill.border" :zIndex="quill.zIndex"
 						:sync-output="quill.syncOutput"
@@ -40,7 +37,7 @@
 						:disabled="quill.disabled"
 						:fullscreen="quill.full"
 						@upload="uploadImg" @blur="onEditorBlur($event)"
-						></m-quill-editor>
+						></m-quill-editor> -->
 					</el-form-item>
 					<!-- <div id="test" class="ql-editor"></div> -->
 				</div>
@@ -49,7 +46,7 @@
 						<el-input :disabled="true" v-model="type"></el-input>
 					</el-form-item>
 					<el-form-item label="来源:" prop="sourceType">
-						<el-radio-group v-model="form1.sourceType" @change="test()">
+						<el-radio-group v-model="form1.sourceType" >
 							<el-radio label="1" disabled>原创</el-radio>
 							<el-radio label="2" disabled>转载</el-radio>
 						</el-radio-group>
@@ -65,8 +62,8 @@
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author" :disabled="true"></el-input>
 					</el-form-item>
-					<el-form-item label="发布账号:" prop="userId" label-width="82">
-						<el-select v-model="form1.userId" disabled>
+					<el-form-item label="发布账号:" v-if="form1.publishSource!='3'" prop="userId" label-width="82">
+						<el-select v-model="form1.createUser" disabled>
 							<el-option label="小号1" value="shanghai"></el-option>
 							<el-option label="小号2" value="beijing"></el-option>
 						</el-select>
@@ -83,9 +80,9 @@
 					<el-form-item label="Tag标签:">
 						<el-input  v-model="form1.tagLabels" :disabled="true"></el-input>
 					</el-form-item>
-					<el-form-item label="关键词:">
+					<!-- <el-form-item label="关键词:">
 						<el-input  v-model="form1.keyWords" :disabled="true"></el-input>
-					</el-form-item>
+					</el-form-item> -->
           <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
             <colgroup>
               <col name="el-table_1_column_1" width="25%">
@@ -111,12 +108,12 @@
               </tr>
             </tbody>
           </table>
-          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border marT20">
+          <table cellspacing="0" cellpadding="0" border="0" style="width:380px" class="el-table el-table__body el-table--border marT20">
             <colgroup>
-              <col name="el-table_1_column_1" width="18%">
-              <col name="el-table_1_column_1" width="40%">
-              <col name="el-table_1_column_1" width="20%">
-              <col name="el-table_1_column_2" width="22%">
+              <col name="el-table_1_column_1" width="70px">
+              <col name="el-table_1_column_1" width="140px">
+              <col name="el-table_1_column_1" width="70px">
+              <col name="el-table_1_column_2" width="140px">
             </colgroup>
             <tbody>
               <tr class="el-table__row">
@@ -128,32 +125,32 @@
               <tr class="el-table__row">
                 <td><div class="cell">创建时间</div></td>
                 <td><div class="cell">{{form1.createTime}}</div></td>
-                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell">{{form1.createUser}}</div></td>
                 <td><div class="cell"></div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">上线时间</div></td>
                 <td><div class="cell">{{form1.onlineTime}}</div></td>
-                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell">{{form1.onlineUser}}</div></td>
                 <td><div class="cell"></div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">下线时间</div></td>
                 <td><div class="cell">{{form1.offlineTime}}</div></td>
-                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell">{{form1.offlineUser}}</div></td>
                 <td><div class="cell"></div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">修改时间</div></td>
-                <td><div class="cell">注:暂时没有字段</div></td>
-                <td><div class="cell">注:暂时没有字段</div></td>
+                <td><div class="cell">{{form1.updateTime}}</div></td>
+                <td><div class="cell">{{form1.updateUser}}</div></td>
                 <td><div class="cell"></div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
-                <td><div class="cell">注:暂时没有字段</div></td>
-                <td><div class="cell"></div></td>
+                <td><div class="cell">{{form1.checkPerson}}</div></td>
+                <td><div class="cell">{{form1.checkMessage}}</div></td>
               </tr>
             </tbody>
           </table>
@@ -175,22 +172,6 @@ import axios from 'axios'
 				type:'新闻',
 				imgFullSrc:'',
 				imgSrc:'',
-				pkg:'',
-      quill: {
-        width: 420,
-				border: true,
-				height:150,
-				zIndex:1,
-        content: 'wellcome ~',
-        syncOutput: false,
-        theme: 'snow', //bubble snow
-        disabled: true,
-        full: false,
-        toolbar: [
-          [{ 'header': 1 }, { 'header': 2 }],
-          ['bold', 'italic', 'underline', 'strike', 'link']
-        ]
-      },
 				uploadData:{},
 				baceUrl:'',
 				status:'',
@@ -198,7 +179,7 @@ import axios from 'axios'
 				editorOption:{},
 				dialogImageUrl: '',
         dialogVisible: false,
-        bannerDialog: false,
+        detailDialog: false,
 				form1: {
 					title: '',
 					content:'',
@@ -217,28 +198,6 @@ import axios from 'axios'
 				idDetail:'',
 				cities:[],
 				rules1: {
-          title: [
-            { required: true, message: '请输入标题', trigger: 'blur' },
-            { min: 3, max: 15, message: '长度在 3 到 15 个字符', trigger: 'blur' }
-          ],
-          content: [
-            { required: true, message: '请输入内容', trigger: 'change' }
-          ],
-          sourceType: [
-            { required: true, message: '请选择来源', trigger: 'change'}
-          ],
-          userId: [
-            {required: true, message: '请选择发布账号', trigger: 'change' }
-          ],
-          imgType: [
-            {required: true, message: '请选择图片', trigger: 'change' }
-          ],
-          source: [
-            { required: true, message: '请选择活动资源', trigger: 'change' }
-          ],
-          desc: [
-            { required: true, message: '请填写活动形式', trigger: 'blur' }
-          ]
         }
 			}
 		},
@@ -250,9 +209,16 @@ import axios from 'axios'
 			// this.getImgUrl();
 		},
 		mounted() {
-			
-		//	var test =  document.getElementById('test');
-			//test.innerHTML=this.form1.content;
+			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
+    		console.log(res.data)
+    		this.cities = res.data
+      });
+      this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
+        console.log(res)
+        this.accounts = res.data;
+      })
+			var content =  document.getElementById('content');
+			content.innerHTML=this.form1.content;
 		},
 		methods:{
 			//上下线操作
@@ -327,7 +293,7 @@ import axios from 'axios'
 				}
 				this.$get('news/show',params).then(res => {
 					this.form1 = res.data[0];
-					console.log(this.form1)
+          console.log(this.form1);
 					this.imgSrc = this.form1.coverImgId;
 					this.status = this.form1.status;
 					this.imgFullSrc = this.baceUrl + this.imgSrc;
@@ -362,21 +328,7 @@ import axios from 'axios'
 			test(){
 				console.log(this.form1.source);
 			},
-			// 获取富文本的内容
-			onEditorBlur({quill, html,text}) {
-				// console.log('editor blur!', quill, html, text)
-				console.log(this.form1.content)
-      },
-      onEditorFocus(quill) {
-        console.log('editor focus!', quill)
-      },
-      onEditorReady(quill) {
-        console.log('editor ready!', quill)
-      },
-      onEditorChange(val) {
-        console.log('editor change!', val)
-				// this.content = html
-			},
+			
 			handleRemove(file, fileList) {
         console.log(file, fileList);
       },
@@ -398,19 +350,27 @@ import axios from 'axios'
 	.editor .el-form-item__content {
 		line-height: 20px;
 	}
-	
+	#content{
+    border: 1px solid #dcdfe6;
+		overflow-y: auto;
+    background-color: #f5f7fa;
+    border-color: #e4e7ed;
+    color: #c0c4cc;
+    cursor: not-allowed;
+    min-height: 500px;
+  }
 	.up_form .el-input__inner{
 		height: 30px;
 		line-height: 30px;
 		max-width: 300px;
 	}
 	.up_form .quill-editor .ql-container{
-		height: 550px;
+		min-height: 550px;
 		overflow-y: auto;
 	}
 	.imgs {
-		width: 200px;
-		height: 200px;
+		width: 80px;
+		height: 80px;
 		display: block;
 	}
 	#p1{
@@ -426,11 +386,17 @@ import axios from 'axios'
 		width: 320px !important;
 		
 	}
-	.el-dialog--center .el-dialog__body{
-		padding: 0 !important;
+	.news_lookes .el-dialog--center .el-dialog__body{
+		padding: 0 ;
 	}
   .news_lookes .el-table td, 
   .news_lookes .el-table th{
     padding: 4px 0;
+  }
+  .news_lookes .el-table .cell{
+    overflow: auto;
+    max-height: 48px;
+    white-space: nowrap;
+    text-overflow: initial;
   }
 </style>

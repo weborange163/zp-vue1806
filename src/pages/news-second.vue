@@ -7,10 +7,10 @@
 				<el-breadcrumb-item>审核新闻资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
-		<el-dialog title="审核页面" :visible.sync="dialogFormVisible">
-			<el-form :model="form">
+		<el-dialog title="审核页面" :visible.sync="dialogFormVisible" width="30%">
+			<el-form :model="form" label-width="80px">
 				<el-form-item label="审核原因" :label-width="formLabelWidth">
-					<el-select v-model="form.region" placeholder="请选择区域">
+					<el-select size="mini" v-model="form.region" placeholder="请选择区域" style="width:100%">
 						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
 						<el-option label="您发布的内容排版、错字过于混乱" value="您发布的内容排版、错字过于混乱"></el-option>
 						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
@@ -18,13 +18,13 @@
 					</el-select>
 				</el-form-item>
 				<el-form-item label="审核信息" :label-width="formLabelWidth">
-					<el-input v-model="form.name" auto-complete="off"></el-input>
+					<el-input size="mini" type="textarea" v-model="form.name" auto-complete="off"></el-input>
 				</el-form-item>
 
 			</el-form>
 			<div slot="footer" class="dialog-footer">
-				<el-button @click="dialogFormVisible = false">取 消</el-button>
-				<el-button type="primary" @click="toAudit('3')">确 定</el-button>
+				<el-button size="mini" @click="dialogFormVisible = false">取 消</el-button>
+				<el-button size="mini" type="primary" @click="toAudit('3')">确 定</el-button>
 			</div>
 		</el-dialog>
 
@@ -60,10 +60,14 @@
 					<el-form-item label="作者:">
 						<el-input :disabled="true" v-model="form1.author"></el-input>
 					</el-form-item>
-					<el-form-item label="发布账号:" prop="userId" label-width="82">
+					<el-form-item label="发布账号:" v-if="form1.publishSource!='3'" prop="userId" label-width="82">
 						<el-select :disabled="true" v-model="form1.userId" placeholder="请选择发布账号">
-							<el-option label="小号1" value="shanghai"></el-option>
-							<el-option label="小号2" value="beijing"></el-option>
+							<el-option 
+                v-for="item in accounts"
+                :key="item.userId"
+                :label="item.nickName"
+                :value="item.userId"
+              ></el-option>
 						</el-select>
 					</el-form-item>
 					<el-form-item label="附加选项:" prop="imgType" label-width="82">
@@ -73,12 +77,7 @@
 						</el-radio-group>
 					</el-form-item>
 					<el-form-item label="封面图" required v-if="form1.imgType == 1">
-						<el-upload :action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1' ref="upload" name="newsFile" list-type="picture-card" :auto-upload="false" :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
-							<i class="el-icon-plus"></i>
-						</el-upload>
-						<el-dialog :visible.sync="dialogVisible">
-							<img width="100%" :src="dialogImageUrl" alt="">
-						</el-dialog>
+						<img class="imgs" :src="imgFullSrc" alt="封面图展示">
 					</el-form-item>
 					<el-form-item label="Tag标签:">
 						<el-input :disabled="true" placeholder="用逗号隔开，单个标签少于12字节" v-model="form1.tagLabels"></el-input>
@@ -147,7 +146,8 @@
 				fileList:[],
 				//弹框
 				dialogTableVisible: false,
-				dialogFormVisible: false,
+        dialogFormVisible: false,
+        accounts:'',
 				form: {
 					name: '',
 					region: '',
@@ -218,7 +218,11 @@
 			}).then(res => {
 				console.log(res.data)
 				this.cities = res.data
-			});
+      });
+      this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
+        console.log(res)
+        this.accounts = res.data;
+      })
 		//	document.getElementById('test').innerHTML(this.form1.content)
 		},
 		methods: {
@@ -234,8 +238,8 @@
 					this.imgSrc = this.form1.coverImgId;
 					this.status = this.form1.status;
 					this.imgFullSrc = this.baceUrl + this.imgSrc;
-					console.log(this.imgFullSrc)
-					this.fileList.push({url:this.imgFullSrc})
+					// console.log(this.imgFullSrc)
+					// this.fileList.push({url:this.imgFullSrc})
 				});
 			},
 			getParams () {
@@ -387,7 +391,7 @@
 	}
 	
 	.up_form .quill-editor .ql-container {
-		height: 550px;
+		min-height: 550px;
 		overflow-y: auto;
 	}
 </style>

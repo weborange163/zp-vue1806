@@ -42,13 +42,14 @@
           </el-select>
         </el-col>
        <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >创建时间</span></el-col>
-        <el-col :span="6">
-           <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+        <el-col :span="7">
+           <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
 					</el-date-picker>
         </el-col>
-        <el-col :span="6" :offset="6">
+        <el-col :span="6" :offset="5">
             <el-input v-model="search_pra" placeholder="请输入内容" style="width:70%" size="mini"></el-input>
-            <el-button class="light_btn" @click.native.prevent="getAuditlist" size="mini">搜索</el-button>
+            <el-button class="light_btn" v-if="status" @click.native.prevent="getTabList" size="mini">搜索</el-button>
+            <el-button class="light_btn" v-else @click.native.prevent="getAuditlist" size="mini">搜索</el-button>
         </el-col>
       </el-row>
     </div>
@@ -64,7 +65,7 @@
                   新闻
                 </template>
               </el-table-column>
-              <el-table-column label="创建人" prop="author" width="80"></el-table-column>
+              <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="120">
                 <template slot-scope="scope">
                   <p v-if="scope.row.status=='1'" >待审核</p>
@@ -77,8 +78,8 @@
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                     <p v-if="scope.row.publish_source=='1'" >PC后台</p>
-                    <p v-if="scope.row.publish_source=='2'" >APP</p>
-                    <p v-if="scope.row.publish_source=='3'" >数据爬取</p>
+                    <p v-if="scope.row.publish_source=='3'" >APP</p>
+                    <p v-if="scope.row.publish_source=='2'" >数据爬取</p>
                 </template>
               </el-table-column>
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
@@ -94,8 +95,9 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1" :page-sizes="[10, 20, 30, 40]" 
-                :page-size="this.per_page1" layout="prev, pager, next" :total="this.total_pages1">
+            <el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1" 
+            :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper" 
+            :total="this.total_pages1" @size-change="handleSizeChange1">
             </el-pagination>
             </div>
           </div>
@@ -115,7 +117,7 @@
                   新闻
                 </template>
               </el-table-column>
-              <el-table-column label="创建人" prop="author" width="80"></el-table-column>
+              <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
                     <p v-if="scope.row.status=='1'" >待审核</p>
@@ -126,8 +128,8 @@
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                   <p v-if="scope.row.publish_source=='1'" >PC后台</p>
-                  <p v-if="scope.row.publish_source=='2'" >APP</p>
-                  <p v-if="scope.row.publish_source=='3'" >数据爬取</p>
+                  <p v-if="scope.row.publish_source=='3'" >APP</p>
+                  <p v-if="scope.row.publish_source=='2'" >数据爬取</p>
                 </template>
               </el-table-column>
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
@@ -140,7 +142,7 @@
             </el-table>
             <div style="margin-top:20px;">
             <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
-                :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
+                :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
             </el-pagination>
             </div>
           </div>
@@ -156,7 +158,7 @@
                   新闻
                 </template>
               </el-table-column>
-              <el-table-column label="创建人" prop="author" width="80"></el-table-column>
+              <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
                     <p v-if="scope.row.status=='1'" >待审核</p>
@@ -167,8 +169,8 @@
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                   <p v-if="scope.row.publish_source=='1'" >PC后台</p>
-                  <p v-if="scope.row.publish_source=='2'" >APP</p>
-                  <p v-if="scope.row.publish_source=='3'" >数据爬取</p>
+                  <p v-if="scope.row.publish_source=='3'" >APP</p>
+                  <p v-if="scope.row.publish_source=='2'" >数据爬取</p>
                 </template>
               </el-table-column>
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
@@ -180,8 +182,8 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange3" :current-page="currentPage3" :page-sizes="[10, 20, 30, 40]" 
-                :page-size="this.per_page3" layout="prev, pager, next" :total="this.total_pages3">
+            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+                :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
             </el-pagination>
             </div>
           </div>
@@ -197,7 +199,7 @@
                   新闻
                 </template>
               </el-table-column>
-              <el-table-column label="创建人" prop="author" width="80"></el-table-column>
+              <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
                     <p v-if="scope.row.status=='1'" >待审核</p>
@@ -208,8 +210,8 @@
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                   <p v-if="scope.row.publish_source=='1'" >PC后台</p>
-                  <p v-if="scope.row.publish_source=='2'" >APP</p>
-                  <p v-if="scope.row.publish_source=='3'" >数据爬取</p>
+                  <p v-if="scope.row.publish_source=='3'" >APP</p>
+                  <p v-if="scope.row.publish_source=='2'" >数据爬取</p>
                 </template>
               </el-table-column>
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
@@ -221,13 +223,13 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange4" :current-page="currentPage4" :page-sizes="[10, 20, 30, 40]" 
-                :page-size="this.per_page4" layout="prev, pager, next" :total="this.total_pages4">
+            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+                :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
             </el-pagination>
             </div>
           </div>
         </el-tab-pane>
-        <el-tab-pane label="审核失败" name="fifth">
+        <el-tab-pane label="审核未通过" name="fifth">
         	<div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -238,7 +240,7 @@
                   新闻
                 </template>
               </el-table-column>
-              <el-table-column label="创建人" prop="author" width="80"></el-table-column>
+              <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
                     <p v-if="scope.row.status=='1'" >待审核</p>
@@ -249,8 +251,8 @@
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                   <p v-if="scope.row.publish_source=='1'" >PC后台</p>
-                  <p v-if="scope.row.publish_source=='2'" >APP</p>
-                  <p v-if="scope.row.publish_source=='3'" >数据爬取</p>
+                  <p v-if="scope.row.publish_source=='2'" >数据爬取</p>
+                  <p v-if="scope.row.publish_source=='3'" >APP</p>
                 </template>
               </el-table-column>
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
@@ -263,8 +265,8 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange5" :current-page="currentPage5" :page-sizes="[10, 20, 30, 40]" 
-                :page-size="this.per_page5" layout="prev, pager, next" :total="this.total_pages5">
+            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+                :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
             </el-pagination>
             </div>
           </div>
@@ -282,26 +284,9 @@ export default {
       per_page1:10,
       currentPage1:1,
       total_pages1:0,
-     
       per_page2:10,
       currentPage2:1,
       total_pages2:0,
-     
-      
-      per_page3:10,
-      currentPage3:1,
-      total_pages3:0,
-    
-      
-      per_page4:10,
-      currentPage4:1,
-      total_pages4:0,
-     
-      
-      per_page5:10,
-      currentPage5:1,
-      total_pages5:0,
-      
        //弹框
       recommendRadio: '',
       dialogTableVisible: false,
@@ -319,28 +304,29 @@ export default {
       },
 			formLabelWidth: '120px',
       btnTable:btnTable,
-     options: [{
+      value: '',
+      options: [{
         value: '',
         label: '全部'
       },{
         value: '1',
         label: '后台发布'
       }, {
-        value: '2',
+        value: '3',
         label: 'App'
       }, {
-        value: '3',
+        value: '2',
         label: '数据爬取'
       }],
-    audit_no:[],
-    ids:[],
-    multipleSelection: [],
-    audit_all:[],
-    value: '',
-    timeVal:'',
-    activeName: 'first',
-    search_pra:'',
-    value6:'',
+      audit_no:[],
+      status:'',
+      ids:[],
+      multipleSelection: [],
+      audit_all:[],
+      timeVal:'',
+      activeName: 'first',
+      search_pra:'',
+      value6:'',
     }
   },
   created(){
@@ -377,21 +363,21 @@ export default {
 				}
 		},
 		//不通过
-			toAudits1(){
-					console.log(this.recoIndex)
-					var params = {
-						ids:this.ids.join(','),
-						tokenId: this.$store.state.user.tokenId,
-						status: '3',
-						checkReason:this.form.region,
-         		checkMessage:this.form.name
-					}
-					this.$post('news/check',params).then(res => {
-						console.log(res,res.code);
-						this.getAuditlist();
+    toAudits1(){
+      console.log(this.recoIndex)
+      var params = {
+        ids:this.ids.join(','),
+        tokenId: this.$store.state.user.tokenId,
+        status: '3',
+        checkReason:this.form.region,
+        checkMessage:this.form.name
+      }
+      this.$post('news/check',params).then(res => {
+        console.log(res,res.code);
+        this.getAuditlist();
 
-					})
-					this.dialogFormVisible = false;
+      })
+      this.dialogFormVisible = false;
 		},
   	//关闭不通过弹窗
   	handleClose2(done) {
@@ -442,24 +428,21 @@ export default {
 				})
     },
     //获取所有审核相关的新闻
-    getAuditlist(){
+    getAuditlist(params){
       this.loading = true;
-//    if(!params){
+      // if(!params){
         var params = {
-        tokenId:this.$store.state.user.tokenId,
-        queryType:'audit',
-        limit:this.per_page1,
-        offset:this.currentPage1,
-        timeType:'create',
-           publishSource:this.value,
-					simpleParameter:this.inputs,
-////					开始也就是逗号前面的
-					startTime:this.value6[0],
-////					结束也就是逗号后面的
-					endTime:this.value6[1],
-
+          tokenId:this.$store.state.user.tokenId,
+          queryType:'audit',
+          limit:this.per_page1,
+          offset:this.currentPage1,
+          timeType:'create',
+          publishSource:this.value,
+          simpleParameter:this.search_pra,
+          startTime:this.value6[0],
+          endTime:this.value6[1],
         }
-//    }
+      // }
       this.$post('news/list',params).then(res =>{
         this.loading = false;
         // console.log(res.data[0].rows)
@@ -467,58 +450,54 @@ export default {
         this.total_pages1 = res.data[0].total;
       })
     },
+    // tab切换获取相应的数据
+    getTabList(params){
+      // if(!params){
+        var params= {
+          tokenId:this.$store.state.user.tokenId,
+          limit:this.per_page2,
+          offset:this.currentPage2,
+          status:this.status,
+          timeType:'create',
+          publishSource:this.value,
+          simpleParameter:this.search_pra,
+          startTime:this.value6[0],
+          endTime:this.value6[1],
+        }
+      // }
+      // console.log(params);
+      this.$post('news/list',params).then(res =>{
+        this.loading = false;
+        // console.log(res.data[0].rows)
+        this.audit_no = res.data[0].rows;
+        this.total_pages2 = res.data[0].total;
+      })
+    },
     // 切换tab 
     handleClick(tab, event) {
+      this.currentPage1=1;
+      this.currentPage2=1;
+      this.search_pra='';
+      this.value6='';
+      this.value='';
       console.log(tab.name, event);
       if(tab.name == 'second'){
-        var params = {
-          tokenId:this.$store.state.user.tokenId,
-          status:'1',
-          limit:this.per_page2,
-          offset:this.currentPage2
-        }
-        this.$post('news/list',params).then(res =>{
-          this.audit_no = res.data[0].rows;
-          this.total_pages2 = res.data[0].total;
-        })
+        this.status='1';
+        this.getTabList();
 
       }else if(tab.name == 'third'){ 	
-        var params = {
-          tokenId:this.$store.state.user.tokenId,
-          limit:this.per_page3,
-          offset:this.currentPage3,
-          status:'2'
-        }
-        this.$post('/news/list',params).then(res =>{
-          console.log(res.data[0].rows)
-          this.audit_no	 = res.data[0].rows;
-          this.total_pages3 = res.data[0].total;
-        })
+        this.status='2';
+        this.getTabList();
       }else if(tab.name == 'fourth'){ 	
-        var params = {
-          tokenId:this.$store.state.user.tokenId,
-          limit:this.per_page4,
-          offset:this.currentPage4,
-          status:'4'
-        }
-        this.$post('news/list',params).then(res =>{
-          console.log(res.data[0].rows)
-          this.audit_no	 = res.data[0].rows;
-          this.total_pages4 = res.data[0].total;
-        })
+       this.status='4'
+       this.getTabList();
       }else if(tab.name == 'fifth'){ 	
-        var params = {
-          tokenId:this.$store.state.user.tokenId,
-          limit:this.per_page5,
-          offset:this.currentPage5,
-          status:'3'
-        }
-        this.$post('news/list',params).then(res =>{
-          console.log(res.data[0].rows)
-          this.audit_no	 = res.data[0].rows;
-          this.total_pages5 = res.data[0].total;
-        })
-			}
+        this.status='3';
+        this.getTabList();
+			}else if(tab.name=='first'){
+        this.status=''
+        this.getAuditlist();
+      }
     },
 //  全部
     handleCurrentChange1(val) {
@@ -528,27 +507,19 @@ export default {
     },
     //待审核
     handleCurrentChange2(val){
-    	this.currentPage2=val;
+      this.currentPage2=val;
       console.log(`当前页: ${val}`);
       this.getAuditlist();
     },
-    //审核中
-     handleCurrentChange3(val){
-    	this.currentPage3=val;
-      console.log(`当前页: ${val}`);
+    
+    handleSizeChange1(val){
+      this.per_page1 = val;
       this.getAuditlist();
     },
-    //审核通过
-     handleCurrentChange4(val){
-    	this.currentPage4=val;
-      console.log(`当前页: ${val}`);
-      this.getAuditlist();
-    },
-    //审核失败
-     handleCurrentChange5(val){
-    	this.currentPage5=val;
-      console.log(`当前页: ${val}`);
-      this.getAuditlist();
+    handleSizeChange2(val){
+      this.status='1'
+      this.per_page2 = val;
+      this.getTabList();
     },
     
   }

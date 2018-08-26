@@ -9,7 +9,7 @@ Vue.use(Router)
 const page = name => () => import('@/pages/' + name)
 
 export default new Router({
-  mode: 'history',
+  // mode: 'history',
   routes: [
     {
       path: '',
@@ -49,7 +49,7 @@ export default new Router({
         {path:'/rules3',name:'rules3',component: page('rules3')},
         {path:'/version',name:'version',component: page('version')},
         {path:'/version/list',name:'version-list',component: page('version-list')},
-         {path:'/version/details',name:'version-details',component: page('version-details')},
+         {path:'/version/detail',name:'version-detail',component: page('version-details')},
         {path:'/permissions',name:'permissions',component: page('permissions')},
         {path:'/accounts',name:'accounts',component: page('accounts')},
         {path:'/content-data',name:'content-data',component: page('content-data')},

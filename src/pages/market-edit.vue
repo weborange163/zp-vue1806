@@ -16,7 +16,7 @@
 		</div>
 		<div class="box">
 			<div class="text-right">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button>
 				<!--<el-button size="small" class="light_btn" @click="toAudit('form2')">仅保存</el-button>-->
 				<el-button size="small" class="light_btn" @click="toAudit('form2')">保存</el-button>
@@ -27,7 +27,15 @@
 						<el-input v-model="form2.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
-						<m-quill-editor ref="myQuillEditor" v-model="form2.content" :width="quill.width" :getContent="onEditorChange" :has-border="quill.border" :zIndex="quill.zIndex" :sync-output="quill.syncOutput" :theme="quill.theme" :disabled="quill.disabled" :fullscreen="quill.full" @upload="uploadImg" @blur="onEditorBlur($event)"></m-quill-editor>
+						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
+             :width="quill.width" :getContent="onEditorChange" 
+             :has-border="quill.border" :zIndex="quill.zIndex"
+             :sync-output="quill.syncOutput" 
+             :theme="quill.theme" 
+             :disabled="quill.disabled" 
+             :fullscreen="quill.full" 
+             @upload="uploadImg" @blur="onEditorBlur($event)">
+             </m-quill-editor>
 					</el-form-item>
 				</div>
 				<div style="width: 35%;float:left;padding:15px;">
@@ -83,7 +91,8 @@
 				quill: {
 					width: 420,
 					border: true,
-					height: 150,
+          height: 150,
+          zIndex:101,
 					content: 'wellcome ~',
 					syncOutput: true,
 					theme: 'snow', //bubble snow
@@ -198,7 +207,7 @@
 						var params = {
 							id: this.$route.params.id,
 							tokenId: this.$store.state.user.tokenId,
-							status: this.status,
+							status: '1',
 							title: this.form2.title,
 							content: this.form2.content,
 							classifyType: this.value,
@@ -262,7 +271,15 @@
 			watch: {
 				// 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
 				'$route': 'getParams'
-			}
+			},
+				 fanhui(){
+        this.$confirm('返回编辑内容将重置是否继续？')
+          .then(_ => {
+            this.$router.back();
+            done();
+          })
+          .catch(_ => {});
+      }
 		}
 	};
 </script>

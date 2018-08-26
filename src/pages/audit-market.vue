@@ -292,7 +292,11 @@ export default {
       value6:'',
       inputs:'',
       aa:'',
-      options: [{
+      options: [
+      {
+					value1: '',
+					label: '全部'
+				},{
       value: '1',
       label: '后台发布'
     }, {
@@ -358,14 +362,25 @@ export default {
 				
 					console.log(this.recoIndex)
 					var params = {
-						id:this.ids.join(','),
+						ids:this.ids.join(','),
 						tokenId: this.$store.state.user.tokenId,
 						status: '5',
 					}
-					this.$post('industry/save',params).then(res => {
+					this.$post('industry/checkByIds',params).then(res => {
 						console.log(res,res.code);
-						this.getAuditAll();
-
+						var params = {
+						tokenId:this.$store.state.user.tokenId,
+						limit:this.per_page2,
+						offset:this.currentPage2,
+						status:'2'
+					}
+			this.$post('/industry/listChick',params).then(res =>{
+				
+        console.log(res.data[0].rows)
+        this.audit_no	 = res.data[0].rows;
+        this.total_pages2 = res.data[0].total;
+      })
+						
 					})
 					// this.tableData[this.recoIndex].top_flag = "1";
 					this.dialogVisible1 = false;
@@ -378,15 +393,26 @@ export default {
 			toAudits1(){
 					console.log(this.recoIndex)
 					var params = {
-						id:this.ids.join(','),
+						ids:this.ids.join(','),
 						tokenId: this.$store.state.user.tokenId,
-						status: '5',
+						status: '4',
 						checkCause:this.form.region,
          		checkMessage:this.form.name
 					}
-					this.$post('industry/save',params).then(res => {
+					this.$post('industry/checkByIds',params).then(res => {
 						console.log(res,res.code);
-						this.getAuditAll();
+						var params = {
+						tokenId:this.$store.state.user.tokenId,
+						limit:this.per_page2,
+						offset:this.currentPage2,
+						status:'2'
+					}
+			this.$post('/industry/listChick',params).then(res =>{
+				
+        console.log(res.data[0].rows)
+        this.audit_no	 = res.data[0].rows;
+        this.total_pages2 = res.data[0].total;
+      })
 
 					})
 					this.dialogFormVisible = false;

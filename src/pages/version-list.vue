@@ -1,13 +1,15 @@
 <template>
 	<div class="version-list">
 		<el-breadcrumb separator-class="el-icon-arrow-right" style="margin-top: 8px;margin-bottom: 8px;margin-left: 22px;">
-			<el-breadcrumb-item :to="{ path: '/' }">系统管理</el-breadcrumb-item>
+      <el-breadcrumb-item :to="{ path: '/' }">系统管理</el-breadcrumb-item>
 			<el-breadcrumb-item>版本管理</el-breadcrumb-item>
 			<el-breadcrumb-item>应用详情</el-breadcrumb-item>
 		</el-breadcrumb>
 		<div style="margin-left: 22px;margin-right: 22px;margin-bottom: 20px;overflow: hidden;background:rgba(255,255,255,1);border-radius:4px;box-shadow:0px 0px 0px rgba(54,88,167,0.07);">
 			<div style="margin-top: 20px;margin-right: 88px; text-align: right;">
-        <el-button size="small" class="light_btn router_btn"><router-link :to="{name:'version'}">返回</router-link></el-button>
+        <router-link :to="{name:'version'}">
+          <el-button size="small" class="light_btn router_btn">返回</el-button>
+        </router-link>
 				<el-button size="small" class="light_btn" v-if="bag.platformType=='1'" @click="newDialog = true;isEdit = false;">上传插件</el-button>
 			</div>
 
@@ -140,8 +142,8 @@
 			<p class="title-p" v-if="bag.platformType == '1'">插件信息</p>
 			<el-table :data="plugData" :row-class-name="miniTable" :header-row-class-name="miniTable" border v-if="bag.platformType == '1'">
         <el-table-column label="序号" type="index" width='50'></el-table-column>
-				<el-table-column prop="version_code" label="版本号" width='120'></el-table-column>
-				<el-table-column prop="plugin_name" label="插件名称" width='160'></el-table-column>
+				<el-table-column prop="version_code" label="版本号" width='80'></el-table-column>
+				<el-table-column prop="plugin_name" label="插件名称" width='80'></el-table-column>
 				<el-table-column prop="download_url" label="下载地址"></el-table-column>
 				<el-table-column prop="file_size" label="插件大小" width='80'></el-table-column>
 				<el-table-column prop="update_time" label="修改时间" width='160'></el-table-column>
@@ -152,9 +154,10 @@
             <p v-if="scope.row.status=='3'" class="yyx">已下线</p>
           </template>
         </el-table-column>
-				<el-table-column label="操作" width="200" fixed="right">
+				<el-table-column label="操作" width="240" fixed="right">
 					<template slot-scope="scope">
-						<router-link :to="{name:'version-details',params:{id:scope.row.id}}">
+            <el-button type="text" @click="downPlug(scope.row.download_url)">下载</el-button>
+						<router-link :to="{name:'version-detail',params:{id:scope.row.id}}">
 							<el-button type="text">查看</el-button>
 						</router-link>
 						<el-button type="text">发布</el-button>
@@ -197,6 +200,9 @@
           <el-form-item label="code版本" prop="plugcode">
             <el-input size="mini" v-model="plugForm.plugcode" style="width:70%;"></el-input>
           </el-form-item>
+          <el-form-item label="插件包名" prop="plugPackageName">
+            <el-input size="mini" v-model="plugForm.plugPackageName" style="width:70%;"></el-input>
+          </el-form-item>
           <el-form-item label="插件名称" prop="plugname">
             <el-input size="mini" v-model="plugForm.plugname" style="width:70%;"></el-input>
           </el-form-item>
@@ -229,6 +235,7 @@
 	</div>
 </template>
 <script>
+  import { getBaceUrl } from '@/utils/auth'
 	export default {
 		data() {
       var valiIcon = (rule, value, callback) => { // 图片验证
@@ -269,8 +276,11 @@
             {pattern: /^[0-9]*$/,message:'code版本只能输入数字', trigger: 'blur'}
           ],
           plugname:[
-            {required: true, message: '请输入应用报名', trigger: 'blur' },
+            {required: true, message: '请输入插件名称', trigger: 'blur' },
             // {pattern:/^[a-zA-Z0-9.]+$/,message:'只允许输入英文数字和.', trigger: 'blur'}
+          ],
+          plugPackageName:[
+            {required: true, message: '请输入插件包名', trigger: 'blur' },
           ],
           desc:[
             {required: true, message: '请输入code版本', trigger: 'blur' },
@@ -278,9 +288,12 @@
         },
         app_id:'',
         isEdit:false,
+        editId:'',
+        baceUrl:''
 			}
     },
      created() {
+      this.baceUrl = getBaceUrl();
       this.getParams();
       this.getInfo();
       this.getPlugList();
@@ -297,6 +310,21 @@
       },
       miniTable(row){
         return 'miniTable'
+      },
+      downPlug(url){
+        this.$confirm('确定要下载此插件包吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+          // window.location.href= this.baceUrl + url;
+          window.location.href= url;
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消下载'
+          });          
+        });
       },
       onOff(status,id){
         var text = '';
@@ -375,13 +403,18 @@
         this.fileList.push({url:row.download_url,name:row.file_name});
         this.plugForm.num = row.version_name;
         this.plugForm.plugcode = row.version_code;
-        this.plugForm.plugname = row.package_name;
+        this.plugForm.plugname = row.plugin_name;
         this.plugForm.desc = row.upgrade_content;
+        this.plugForm.plugPackageName = row.package_name;
         this.plugForm.radio = row.upgrade_mode;
+        this.plugForm.id = row.id;
+        // this.plugForm.appId = row.app_id;
         this.isEdit=true;
-        this.app_id = row.appid;
+        this.editId = row.id;
+        // this.app_id = row.id;
         this.hasFmt = true;
-
+        console.log(this.fileList);
+        console.log(this.plugForm.file);
       },
       beforeClose(){
         this.$confirm('关闭后输入的信息将重置!')
@@ -434,18 +467,21 @@
         this.$refs.plugForm.validate((valid) => {
           if(valid){
             this.loading2 = true;
+            // console.log(this.idDetail,this.plugForm.appId);
             let param = new FormData();
             param.append('tokenId',this.$store.state.user.tokenId);
-            param.append('appId',this.idDetail);  
+            param.append('appId',this.idDetail);
             param.append('versionName',this.plugForm.num);
             param.append('versionCode',this.plugForm.plugcode);
             param.append('upgradeContent',this.plugForm.desc);
             param.append('upgradeMode',this.plugForm.radio);
             param.append('newsFile',this.plugForm.file,this.plugForm.filename);
+            param.append('packageName',this.plugForm.plugPackageName);
             param.append('pluginName',this.plugForm.plugname);
-            param.append('status','1'); // 1新建,2上线,3下线
+            // param.append('status','1'); // 1新建,2上线,3下线
             if(this.isEdit){
-              param.append('appId',this.app_id);
+              console.log(1111);
+              param.append('id',this.editId);
             }
             console.log(this.idDetail)
             this.$post('pluginUpgrade/save',param).then(res =>{
@@ -502,7 +538,8 @@
       this.$refs['icon'].clearValidate(); // 图片验证
       this.plugForm.filename = file.name;
       this.plugForm.file = file.raw;
-      console.log(file.raw)
+      console.log(file.name);
+      console.log(file.raw);
       if(fileList.length>0){
         this.hasFmt = true;
       }

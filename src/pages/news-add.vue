@@ -15,8 +15,8 @@
 		</div>
 		
 		<div class="box" >
-			<div class="text-right">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+			<div class="text-right marR100">
+				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
         <el-button size="small" class="light_btn" @click="showNews = true;" >预览</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1','1')">保存并提交审核</el-button>
@@ -24,7 +24,7 @@
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
-						<el-input v-model="form1.title" placeholder="请输入标题"></el-input>
+						<el-input type="textarea" autosize v-model="form1.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
 						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
@@ -38,46 +38,57 @@
 						></m-quill-editor>
 					</el-form-item>
 				</div>
-				<div style="width: 35%;float:left;padding:15px;">
+				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
 					<el-form-item label="发布到:">
 						<el-input :disabled="true" v-model="form1.column"></el-input>
 					</el-form-item>
-					<el-form-item label="来源:" prop="sourceType">
-						<el-radio-group v-model="form1.sourceType" @change="test()">
-							<el-radio label="1" >原创</el-radio>
-							<el-radio label="2" >转载</el-radio>
-						</el-radio-group>
-						<el-select v-if="form1.sourceType == 2" v-model="form1.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
-							<el-option
-								v-for="item in cities"
-								:key="item.id"
-								:label="item.name"
-								:value="item.id">
-							</el-option>
-						</el-select>
-					</el-form-item>
+          <el-row>
+            <el-col :span="14">
+              <el-form-item label="来源:" prop="sourceType">
+                <el-radio-group v-model="form1.sourceType" @change="test()">
+                  <el-radio label="1" >原创</el-radio>
+                  <el-radio label="2" >转载</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+            <el-col :span="10">
+              <el-form-item v-if="form1.sourceType == 2" prop="source" class="source_style">
+                <el-select v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+                  <el-option
+                    v-for="item in cities"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author"></el-input>
 					</el-form-item>
-					<el-form-item label="发布账号:" prop="userId" label-width="82">
+					<el-form-item class="fabuStyle" label="发布账号:" prop="userId" label-width="82">
 						<el-select v-model="form1.userId" placeholder="请选择发布账号">
-							<el-option label="小号1" value="shanghai"></el-option>
-							<el-option label="小号2" value="beijing"></el-option>
+							<el-option 
+                v-for="item in accounts"
+                :key="item.userId"
+                :label="item.nickName"
+                :value="item.userId"
+              ></el-option>
 						</el-select>
 					</el-form-item>
 					<el-form-item label="附加选项:" prop="imgType" label-width="82">
-							<el-radio-group v-model="form1.imgType">
+							<el-radio-group v-model="form1.imgType" @change="radioChange">
 								<el-radio label="1">上传缩略图</el-radio>
 								<el-radio label="2">提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item label="封面图:" prop="" v-if="form1.imgType == 1" required>
+					<el-form-item label="封面图:" prop="icon" ref="icon" v-show="form1.imgType == '1'">
 						<el-upload
-							:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
-							ref="upload" name="newsFile"
-							list-type="picture-card"
-							:auto-upload="false"
-							:on-change="fileChange"
+							action="" :multiple="false" :limit='1'
+							ref="upload" name="newsFile" :file-list="fileList"
+							list-type="picture-card" :auto-upload="false"
+							:on-change="fileChange" :on-exceed="handleExceed"
 							:on-preview="handlePictureCardPreview"
 							:on-remove="handleRemove">
 							<i class="el-icon-plus"></i>
@@ -86,12 +97,12 @@
 							<img width="100%" :src="dialogImageUrl" alt="">
 						</el-dialog>
 					</el-form-item>
-					<el-form-item label="Tag标签:">
-						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form1.tagLabels"></el-input>
+					<el-form-item label="Tag标签:" prop="tagLabels">
+						<el-input placeholder="用'，'隔开，单个标签小于12字节" v-model="form1.tagLabels"></el-input>
 					</el-form-item>
-					<el-form-item label="关键词:">
+					<!-- <el-form-item label="关键词:">
 						<el-input placeholder="用英文 “ , ” 隔开" v-model="form1.keyWords"></el-input>
-					</el-form-item>
+					</el-form-item> -->
 				</div>
 			</el-form>
 		</div>
@@ -104,16 +115,40 @@ import axios from 'axios'
 	export default{
 		components: {
 		//	MQuillEditor
-		},
+    },
 		data(){
+      var valiIcon = (rule, value, callback) => { // 图片验证
+        if (!this.hasFmt) {
+          callback(new Error('请上传封面图'));
+        } else {
+          callback();
+        }
+      };
+      var valiTag=(rule,value,callback) => {
+        if (value === '') {
+          callback();
+        } else {
+          var v = value.replace(/，/ig,',');
+          var arr = v.split(',');
+          arr.map(item => {
+            if(item.replace(/[^\x00-\xff]/g,"aa").length>12){
+              callback(new Error('单个tag标签不能超过12字节!'))
+            }else{
+              callback();
+            }
+          })
+        }
+      }
 			return{
+        accounts:[],
+        fileList:[],
         showNews:false,
 				pkg:'',
       quill: {
         width: 420,
 				border: true,
 				height:150,
-				zIndex:1,
+				zIndex:101,
         content: 'wellcome ~',
         syncOutput: true,
         theme: 'snow', //bubble snow
@@ -146,9 +181,12 @@ import axios from 'axios'
 				cities:[],
 				hasFmt:false,
 				rules1: {
+          icon:[
+            {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
+          ],
           title: [
             { required: true, message: '请输入标题', trigger: 'blur' },
-            { min: 3, max: 45, message: '长度在 3 到 45 个字符', trigger: 'blur' }
+            { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
           ],
           content: [
             { required: true, message: '请输入内容', trigger: 'change' }
@@ -156,20 +194,23 @@ import axios from 'axios'
           sourceType: [
             { required: true, message: '请选择来源', trigger: 'change'}
           ],
+          source:[
+            {required: true, message: '请选择转载来源', trigger: 'change' }
+          ],
           userId: [
             {required: true, message: '请选择发布账号', trigger: 'change' }
           ],
           imgType: [
-            {required: true, message: '请选择图片', trigger: 'change' }
+            {required: true, message: '请选择封面图类型', trigger: 'change' }
 					],
 					coverImg:[
 						{required: true, message: '请上传图片', trigger: 'change' }
 					],
-          source: [
-            { required: true, message: '请选择活动资源', trigger: 'change' }
-          ],
           desc: [
             { required: true, message: '请填写活动形式', trigger: 'blur' }
+          ],
+          tagLabels:[
+            { validator: valiTag, trigger: 'blur' }
           ]
         }
 			}
@@ -182,9 +223,21 @@ import axios from 'axios'
 			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
     		console.log(res.data)
     		this.cities = res.data
-    	})
+      });
+      this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
+        console.log(res)
+        this.accounts = res.data;
+      })
 		},
 		methods:{
+      radioChange(val){
+        console.log(val)
+        if(val == '2'){
+          this.hasFmt = true;
+        }else{
+          this.hasFmt=false;
+        }
+      },
 			// 富文本图片上传
 			uploadImg(file,insert){
 				console.log(file)
@@ -218,73 +271,47 @@ import axios from 'axios'
 			// 新建新闻
 			creatNews(formName,status){
 				this.$refs[formName].validate((valid) => {
+          console.log(valid)
           if (valid) {
 						// console.log(valid)
-						if(this.form1.sourceType == '2' && !this.form1.source){ // 选择转载时候,需要选择转载来源 (待)
+						/* if(this.form1.sourceType == '2' && !this.form1.source){ // 选择转载时候,需要选择转载来源 (待)
 							this.$message.error('请选择转载来源!');
 							return;
-						}
+						} */
 						if(this.form1.imgType == 2){	// 封面图的类型 
-							var reg = /src=/ig;
-							if(!!this.form1.content.match(reg)){
-								var params ={
-									tokenId:this.$store.state.user.tokenId,
-									title: this.form1.title,
-									content: this.form1.content,
-									sourceType:this.form1.sourceType,
-									source:this.form1.source,
-									author:this.form1.author,
-									userId:this.form1.userId,
-									imgType:this.form1.imgType,
-									tagLabels:this.form1.tagLabels,
-									keyWords:this.form1.keyWords,
-									status:status,
-									publishSource:"1"
-								}
-								console.log(params)
-								this.$post('news/add',params).then(res =>{
-									if(res.code == 0){
-										setTimeout(() => {
-											this.$router.push({name: 'news'});
-										}, 1000);
-									}
-								})
-							}else{
-								 this.$message.error('内容里没有图片!');
-							}
-						}else{
-							if(!this.hasFmt){
-								this.$message.error('请上传封面图!');
-								return;
-							}
-							this.uploadData={
-								tokenId:this.$store.state.user.tokenId,
-								newsFile:this.form1.newsFile,
-								status:status,
-								title: this.form1.title,
-								content: this.form1.content,
-								sourceType:this.form1.sourceType,
-								source:this.form1.source,
-								author:this.form1.author,
-								userId:this.form1.userId,
-								imgType:this.form1.imgType,
-								tagLabels:this.form1.tagLabels,
-								keyWords:this.form1.keyWords,
-								publishSource:"1"
-							}
-							// this.uploadData = params;
-							console.log(this.uploadData)
-							setTimeout(() => {
-								this.$refs.upload.submit();
-								this.$message({
-									type: 'success',
-									message: '添加成功!'
-								});
-								setTimeout(() => {
-									this.$router.push({name: 'news'});
-								}, 1000);
-							}, 0);
+              var reg = /src=/ig;
+							if(!this.form1.content.match(reg)){
+                 this.$message.error('内容里没有图片!');
+                 return;
+              }
 						}
+            let param = new FormData();
+            param.append('tokenId',this.$store.state.user.tokenId);
+            param.append('title',this.form1.title);  
+            param.append('content',this.form1.content);
+            param.append('sourceType',this.form1.sourceType);
+            param.append('author',this.form1.author);
+            param.append('userId',this.form1.userId);
+            param.append('imgType',this.form1.imgType);
+            param.append('tagLabels',this.form1.tagLabels);
+            param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
+            param.append('publishSource','1');
+            param.append('status',status);
+            if(this.form1.imgType == '1'){
+              param.append('newsFile',this.form1.newsFile,this.form1.filename);
+            }
+            if(this.form1.sourceType=='2'){
+              param.append('source',this.form1.source)
+            }
+            console.log(this.form1.newsFile)
+            this.$post('news/add',param).then(res =>{
+                if(res.code == 0){
+                  setTimeout(() => {
+                    this.$router.push({name: 'news'});
+                  }, 1000);
+                }
+              })
+						
           } else {
             console.log('error submit!!');
             return false;
@@ -294,11 +321,13 @@ import axios from 'axios'
 			},
 			test(){
 				console.log(this.form1.source);
-			},
+      },
 			//图片的验证
 			fileChange(file,fileList){
-				this.form1.newsFile = file.raw;
-				console.log(fileList.length)
+        this.$refs['icon'].clearValidate(); // 图片验证
+        this.form1.filename = file.name;
+        this.form1.newsFile = file.raw;
+				// console.log(file)
 				if(fileList.length>0){
 					this.hasFmt = true;
 				}
@@ -324,10 +353,21 @@ import axios from 'axios'
 					this.hasFmt =false;
 				}
       },
+      handleExceed(files, fileList){
+        this.$message.warning('当前限制选择 1 个文件');
+      },
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
-			}
+      },
+      fanhui(){
+        this.$confirm('返回已编辑内容将重置是否继续？')
+          .then(_ => {
+            this.$router.back();
+            done();
+          })
+          .catch(_ => {});
+      }
 		}
 	}
 </script>
@@ -351,7 +391,13 @@ import axios from 'axios'
 		max-width: 300px;
 	}
 	.up_form .quill-editor .ql-container{
-		height: 550px;
+		min-height: 550px;
 		overflow-y: auto;
 	}
+  .source_style .el-form-item__error{
+    left: -50px;
+  }
+  .fabuStyle .el-form-item__error{
+    left: 80px;
+  }
 </style>

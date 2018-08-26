@@ -4,6 +4,8 @@
 			<el-row>
 				<el-col :span="5">
 					<el-select size="mini" v-model="value" name="classifyType" placeholder="分类" style="width:49%">
+						<el-option label="全部" value=""></el-option>
+						</el-option>
 						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
 						</el-option>
 					</el-select>
@@ -23,7 +25,7 @@
 					</el-date-picker>
 				</el-col>
 				<el-col :span="6" :offset="4">
-					<el-input size="mini" v-model="inputs" placeholder="标题、发布账号、文章ID" style="width:70%;margin-right:5%;"></el-input>
+					<el-input size="mini" v-model="inputs" placeholder="标题、创建人、会员id、文章id" style="width:70%;margin-right:5%;"></el-input>
 					<el-button size="mini" class="light_btn" style="width:20%;" @click.native.prevent="getMarket()">搜索</el-button>
 				</el-col>
 			</el-row>
@@ -99,6 +101,9 @@
 									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
 										<el-button type="text" v-if="scope.row.status!='5'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
+									
+									
+									
 
 									<el-button type="text" v-if="scope.row.top_flag=='1'" :disabled="true" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button type="text" v-else :disabled="false" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
@@ -107,10 +112,17 @@
 							</el-table-column>
 						</el-table>
 					</div>
+					
 					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage1" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="prev, pager, next" :total="this.total_pages1">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage1"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="this.per_page1" :total="this.total_pages1">
 						</el-pagination>
 					</div>
+					<!--<div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage1" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="prev, pager, next" :total="this.total_pages1">
+						</el-pagination>
+					</div>-->
 				</el-tab-pane>
 				<el-tab-pane label="新建" name="second">
 					<div class="tab2">
@@ -125,7 +137,7 @@
 							</el-table-column>
 							<el-table-column prop="title" label="标题">
 							</el-table-column>
-							<el-table-column prop="author" label="创建人" width="100">
+							<el-table-column prop="create_user_id" label="创建人" width="100">
 							</el-table-column>
 							<el-table-column label="状态" width="50">
 								<template slot-scope="scope">
@@ -144,19 +156,36 @@
 							<el-table-column label="文章ID" prop="id"></el-table-column>
 							<el-table-column label="操作" width="300" fixed="right">
 								<template slot-scope="scope">
-									<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
-									<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
+									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
+										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
+									
+									<!--<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>-->
+									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
+										<el-button type="text" v-if="scope.row.status!='5'"><i class="iconfont icon-edit"></i></el-button>
+									</router-link>
+									
+									<!--<el-button type="text"><i class="iconfont icon-edit"></i></el-button>-->
 									<el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button type="text" @click.native.prevent="cancelUp2(scope.$index, scope.row)">提交审核</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
 					</div>
-
+					
+					
 					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="this.per_page2" :total="this.total_pages1">
 						</el-pagination>
 					</div>
+					
+
+					<!--<div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
+						</el-pagination>
+					</div>-->
 
 				</el-tab-pane>
 			</el-tabs>
@@ -243,8 +272,8 @@
 				currentPage1: 1, // 页面默认展示的当前页码
 				currentPage2: 1,
 				total_pages2: 0,
-				per_page1: 5,
-				per_page2: 5,
+				per_page1: 10,
+				per_page2: 10,
 				total_pages1: 0,
 				classifyType: '',
 				upData: [{
@@ -282,7 +311,12 @@
 					value: '选项6',
 					label: '已下线'
 				}],
-				optionss: [{
+				optionss: [
+					 {
+					value1: '',
+					label: '全部'
+				}
+				,{
 					value1: '3',
 					label: 'APP'
 				}, {
@@ -314,6 +348,7 @@
 				topFlag: '',
 				timeStart: '',
 				timeEnd: '',
+				ids:[],
 			}
 		},
 		computed: {
@@ -365,6 +400,19 @@
 					this.upData = res.data;
 				})
 			},
+			//新闻预览
+//			newsShow(row){
+//				console.log(row.id);
+//				var params = {
+//					tokenId:this.$store.state.user.tokenId,
+//					id:row.id
+//				}
+//				this.$get('news/show',params).then(res =>{
+//					
+//					console.log(res)
+//				})
+//			},
+			
 			//提交置顶排序(弹框点击发布)
 			toPublish() {
 				// console.log(this.upData)
@@ -389,6 +437,7 @@
 				this.getMarket()
 				//				alert(111)
 			},
+			
 
 			//列表
 			getMarket() {
@@ -441,10 +490,7 @@
 			btnTable(row) {
 				return 'btnTable'
 			},
-			handleSelectionChange(val) {
-				this.multipleSelection = val;
-				console.log(this.multipleSelection)
-			},
+			
 			handleClick(tab, event) {
 				console.log(tab, event);
 				if(tab.name == 'second') {
@@ -539,7 +585,7 @@
 						id: rows.id,
 						status: '6'
 					}
-					this.$post('/industry/save', params).then(res => {
+					this.$post('/industry/onAndOffLine', params).then(res => {
 						// console.log(res)
 						this.$message({
 							type: 'success',
@@ -566,7 +612,7 @@
 						id: rows.id,
 						status: '5'
 					}
-					this.$post('/industry/save', params).then(res => {
+					this.$post('/industry/onAndOffLine', params).then(res => {
 						// console.log(res)
 						this.$message({
 							type: 'success',
@@ -721,6 +767,14 @@
 				});
 
 			},
+			handleSelectionChange(val) {
+				this.multipleSelection = val;
+				console.log(this.multipleSelection);
+				this.ids = [];
+				this.multipleSelection.map(item => {
+					this.ids.push(item.id);
+				})
+			},
 
 			// 批量提交审核
 			toAudits() {
@@ -738,10 +792,11 @@
 				}).then(() => {
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
-						ids: this.ids.join(',')
+						ids: this.ids.join(','),
+						 status:'2',
 					}
 
-					this.$post('news/batchWaitCheck', params).then(res => {
+					this.$post('/industry/toCheckByIds', params).then(res => {
 						console.log(res)
 						this.creatList();
 						this.$message({
@@ -757,6 +812,7 @@
 				});
 
 			},
+		
 		}
 	}
 </script>
