@@ -16,9 +16,9 @@
     <m-nav-item padding="0 20px 0 0">
       <i class="iconfont icon-personal" style="font-size: 20px;vertical-align: middle;"></i>&nbsp;<span v-if="nickname">{{nickname}}</span>
     </m-nav-item>
-    <m-nav-item padding="0 20px 0 0">
+    <!-- <m-nav-item padding="0 20px 0 0">
       <i class="iconfont icon-lock1" style="font-size: 20px;vertical-align: middle;"></i>&nbsp;<span>修改密码</span>
-    </m-nav-item>
+    </m-nav-item> -->
      <m-nav-item padding="0">
       <div @click="logout()"><i class="iconfont icon-logout" style="font-size: 18px;vertical-align: middle;"></i>&nbsp;<span>退出</span></div>
     </m-nav-item>

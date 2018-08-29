@@ -1,6 +1,8 @@
 <template>
 	<div class="big">
-		<p id="title-1"><a>{{nickname}}，您好！</a><span>上次登录时间：2018.04.25   12:30</span></p>
+		<p id="title-1"><a>{{nickname}}，您好！</a>
+      <!-- <span>上次登录时间：2018.04.25   12:30</span> -->
+    </p>
 		<div class="main">
 			<div class="main-1">
 				<img class="img-1" src="../assets/img/y1.png" />
@@ -53,11 +55,11 @@
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
-						<dd>1200</dd>
+						<dd></dd>
 					</dl>
 					<dl class="dl2">
 						<dt>今日</dt>
-						<dd>1200</dd>
+						<dd></dd>
 					</dl>
 					<p class="gap_vertical"></p>
 				</div>
@@ -68,11 +70,11 @@
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
-						<dd>1200</dd>
+						<dd></dd>
 					</dl>
 					<dl class="dl2">
 						<dt>今日</dt>
-						<dd>1200</dd>
+						<dd></dd>
 					</dl>
 					<p class="gap_vertical"></p>
 				</div>
@@ -83,11 +85,11 @@
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
-						<dd>1200</dd>
+						<dd></dd>
 					</dl>
 					<dl class="dl2">
 						<dt>今日</dt>
-						<dd>1200</dd>
+						<dd></dd>
 					</dl>
 					<p class="gap_vertical"></p>
 				</div>

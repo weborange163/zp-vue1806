@@ -3,7 +3,7 @@
   <div class="login-box">
     <form action="" class="login-form">
       <p class="log_title">登录 <span>SING IN</span></p>
-      <div class="m-list-group">
+      <div class="m-list-group" style="margin-top:50px">
         <div class="m-list-group-item">
           <i class="iconfont icon-user"></i>
           <!-- <i class="fa fa-user" aria-hidden="true"></i> -->
@@ -13,10 +13,10 @@
           <i class="iconfont icon-lock"></i>
           <input type="password" placeholder="Password" class="m-input" v-model="password">
         </div>
-        <div class="m-list-group-item">
+        <!-- <div class="m-list-group-item">
           <i class="iconfont icon-key"></i>
           <input type="text" placeholder="Password" class="m-input" v-model="vercode">
-        </div>
+        </div> -->
       </div>
       
       <button class="m-btn sub select-none" @click.prevent="handleLogin" v-loading="isLoging">登录</button>
@@ -38,9 +38,9 @@ export default {
   name: 'login',
   data () {
     return {
-      username: 'zpkj',
-      password: '111111',
-      vercode:'1234',
+      username: '',
+      password: '',
+      // vercode:'1234',
       isLoging: false,
       author: window.APP_INFO.author,
       version: window.APP_INFO.version,
@@ -74,6 +74,8 @@ export default {
           }).catch(_ => {
             this.$message.success('登录异常')
           })
+        }else{
+           this.$message.error('用户名或密码错误')
         }
     	});
       

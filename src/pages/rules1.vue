@@ -179,8 +179,8 @@ export default {
       this.$refs.classForm.validate((valid) => {
         if(valid){
           let param = new FormData();
-          param.append('newsFile',this.classForm.file,this.classForm.filename);
           param.append('tokenId',this.$store.state.user.tokenId);
+          param.append('newsFile',this.classForm.file,this.classForm.filename);
           param.append('name',this.classForm.title);
           param.append('status',this.classForm.radio);
           if(this.isEdit){
@@ -201,7 +201,11 @@ export default {
               setTimeout(() => {
                 this.getList();
               }, 500);
-              
+            }else{
+              this.$message({
+                type: 'warning',
+                message: res.msg?res.msg:'出错了'
+              });
             }
           })
         }
@@ -229,6 +233,11 @@ export default {
             setTimeout(() => {
               this.getList();
             }, 1000);
+          }else if(res.code == '1'){
+            this.$message({
+              type: 'error',
+              message: res.msg
+            });
           }else{
             this.$message({
               type: 'info',

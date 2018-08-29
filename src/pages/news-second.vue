@@ -3,24 +3,25 @@
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
-				<el-breadcrumb-item>新闻信息</el-breadcrumb-item>
+				<el-breadcrumb-item>新闻审核</el-breadcrumb-item>
 				<el-breadcrumb-item>审核新闻资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		<el-dialog title="审核页面" :visible.sync="dialogFormVisible" width="30%">
-			<el-form :model="form" label-width="80px">
-				<el-form-item label="审核原因" :label-width="formLabelWidth">
-					<el-select size="mini" v-model="form.region" placeholder="请选择区域" style="width:100%">
-						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
+			<el-form :model="form" label-width="80px" :rules="rules">
+				<el-form-item label="审核原因" prop="region">
+					<el-select size="mini" v-model="form.region" placeholder="请选择不通过的原因" style="width:100%" @change="selectChange">
 						<el-option label="您发布的内容排版、错字过于混乱" value="您发布的内容排版、错字过于混乱"></el-option>
+						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
 						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
 						<el-option label="您发布的内容不符合栏目属性" value="您发布的内容不符合栏目属性"></el-option>
+            <el-option label="其他" value="其他"></el-option>
 					</el-select>
 				</el-form-item>
-				<el-form-item label="审核信息" :label-width="formLabelWidth">
-					<el-input size="mini" type="textarea" v-model="form.name" auto-complete="off"></el-input>
+				<el-form-item label="审核信息">
+					<el-input size="mini" type="textarea" v-model="form.name" auto-complete="off" :disabled="qita"
+          placeholder="审核原因选择其他,可以填写审核信息"></el-input>
 				</el-form-item>
-
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button size="mini" @click="dialogFormVisible = false">取 消</el-button>
@@ -37,10 +38,10 @@
 			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title">
-						<el-input :disabled="true" v-model="form1.title" placeholder="请输入标题"></el-input>
+						<el-input :disabled="true" type="textarea" autosize v-model="form1.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
-						<m-quill-editor ref="myQuillEditor" v-model="form1.content" :width="quill.width" :getContent="onEditorChange" :has-border="quill.border" :zIndex="quill.zIndex" :sync-output="quill.syncOutput" :theme="quill.theme" :disabled="quill.disabled" :fullscreen="quill.full" @upload="uploadImg" @blur="onEditorBlur($event)"></m-quill-editor>
+						<div id="content" class="ql-editor" v-html="form1.content"></div>
 					</el-form-item>
 				</div>
 				<div style="width: 35%;float:left;padding:15px;">
@@ -70,6 +71,9 @@
               ></el-option>
 						</el-select>
 					</el-form-item>
+          <el-form-item v-else label="发布账号:" required>
+            <el-input size="mini" disabled v-model="form1.createUser"></el-input>
+          </el-form-item>
 					<el-form-item label="附加选项:" prop="imgType" label-width="82">
 						<el-radio-group :disabled="true" v-model="form1.imgType">
 							<el-radio label="1">上传缩略图</el-radio>
@@ -77,14 +81,87 @@
 						</el-radio-group>
 					</el-form-item>
 					<el-form-item label="封面图" required v-if="form1.imgType == 1">
-						<img class="imgs" :src="imgFullSrc" alt="封面图展示">
+						<img class="wh80" :src="imgFullSrc" alt="封面图展示">
 					</el-form-item>
 					<el-form-item label="Tag标签:">
 						<el-input :disabled="true" placeholder="用逗号隔开，单个标签少于12字节" v-model="form1.tagLabels"></el-input>
 					</el-form-item>
-					<el-form-item label="关键词:">
+					<!-- <el-form-item label="关键词:">
 						<el-input :disabled="true" placeholder="用英文 “ , ” 隔开" v-model="form1.keyWords"></el-input>
-					</el-form-item>
+					</el-form-item> -->
+          <div class="tableOverstyle">
+          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
+            <colgroup>
+              <col name="el-table_1_column_1" width="25%">
+              <col name="el-table_1_column_2" width="75%">
+            </colgroup>
+            <tbody>
+              <tr class="el-table__row">
+                <td><div class="cell">发布来源</div></td>
+                <td><div class="cell">
+                  <span v-if="form1.publishSource == '1'">PC后台</span><span v-if="form1.publishSource == '2'">数据爬取</span><span v-if="form1.publishSource == '3'">APP端</span>
+                  </div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">文章ID</div></td>
+                <td><div class="cell">{{form1.articleId}}</div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">状态</div></td>
+                <td><div class="cell">
+                  <span v-if="form1.status == '0'">新建</span><span v-if="form1.status == '1'">待审核</span><span v-if="form1.status == '3'">审核中</span>
+                  <span v-if="form1.status == '4'">已上线</span><span v-if="form1.status == '5'">已下线</span>
+                  </div></td>
+              </tr>
+            </tbody>
+          </table>
+          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border marT20">
+            <colgroup>
+              <col name="el-table_1_column_1" >
+              <col name="el-table_1_column_1" >
+              <col name="el-table_1_column_1" >
+              <col name="el-table_1_column_2" >
+            </colgroup>
+            <tbody>
+              <tr class="el-table__row">
+                <td><div class="cell"></div></td>
+                <td><div class="cell">时间</div></td>
+                <td><div class="cell">操作账号</div></td>
+                <td><div class="cell">备注</div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">创建时间</div></td>
+                <td><div class="cell">{{form1.createTime}}</div></td>
+                <td><div class="cell">{{form1.createUser}}</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">上线时间</div></td>
+                <td><div class="cell">{{form1.onlineTime}}</div></td>
+                <td><div class="cell">{{form1.onlineUser}}</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">下线时间</div></td>
+                <td><div class="cell">{{form1.offlineTime}}</div></td>
+                <td><div class="cell">{{form1.offlineUser}}</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">修改时间</div></td>
+                <td><div class="cell">{{form1.updateTime}}</div></td>
+                <td><div class="cell">{{form1.updateUser}}</div></td>
+                <td><div class="cell"></div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">审核时间</div></td>
+                <td><div class="cell">{{form1.checkTime}}</div></td>
+                <td><div class="cell">{{form1.checkPerson}}</div></td>
+                <td><div class="cell">{{form1.checkMessage}}</div></td>
+              </tr>
+            </tbody>
+          </table>
+          </div>
 				</div>
 			</el-form>
 		</div>
@@ -100,7 +177,8 @@
 		},
 		data() {
 			return {
-				pkg: '',
+        pkg: '',
+        qita:true,
 				quill: {
 					width: 420,
 					border: true,
@@ -138,7 +216,12 @@
 					newsFile: '',
 					tagLabels: '',
 					keyWords: ''
-				},
+        },
+        rules:{
+          region:[
+            {required:true}
+          ]
+        },
 				cities: [],
 				idDetail:'',
 				imgSrc:'',
@@ -150,13 +233,7 @@
         accounts:'',
 				form: {
 					name: '',
-					region: '',
-					date1: '',
-					date2: '',
-					delivery: false,
-					type: [],
-					resource: '',
-					desc: ''
+					region: '您发布的内容排版、错字过于混乱',
 				},
 				formLabelWidth: '120px',
 				rules1: {
@@ -223,7 +300,7 @@
         console.log(res)
         this.accounts = res.data;
       })
-		//	document.getElementById('test').innerHTML(this.form1.content)
+			document.getElementById('content').innerHTML=this.form1.content;
 		},
 		methods: {
 			// 获取新闻详情
@@ -241,7 +318,16 @@
 					// console.log(this.imgFullSrc)
 					// this.fileList.push({url:this.imgFullSrc})
 				});
-			},
+      },
+      selectChange(val){
+        console.log(val);
+        if(val == '其他'){
+          this.qita = false;
+        }else{
+          this.qita = true;
+          this.form.name='';
+        }
+      },
 			getParams () {
         // 取到路由带过来的参数 
         let routerParams = this.$route.params.id
@@ -267,25 +353,48 @@
 			getFullUrl() {
 				return(this.baceUrl + '/news/add')
 			},
-			//不通过
+			//通过&不通过
 			toAudit(num) {
-				var params = {
-					ids: this.$route.params.id,
-					tokenId: this.$store.state.user.tokenId,
-					status: num,
-					checkReason: this.form.region,
-					checkMessage: this.form.name
-				};
-				this.$post('/news/check', params).then(res => {
-					if(res.code === 0) {
-						console.log(1111111, res);
-					}
-					setTimeout(() => {
-						this.$router.push({
-							name: 'audit-news'
-						});
-					}, 1000);
-				});
+        this.$confirm('是否要进行审核操作?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          var params = {
+            ids: this.$route.params.id,
+            tokenId: this.$store.state.user.tokenId,
+            status: num,
+          };
+          if(num==3){
+            params.checkReason= this.form.region;
+            params.checkMessage= this.form.name;
+          }
+          this.$post('/news/check', params).then(res => {
+            console.log(res);
+            if(res.code == 0) {
+              this.$message({
+                type: 'success',
+                message: res.msg
+              });
+              setTimeout(() => {
+                this.$router.push({
+                  name: 'audit-news'
+                });
+              }, 1000);
+            }else if(res.code == 2){
+              this.$message({
+                type: 'info',
+                message: res.msg
+              });
+            }
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消审核操作'
+          });          
+        });
+				
 			},
 
 			// 新建新闻

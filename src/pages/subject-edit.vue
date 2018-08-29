@@ -17,7 +17,7 @@
     <div class="box">
 			<div class="text-right marBo4">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button>
+				<!-- <el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button> -->
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','3')">仅保存</el-button>
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','4')">保存并上线</el-button>
 			</div>
@@ -28,12 +28,11 @@
         <el-form-item label="专题描述" prop="description">
           <el-input type="textarea" v-model="subjectForm.description"></el-input>
         </el-form-item>
-        <el-form-item label="封面缩略图" ref="imgItem">
-          <el-upload name="file" :data="uploadData" ref="upload" :multiple="false" :limit='1'
-            :action="getFullUrl()" :on-success="onSuccess"
-            list-type="picture-card"
-            :auto-upload="false"
-            :file-list="fileList"
+        <el-form-item label="封面缩略图" ref="icon" prop="icon">
+          <el-upload name="file" ref="upload" :multiple="false" :limit='1'
+            action="" list-type="picture-card"
+            :file-list="fileList" :on-change="fileChange"
+            :auto-upload="false" :on-exceed="handleExceed"
             :on-preview="handlePictureCardPreview"
             :on-remove="handleRemove">
             <i class="el-icon-plus"></i>
@@ -44,9 +43,6 @@
         </el-form-item>
         <el-form-item label="tag标签" prop="tag">
           <el-input v-model="subjectForm.tagLabels"></el-input>
-        </el-form-item>
-        <el-form-item label="关键字" prop="keyWords">
-          <el-input v-model="subjectForm.keyWords"></el-input>
         </el-form-item>
         <el-form-item label="关联文章" prop="linkArt">
           <el-row>
@@ -95,7 +91,16 @@
 import { getBaceUrl } from '@/utils/auth'
 export default {
   data(){
+    var valiIcon = (rule, value, callback) => { // 图片验证
+        if (!this.hasFmt) {
+          callback(new Error('请上传图片'));
+        } else {
+          callback();
+        }
+    };
     return{
+      hasFmt:true,
+      editStatus:'2',
     	fileList:[],	// 预览图片
     	imgFullSrc:'',
 				imgSrc:'',
@@ -125,17 +130,21 @@ export default {
           ],
         description:[
           { required: true, message: '请输入专题描述', trigger: 'blur' }
+        ],
+        icon:[
+          {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
         ]
-        
       }
     }
   },
   created(){
     this.baceUrl = getBaceUrl();
+    console.log(this.$route.params.rowInfo)
     this.$get('/specialInfo/show', {
 				tokenId: this.$store.state.user.tokenId,
 				id: this.$route.params.rowInfo.id
 			}).then(res => {
+        console.log(res)
 				this.subjectForm=res.data[0]
 				this.imgSrc = this.subjectForm.coverImgId;
 					this.status = this.subjectForm.status;
@@ -151,8 +160,6 @@ export default {
   mounted() {
 				
 		},
-  
-  
   methods:{
     onSuccess(){
 //    console.log(111)
@@ -234,31 +241,31 @@ export default {
     addSubject(formName,status){
       this.$refs[formName].validate((valid) => {
           if (valid) {
-            console.log(valid)
+            let param = new FormData();
             var ids = [];
-            this.uploadData={
-							tokenId:this.$store.state.user.tokenId,
-              status:status,
-              title: this.subjectForm.title,
-              description: this.subjectForm.description,
-              tagLabels:this.subjectForm.tagLabels,
-              newsArticleIds:ids,
-              keyWords:this.subjectForm.keyWords,
-              editStatus:1
-						}
-						// this.uploadData = params;
-						console.log(this.uploadData)
-//						alert(1111)
-						setTimeout(() => {
-              this.$refs.upload.submit();
-              this.$router.back(-1);
-						}, 0);
-					// console.log(params)
-					/* this.$post('news/add',params).then(res =>{
-						if(res.code == 0){
-							console.log(1111111,res)
-						}
-					}) */
+            this.artData.map(item => {
+              ids.push(item.articleId);
+            });
+            param.append('tokenId',this.$store.state.user.tokenId);
+            param.append('status',status);
+            param.append('description',this.subjectForm.description);
+            param.append('title',this.subjectForm.title);
+            param.append('tagLabels',this.subjectForm.tagLabels);
+            param.append('newsArticleIds',ids.join(','));
+            param.append('file',this.subjectForm.file,this.subjectForm.filename);
+            param.append('id',this.$route.params.rowInfo.id);
+            param.append('editStatus',this.editStatus);
+            this.$post('specialInfo/edit',param).then(res => {
+              if(res.code == 0){
+                setTimeout(() => {
+                  this.$message({
+                  type: 'success',
+                  message: res.msg
+                });
+                  this.$router.push({name: 'subject'});
+                }, 500);
+              }
+            });
           } else {
             console.log('error submit!!');
             return false;
@@ -313,12 +320,26 @@ export default {
         });
     },
     handleRemove(file, fileList) {
-        console.log(file, fileList);
-      },
+      this.hasFmt=false;
+      console.log(file, fileList);
+    },
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
-    }
+    },
+    fileChange(file,fileList){
+      this.$refs['icon'].clearValidate(); // 图片验证
+      this.subjectForm.filename = file.name;
+      this.subjectForm.file = file.raw;
+      this.editStatus='1';
+      console.log(file.raw)
+      if(fileList.length>0){
+        this.hasFmt = true;
+      }
+    },
+    handleExceed(files, fileList){
+      this.$message.warning('当前限制选择 1 个文件');
+    },
   }
 }
 </script>

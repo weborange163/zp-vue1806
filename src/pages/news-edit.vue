@@ -19,12 +19,12 @@
 			<div class="text-right marR100">
 				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="bannerDialog = true;" >预览</el-button>
-				<el-button size="small" class="light_btn" @click="editNews('form1',0)">保存</el-button>
+				<el-button size="small" class="light_btn" @click="editNews('form1',form1.status)">保存</el-button>
 			</div>
-			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
+			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
-						<el-input v-model="form1.title"></el-input>
+						<el-input v-model="form1.title" type="textarea" autosize style="width:420px;" ></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
 						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
@@ -60,7 +60,7 @@
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author"></el-input>
 					</el-form-item>
-					<el-form-item label="发布账号:" prop="userId" label-width="82">
+					<el-form-item label="发布账号:" prop="userId">
 						<el-select v-model="form1.userId">
 							<el-option 
                 v-for="item in accounts"
@@ -70,15 +70,15 @@
               ></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="附加选项:" prop="imgType" label-width="82">
-							<el-radio-group v-model="form1.imgType">
+					<el-form-item label="附加选项:" prop="imgType">
+							<el-radio-group v-model="form1.imgType" @change="radioChange">
 								<el-radio label="1">上传缩略图</el-radio>
 								<el-radio label="2">提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
 					<el-form-item prop="icon" ref="icon" label="封面图" v-if="form1.imgType=='1'">
 						<el-upload
-							action="" :data="uploadData" :multiple="false" :limit='1'
+							action="" :multiple="false" :limit='1'
 							ref="upload" name="newsFile"
               :file-list="fileList"
 							list-type="picture-card"
@@ -98,52 +98,79 @@
 					<!-- <el-form-item label="关键词:">
 						<el-input  v-model="form1.tagLabels" ></el-input>
 					</el-form-item> -->
+          <div class="tableOverstyle">
+          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
+            <colgroup>
+              <col name="el-table_1_column_1" width="25%">
+              <col name="el-table_1_column_2" width="75%">
+            </colgroup>
+            <tbody>
+              <tr class="el-table__row">
+                <td><div class="cell">发布来源</div></td>
+                <td><div class="cell">
+                  <span v-if="form1.publishSource == '1'">PC后台</span><span v-if="form1.publishSource == '2'">数据爬取</span><span v-if="form1.publishSource == '3'">APP端</span>
+                  </div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">文章ID</div></td>
+                <td><div class="cell">{{form1.articleId}}</div></td>
+              </tr>
+              <tr class="el-table__row">
+                <td><div class="cell">状态</div></td>
+                <td><div class="cell">
+                  <span v-if="form1.status == '0'">新建</span><span v-if="form1.status == '1'">待审核</span><span v-if="form1.status == '3'">审核中</span>
+                  <span v-if="form1.status == '4'">已上线</span><span v-if="form1.status == '5'">已下线</span>
+                  </div></td>
+              </tr>
+            </tbody>
+          </table>
           <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border marT20">
             <colgroup>
-              <col name="el-table_1_column_1" width="18%">
-              <col name="el-table_1_column_1" width="36%">
-              <col name="el-table_1_column_1" width="36%">
-              <!-- <col name="el-table_1_column_2" width="22%"> -->
+              <col name="el-table_1_column_1">
+              <col name="el-table_1_column_1" >
+              <col name="el-table_1_column_1" >
+              <col name="el-table_1_column_2" >
             </colgroup>
             <tbody>
               <tr class="el-table__row">
                 <td><div class="cell"></div></td>
                 <td><div class="cell">时间</div></td>
                 <td><div class="cell">操作账号</div></td>
-                <!-- <td><div class="cell">备注</div></td> -->
+                <td><div class="cell">备注</div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">创建时间</div></td>
                 <td><div class="cell">{{form1.createTime}}</div></td>
                 <td><div class="cell">{{form1.createUser}}</div></td>
-                <!-- <td><div class="cell"></div></td> -->
+                <td><div class="cell"></div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">上线时间</div></td>
                 <td><div class="cell">{{form1.onlineTime}}</div></td>
                 <td><div class="cell">{{form1.onlineUser}}</div></td>
-                <!-- <td><div class="cell"></div></td> -->
+                <td><div class="cell"></div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">下线时间</div></td>
                 <td><div class="cell">{{form1.offlineTime}}</div></td>
                 <td><div class="cell">{{form1.offlineUser}}</div></td>
-                <!-- <td><div class="cell"></div></td> -->
+                <td><div class="cell"></div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">修改时间</div></td>
                 <td><div class="cell">{{form1.updateTime}}</div></td>
                 <td><div class="cell">{{form1.updateUser}}</div></td>
-                <!-- <td><div class="cell"></div></td> -->
+                <td><div class="cell"></div></td>
               </tr>
               <tr class="el-table__row">
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
                 <td><div class="cell">{{form1.checkPerson}}</div></td>
-                <!-- <td><div class="cell"></div></td> -->
+                <td><div class="cell">{{form1.checkMessage}}</div></td>
               </tr>
             </tbody>
           </table>
+          </div>
 				</div>
 			</el-form>
 		</div>
@@ -236,7 +263,8 @@ import axios from 'axios'
             { min: 3, max: 45, message: '长度在 3 到 45 个字符', trigger: 'blur' }
           ],
           content: [
-            { required: true, message: '请输入内容', trigger: 'change' }
+            { required: true, message: '请输入内容', trigger: 'change' },
+            {pattern:/[0-9\u4e00-\u9fa5]+/g,message:'内容必须有中文或者数字',trigger:'blur'}
           ],
           sourceType: [
             { required: true, message: '请选择来源', trigger: 'change'}
@@ -276,11 +304,23 @@ import axios from 'axios'
 			//test.innerHTML=this.form1.content;
 		},
 		methods:{
+      radioChange(val){
+        console.log(val)
+        if(val == '2'){
+          this.hasFmt = true;
+        }else{
+          if(!this.fileList){
+            this.hasFmt=false;
+          }
+          // 
+        }
+      },
 			//图片的验证
 			fileChange(file,fileList){
         this.$refs['icon'].clearValidate(); // 图片验证
-				this.form1.newsFile = file.raw;
-				console.log(fileList.length)
+        this.form1.filename = file.name;
+        this.form1.newsFile = file.raw;
+				// console.log(file)
 				if(fileList.length>0){
 					this.hasFmt = true;
 				}
@@ -296,68 +336,40 @@ import axios from 'axios'
 						}
 						if(this.form1.imgType == 2){	// 封面图的类型 
 							var reg = /src=/ig;
-							if(!!this.form1.content.match(reg)){
-								var params ={
-									tokenId:this.$store.state.user.tokenId,
-									status:status,
-									id:this.idDetail,
-									title: this.form1.title,
-									content: this.form1.content,
-									sourceType:this.form1.sourceType,
-									source:this.form1.source,
-									author:this.form1.author,
-									userId:this.form1.userId,
-									imgType:this.form1.imgType,
-									tagLabels:this.form1.tagLabels,
-									keyWords:this.form1.keyWords,
-									publishSource:"1"
-								}
-								this.$post('news/edit',params).then(res =>{
-									if(res.code == 0){
-										setTimeout(() => {
-											this.$router.push({name: 'news'});
-										}, 1000);
-									}
-								})
-							}else{
+							if(!this.form1.content.match(reg)){
 								 this.$message.error('内容里没有图片!');
+                 return;
 							}
-						}else{
-							if(!this.hasFmt){
-								this.$message.error('请上传封面图!');
-								return;
-							}
-							this.uploadData={
-								tokenId:this.$store.state.user.tokenId,
-								id:this.idDetail,
-								// newsFile:this.form1.newsFile,
-								status:status,
-								title: this.form1.title,
-								content: this.form1.content,
-								sourceType:this.form1.sourceType,
-								editStatus:'1',
-								source:this.form1.source,
-								articleId:this.form1.articleId,
-								author:this.form1.author,
-								userId:this.form1.userId,
-								imgType:this.form1.imgType,
-								tagLabels:this.form1.tagLabels,
-								keyWords:this.form1.keyWords,
-								publishSource:"1"
-							}
-							// this.uploadData = params;
-							console.log(this.uploadData)
-							setTimeout(() => {
-								this.$refs.upload.submit();
-								this.$message({
-									type: 'success',
-									message: '添加成功!'
-								});
-								setTimeout(() => {
-									this.$router.push({name: 'news'});
-								}, 1000);
-							}, 0);
 						}
+						let param = new FormData();
+            param.append('tokenId',this.$store.state.user.tokenId);
+            param.append('id',this.form1.id);
+            param.append('title',this.form1.title);  
+            param.append('content',this.form1.content);
+            param.append('sourceType',this.form1.sourceType);
+            param.append('author',this.form1.author);
+            param.append('userId',this.form1.userId);
+            param.append('imgType',this.form1.imgType);
+            param.append('tagLabels',this.form1.tagLabels.replace(/，/ig,','));
+
+            // param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
+            param.append('publishSource','1');
+            param.append('status',status);
+            if(this.form1.imgType == '1'){
+              param.append('newsFile',this.form1.newsFile,this.form1.filename);
+            }
+            this.$post('news/edit',param).then(res =>{
+              if(res.code == 0){
+                this.$message({
+                message: res.msg,
+                type: 'success'
+              });
+              setTimeout(() => {
+                this.$router.push({name: 'news'});
+              }, 1000);
+              }
+            })
+						
           } else {
             console.log('error submit!!');
             return false;

@@ -46,11 +46,11 @@
         <el-table-column prop="content"  label="评论内容"></el-table-column>
         <el-table-column prop="commentObj"  label="评论对象" width="120"></el-table-column>
         <el-table-column prop="nickName"  label="评论人" width="120"></el-table-column>
-        <el-table-column prop="userUniqueCode"  label="会员ID" width="180"></el-table-column>
+        <el-table-column prop="userUniqueCode"  label="会员ID" width="100"></el-table-column>
         <el-table-column prop="createTime"  label="评论时间" width="180"></el-table-column>
         <el-table-column label="状态" width="80">
           <template slot-scope="scope">
-            <p v-if="scope.row.status=='0'" >正常</p>
+            <p v-if="scope.row.status=='0'" class="yshx">正常</p>
 						<p v-if="scope.row.status=='1'" >已屏蔽</p>
           </template>
         </el-table-column>
@@ -60,10 +60,10 @@
 						<p v-else>{{scope.row.checkPerson}}</p>
           </template>
         </el-table-column>
-        <el-table-column label="操作" width="100" fixed="right">
+        <el-table-column label="操作" width="140" fixed="right">
           <template slot-scope="scope">
             <router-link :to="{name:'comments-lookes',params:{id:scope.row.id}}">
-              <el-button type="text"  size="small">查看</el-button>
+              <el-button type="text"  size="small" class="marR10">查看</el-button>
             </router-link>
             <!-- <el-button @click="handleClick(scope.row)" type="text" size="small">查看</el-button> -->
             <el-button type="text" size="small" v-if="scope.row.status=='0'" @click="isBlock(scope.row.id,scope.row.type,1)">屏蔽</el-button>

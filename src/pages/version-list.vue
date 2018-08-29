@@ -132,7 +132,7 @@
 								<div class="cell">操作人</div>
 							</td>
 							<td>
-								<div class="cell">{{bag.createUserId}}</div>
+								<div class="cell">{{bag.updateUserId}}</div>
 							</td>
 						</tr>
 					</tbody>
@@ -160,7 +160,6 @@
 						<router-link :to="{name:'version-detail',params:{id:scope.row.id}}">
 							<el-button type="text">查看</el-button>
 						</router-link>
-						<el-button type="text">发布</el-button>
 						<el-button type="text" v-if="scope.row.status == '2'" @click="onOff('3',scope.row.id)">下线</el-button>
             <el-button type="text" v-else @click="onOff('2',scope.row.id)" >上线</el-button>
 						<el-button type="text" v-if="scope.row.status=='1'" @click="editPlug(scope.row)"><i class="iconfont icon-edit"></i></el-button>
@@ -283,7 +282,7 @@
             {required: true, message: '请输入插件包名', trigger: 'blur' },
           ],
           desc:[
-            {required: true, message: '请输入code版本', trigger: 'blur' },
+            {required: true, message: '请输入插件提示', trigger: 'blur' },
           ]
         },
         app_id:'',
@@ -333,7 +332,7 @@
         }else{
           text= '下线';
         }
-        this.$confirm(`确定要${text}当前应用包吗?`, '提示', {
+        this.$confirm(`确定要${text}当前插件吗?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'info'

@@ -30,11 +30,11 @@ export default new Router({
         {path:'/market/add',name:'market-add',component: page('market-add')},
         {path:'/market/edit',name:'market-edit',component: page('market-edit')},
         {path:'/market/lookes',name:'market-lookes',component: page('market-lookes')},
-         {path:'/market/lookes2',name:'market-lookes2',component: page('market-lookes2')},
+        {path:'/market/lookes2',name:'market-lookes2',component: page('market-lookes2')},
         
         {path:'/audit-news',name:'audit-news',component: page('audit-news')},
         {path:'/audit-market',name:'audit-market',component: page('audit-market')},
-        {path:'/market/second',name:'second-market',component: page('second-market')},
+        {path:'/market/second',name:'market-second',component: page('market-second')},
         {path:'/banner',name:'banner',component: page('banner')},
         {path:'/subject',name:'subject',component: page('subject')},
         {path:'/subject/add',name:'subject-add',component: page('subject-add')},

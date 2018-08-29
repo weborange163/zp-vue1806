@@ -25,7 +25,7 @@
         <el-table-column prop="platform_type" label="应用平台" width='80'>
           <template slot-scope="scope">
             <p v-if="scope.row.platform_type=='1'" class="yshx">安卓</p>
-            <p v-if="scope.row.platform_type=='2'" class="dshx">IOS</p>
+            <p v-if="scope.row.platform_type=='2'" class="dshx">iOS</p>
           </template>
         </el-table-column>
         <el-table-column prop="file_size" label="应用大小"></el-table-column>
@@ -42,10 +42,10 @@
           <template slot-scope="scope">
             <el-button type="text" v-if="scope.row.platform_type == '1'" @click="downBag(scope.row.download_url)">下载</el-button>
             <el-button type="text" v-else disabled>下载</el-button>
-            <el-button type="text" v-if="scope.row.status == '2'" @click="onOff('3',scope.row.id)">下线</el-button>
+            <el-button type="text" class="marR10" v-if="scope.row.status == '2'" @click="onOff('3',scope.row.id)">下线</el-button>
             <el-button type="text" v-else @click="onOff('2',scope.row.id)" >上线</el-button>
             <router-link :to="{name:'version-list',params:{id:scope.row.id}}">
-              <el-button type="text">查看</el-button>
+              <el-button class="marR10" type="text">查看</el-button>
             </router-link>
                  <!--<el-button class="light_btn">添加新闻</el-button>-->
             <el-button type="text" v-if="scope.row.status == '1'" @click="editBag(scope.row)"><i class="iconfont icon-edit"></i></el-button>
@@ -75,7 +75,7 @@
             <el-select size="mini" v-model="plat" placeholder="请选择应用平台" :disabled="isEdit"
                 @change="selectChange">
                 <el-option label="安卓" value="1"></el-option>
-                <el-option label="IOS" value="2"></el-option>
+                <el-option label="iOS" value="2"></el-option>
             </el-select>
           </div>
         </div>
@@ -204,11 +204,11 @@ export default {
         },
         {
           value:'2',
-          label:'ios'
+          label:'iOS'
         },
         {
           value:'1',
-          label:'android'
+          label:'Adroid'
         },
       ] 
     }

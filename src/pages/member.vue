@@ -2,7 +2,7 @@
   <div class="page-body member">
     <div class="page-header clearfix">
       <el-row >
-        <el-col :span='10'>
+        <el-col :span='14'>
           <el-row :gutter="6" style="margin-bottom:8px;">
             <el-col :span='7'>
               <el-select size="mini" v-model="value" placeholder="时间类型" @change="tofilter">
@@ -14,12 +14,10 @@
                 </el-option>
               </el-select>
             </el-col>
-            <el-col :span='7'>
-              <el-date-picker size="mini" type="date" placeholder="选择日期" v-model="value1" style="width: 100%;"></el-date-picker>
-            </el-col>
-            <el-col :span='7'>
-              <el-date-picker size="mini" type="date" placeholder="选择日期" v-model="value2" style="width: 100%;"></el-date-picker>
-            </el-col>
+            <el-date-picker size="mini"  v-model="value2" type="datetimerange" 
+              value-format="yyyy-MM-dd HH-mm-ss"
+              start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
+              </el-date-picker>
           </el-row>
           <el-row :gutter="6">
             <el-col :span='7'>
@@ -33,20 +31,20 @@
               </el-select>
             </el-col>
             <el-col :span='7'>
-              <el-input size="mini" placeholder="请输入起始年龄"></el-input>
+              <el-input size="mini" type="number" placeholder="请输入起始年龄" v-model="value4"></el-input>
             </el-col>
             <el-col :span='7'>
-              <el-input size="mini" placeholder="请输入结束年龄"></el-input>
+              <el-input size="mini" type="number" placeholder="请输入结束年龄" v-model="value5"></el-input>
             </el-col>
           </el-row>
         </el-col>
-        <el-col :span='10' :offset="4" style="margin-top:26px;">
+        <el-col :span='9' :offset="0" style="margin-top:26px;">
           <el-row :gutter="6" type="flex" justify="end">
             <el-col :span='14'>
-              <el-input size="mini" v-model="value6" placeholder="请输入内容"></el-input>
+              <el-input size="mini" v-model="value6" placeholder="请输入用户名/用户ID/手机号"></el-input>
             </el-col>
             <el-col :span='3'>
-              <el-button class="light_btn" size="mini">搜索</el-button>
+              <el-button class="light_btn" size="mini" @click="showList">搜索</el-button>
             </el-col>
           </el-row>
         </el-col>
@@ -64,7 +62,7 @@
           <el-table-column
             prop="nickName"
             label="用户名"
-            width="120">
+           >
           </el-table-column>
           <el-table-column
             prop="identity"
@@ -84,7 +82,7 @@
             label="年龄">
           </el-table-column>
           <el-table-column
-            prop="address"
+            prop="addr"
             label="城市" width="150">
           </el-table-column>
           <el-table-column
@@ -212,10 +210,10 @@ export default {
           value: '0',
           label: '全部'
         }, {
-          value: '选项2',
+          value: 'registTime',
           label: '注册时间'
         }, {
-          value: '选项3',
+          value: 'loginTime',
           label: '最后登录时间'
         }],
         options1:[{
@@ -249,15 +247,40 @@ export default {
           limit: this.per_page,
           offset: this.currentPage,
           status:this.value,
-          startTime: this.value1,
-          endTime:this.value2,
-          simpleParameter:this.value6
+          simpleParameter:this.value6,
+          queryType:this.value,
+          sex:this.value3,
+          ageStart:this.value4,
+          ageEnd:this.value5,
+          simpleParameter:this.value6,
         };
+        if(this.value == 0){
+          params.queryType ='';
+          params.startTime ='';
+          params.endTime = ''
+        }
+        if(this.value3==0){
+          params.sex=''
+        }
+        if(this.value2){
+          params.startTime = this.value2[0];
+          params.endTime = this.value2[1];
+        }
+        // console.log(this.value1)
         this.$post('members/list', params).then(res => {
           if(res.code == 0){
           //  console.log(res)
           //  console.log(res.data[0].rows);
-            this.tableData = res.data[0].rows;
+            var data = res.data[0].rows;
+            data.map(item=>{
+              if(item.province == '未填写'){
+                item.addr = '未填写'
+              }else{
+                item.addr = item.province + item.city + item.area;
+              }
+            })
+            console.log(data);
+            this.tableData = data;
 
             this.total_pages = res.data[0].total;
             this.loading=false;
@@ -340,27 +363,32 @@ export default {
       },
       // 创建小号
       createInner(){
-        var params = {
-          tokenId:this.$store.state.user.tokenId,
-          phone:this.form.tel,
-          nickName:this.form.name,
-          userDesc:this.form.shortDes
-        };
-        this.$post('members/addInnerMember',params).then(res=>{
-          if(res.code == 0){
-            this.innerMemDia = false;
-            this.$message({
-              message: res.msg,
-              type: 'success'
-            });
-            this.showList();
-          }else{
-            this.$message({
-              message: '添加失败请重试!',
-              type: 'error'
-            });
+        this.$refs['form'].validate((valid) => {
+          if (valid) {
+            var params = {
+              tokenId:this.$store.state.user.tokenId,
+              phone:this.form.tel,
+              nickName:this.form.name,
+              userDesc:this.form.shortDes
+            };
+            this.$post('members/addInnerMember',params).then(res=>{
+              if(res.code == 0){
+                this.innerMemDia = false;
+                this.$message({
+                  message: res.msg,
+                  type: 'success'
+                });
+                this.showList();
+              }else{
+                this.$message({
+                  message: '添加失败请重试!',
+                  type: 'error'
+                });
+              }
+            })
           }
         })
+        
       },
       handleCurrentChange(val){
         this.currentPage = val;

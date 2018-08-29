@@ -2,29 +2,31 @@
 	<div class="page-body news">
 		<div class="page-header">
 			<el-row>
-				<el-col :span="5">
-					<el-select size="mini" v-model="value" name="classifyType" placeholder="分类" style="width:49%">
-						<el-option label="全部" value=""></el-option>
+				<el-col :span="3">
+					<el-select size="mini" v-model="value" name="classifyType" placeholder="请选择分类" style="width:95%">
+						<el-option label="全部" value="全部"></el-option>
 						</el-option>
 						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
 						</el-option>
 					</el-select>
-					<el-select size="mini" v-model="value1" placeholder="发布来源" style="width:49%">
+				</el-col>
+        <el-col :span="3">
+          <el-select size="mini" v-model="value1" placeholder="请选择发布来源" style="width:95%">
 						<el-option v-for="item in optionss" :key="item.value1" :label="item.label" :value="item.value1">
 						</el-option>
 					</el-select>
-				</el-col>
+        </el-col>
 				<el-col :span="3">
 					<el-select size="mini" v-model="value2" placeholder="时间类型">
 						<el-option v-for="item in optionsss" :key="item.value2" :label="item.label" :value="item.value2">
 						</el-option>
 					</el-select>
 				</el-col>
-				<el-col :span="4" class="padLe4">
-					<el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['12:00:00']">
+				<el-col :span="8" class="padLe4">
+					<el-date-picker size="mini"  v-model="value6" type="datetimerange" value-format="yyyy-MM-dd HH:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期">
 					</el-date-picker>
 				</el-col>
-				<el-col :span="6" :offset="4">
+				<el-col :span="5" :offset="2">
 					<el-input size="mini" v-model="inputs" placeholder="标题、创建人、会员id、文章id" style="width:70%;margin-right:5%;"></el-input>
 					<el-button size="mini" class="light_btn" style="width:20%;" @click.native.prevent="getMarket()">搜索</el-button>
 				</el-col>
@@ -39,7 +41,7 @@
 								<el-button class="light_btn" size="mini">添加行情</el-button>
 							</router-link>
 							<el-button class="light_btn" @click="publishWaitTop()" size="mini">置顶排序</el-button>
-							<el-button class="light_btn" @click.native.prevent="getMarket1()" size="mini">刷新</el-button>
+							<el-button class="light_btn" @click.native.prevent="getMarket()" size="mini">刷新</el-button>
 						</div>
 						<el-table :data="tableData" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
 							<!--<el-table-column label="#" type="index"></el-table-column>-->
@@ -81,33 +83,23 @@
 							<el-table-column label="操作" width="220" fixed="right">
 								<template slot-scope="scope">
 									<!--v-if="scope.row.isUping"-->
-
 									<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
 									<el-button type="text" v-else-if="scope.row.status!='5'" :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
 									<el-button type="text" v-else-if="scope.row.top_flag=='0'&& scope.row.status == '5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-
-									<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp2(scope.$index, scope.row)"> 提交审核 </el-button>
-
+									<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="toAudit(scope.$index, scope.row)"> 提交审核 </el-button>
 									<!--v-if="scope.row.status =='已上线'"-->
-									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag=='1' " :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
+									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag=='1' " :disabled="true" style="margin-right:8px;vertical-align:middle;">下线</el-button>
 									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
-
 									<el-button type="text" v-if="scope.row.status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
 									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
 										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
 									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
-
 									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
-										<el-button type="text" v-if="scope.row.status!='5'"><i class="iconfont icon-edit"></i></el-button>
+										<el-button type="text" v-if="(scope.row.status=='6'||scope.row.status=='1')&&scope.row.publish_source!=3"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									
-									
-									
-
-									<el-button type="text" v-if="scope.row.top_flag=='1'" :disabled="true" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" v-else :disabled="false" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
+									<el-button type="text" v-if="scope.row.status!='5'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-else disabled  @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 								</template>
 							</el-table-column>
 						</el-table>
@@ -167,7 +159,7 @@
 									
 									<!--<el-button type="text"><i class="iconfont icon-edit"></i></el-button>-->
 									<el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" @click.native.prevent="cancelUp2(scope.$index, scope.row)">提交审核</el-button>
+									<el-button type="text" @click.native.prevent="toAudit(scope.$index, scope.row)">提交审核</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
@@ -313,7 +305,7 @@
 				}],
 				optionss: [
 					 {
-					value1: '',
+					value1: '全部',
 					label: '全部'
 				}
 				,{
@@ -326,7 +318,10 @@
 					value1: '2',
 					label: '数据爬取'
 				}],
-				optionsss: [{
+				optionsss: [
+          {	value2: '全部',
+          label: '全部'
+          },{
 					value2: '3',
 					label: '上线时间'
 				}, {
@@ -400,18 +395,7 @@
 					this.upData = res.data;
 				})
 			},
-			//新闻预览
-//			newsShow(row){
-//				console.log(row.id);
-//				var params = {
-//					tokenId:this.$store.state.user.tokenId,
-//					id:row.id
-//				}
-//				this.$get('news/show',params).then(res =>{
-//					
-//					console.log(res)
-//				})
-//			},
+			
 			
 			//提交置顶排序(弹框点击发布)
 			toPublish() {
@@ -437,43 +421,29 @@
 				this.getMarket()
 				//				alert(111)
 			},
-			
-
 			//列表
 			getMarket() {
-				//				alert(Date.parse(this.value6[0]))
-				//				alert(Date.parse(this.value6[1]))
-				this.$get('industry/list', {
-					tokenId: this.$store.state.user.tokenId,
-					limit: this.per_page1,
-					offset: this.currentPage1,
-					classifyType: this.value,
-					publishSource: this.value1,
-					timeType: this.value2,
-					title: this.inputs,
-					//					开始也就是逗号前面的
-					timeStart: this.value6[0],
-					//					结束也就是逗号后面的
-					timeEnd: this.value6[1],
-
-				}).then(res => {
+        var params = {
+          tokenId: this.$store.state.user.tokenId,
+          limit: this.per_page1,
+          offset: this.currentPage1, 
+          title: this.inputs,
+          classifyType: this.value=='全部'?'':this.value,
+					publishSource: this.value1=='全部'?'':this.value1,
+          timeType: this.value2=='全部'?'':this.value2,
+        }
+        if(this.value6){
+          params.timeStart = this.value6[0];
+          params.timeEnd = this.value6[1];
+        }
+				this.$get('industry/list', params).then(res => {
 					console.log(res.data[0].rows)
 					this.tableData = res.data[0].rows
 					this.total_pages1 = res.data[0].total;
 				})
 			},
 			//刷新
-			getMarket1() {
-				this.$get('industry/list', {
-					tokenId: this.$store.state.user.tokenId,
-					limit: this.per_page1,
-					offset: this.currentPage1,
-				}).then(res => {
-					console.log(res.data[0].rows)
-					this.tableData = res.data[0].rows
-					this.total_pages1 = res.data[0].total;
-				})
-			},
+			
 			marketShow(row) {
 				console.log(row.id);
 				var params = {
@@ -628,7 +598,7 @@
 				});
 			},
 			//提交审核
-			cancelUp2(index, rows) {
+			toAudit(index, rows) {
 				this.$confirm('确定要提交审核吗?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
@@ -644,8 +614,10 @@
 						this.$message({
 							type: 'success',
 							message: '提交成功!'
-						});
-						this.creatList();
+            });
+            setTimeout(() => {
+						  this.getMarket();
+            },500)
 					})
 				}).catch(() => {
 					this.$message({
@@ -737,35 +709,6 @@
 					});
 				});
 				console.log(index, rows);
-			},
-			//提交审核
-			toAudit(row) {
-				//				alert(row.id)
-				this.$confirm('是否提交到审核列表?', '提示', {
-					confirmButtonText: '确定',
-					cancelButtonText: '取消',
-					type: 'info'
-				}).then(() => {
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						id: row.id,
-						status: '2'
-					}
-					this.$post('/industry/save', params).then(res => {
-						this.creatList();
-						this.$message({
-							type: 'success',
-							message: '操作成功!'
-						});
-
-					})
-				}).catch(() => {
-					this.$message({
-						type: 'info',
-						message: '操作已取消'
-					});
-				});
-
 			},
 			handleSelectionChange(val) {
 				this.multipleSelection = val;

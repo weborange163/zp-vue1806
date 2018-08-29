@@ -63,11 +63,18 @@
 						<el-input v-model="form1.author" :disabled="true"></el-input>
 					</el-form-item>
 					<el-form-item label="发布账号:" v-if="form1.publishSource!='3'" prop="userId" label-width="82">
-						<el-select v-model="form1.createUser" disabled>
-							<el-option label="小号1" value="shanghai"></el-option>
-							<el-option label="小号2" value="beijing"></el-option>
+						<el-select v-model="form1.userId" disabled>
+							<el-option 
+                v-for="item in accounts"
+                :key="item.userId"
+                :label="item.nickName"
+                :value="item.userId"
+              ></el-option>
 						</el-select>
 					</el-form-item>
+          <el-form-item v-else label="发布账号:" required>
+            <el-input size="mini" disabled v-model="form1.createUser"></el-input>
+          </el-form-item>
 					<el-form-item label="附加选项:" prop="sourceType" label-width="82">
 							<el-radio-group v-model="form1.sourceType">
 								<el-radio label="1" disabled>上传缩略图</el-radio>
@@ -75,7 +82,7 @@
 							</el-radio-group>
 					</el-form-item>
 					<el-form-item label="封面图">
-						<img class="imgs" :src="imgFullSrc" alt="封面图展示">
+						<img class="wh80" :src="imgFullSrc" alt="封面图展示">
 					</el-form-item>
 					<el-form-item label="Tag标签:">
 						<el-input  v-model="form1.tagLabels" :disabled="true"></el-input>
@@ -83,6 +90,7 @@
 					<!-- <el-form-item label="关键词:">
 						<el-input  v-model="form1.keyWords" :disabled="true"></el-input>
 					</el-form-item> -->
+          <div class="tableOverstyle">
           <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
             <colgroup>
               <col name="el-table_1_column_1" width="25%">
@@ -108,12 +116,12 @@
               </tr>
             </tbody>
           </table>
-          <table cellspacing="0" cellpadding="0" border="0" style="width:380px" class="el-table el-table__body el-table--border marT20">
+          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border marT20">
             <colgroup>
-              <col name="el-table_1_column_1" width="70px">
-              <col name="el-table_1_column_1" width="140px">
-              <col name="el-table_1_column_1" width="70px">
-              <col name="el-table_1_column_2" width="140px">
+              <col name="el-table_1_column_1" >
+              <col name="el-table_1_column_1" >
+              <col name="el-table_1_column_1" >
+              <col name="el-table_1_column_2" >
             </colgroup>
             <tbody>
               <tr class="el-table__row">
@@ -154,6 +162,7 @@
               </tr>
             </tbody>
           </table>
+          </div>
 				</div>
 			</el-form>
 		</div>
@@ -169,7 +178,8 @@ import axios from 'axios'
 		},
 		data(){
 			return{
-				type:'新闻',
+        type:'新闻',
+        accounts:[],
 				imgFullSrc:'',
 				imgSrc:'',
 				uploadData:{},
@@ -350,15 +360,7 @@ import axios from 'axios'
 	.editor .el-form-item__content {
 		line-height: 20px;
 	}
-	#content{
-    border: 1px solid #dcdfe6;
-		overflow-y: auto;
-    background-color: #f5f7fa;
-    border-color: #e4e7ed;
-    color: #c0c4cc;
-    cursor: not-allowed;
-    min-height: 500px;
-  }
+	
 	.up_form .el-input__inner{
 		height: 30px;
 		line-height: 30px;
@@ -368,11 +370,7 @@ import axios from 'axios'
 		min-height: 550px;
 		overflow-y: auto;
 	}
-	.imgs {
-		width: 80px;
-		height: 80px;
-		display: block;
-	}
+	
 	#p1{
 		text-align: center;
 		font-size: 20px;
@@ -393,10 +391,10 @@ import axios from 'axios'
   .news_lookes .el-table th{
     padding: 4px 0;
   }
-  .news_lookes .el-table .cell{
+  /* .news_lookes .el-table .cell{
     overflow: auto;
     max-height: 48px;
     white-space: nowrap;
     text-overflow: initial;
-  }
+  } */
 </style>

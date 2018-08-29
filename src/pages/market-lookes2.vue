@@ -32,16 +32,7 @@
 						<el-input :disabled="true" v-model="form2.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
-						
-						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
-						:width="quill.width" :getContent="onEditorChange"
-						:has-border="quill.border" :zIndex="quill.zIndex"
-						:sync-output="quill.syncOutput"
-						:theme="quill.theme"
-						:disabled="quill.disabled"
-						:fullscreen="quill.full"
-						@upload="uploadImg" @blur="onEditorBlur($event)"
-						></m-quill-editor>
+						<div id="content" class="ql-editor" v-html="form2.content"></div>
 					</el-form-item>
 				</div>
 				<div style="width: 35%;float:left;padding:15px;">
@@ -167,13 +158,11 @@ import { getBaceUrl } from '@/utils/auth'
 						if(selectid == this.classifyType[i].id) {
 							this.value = this.classifyType[i].name
 						}
-
 					}
-
 				})
-
 			})
-
+      var content =  document.getElementById('content');
+			content.innerHTML=this.form2.content;
 		},
 		created() {
 			this.baceUrl = getBaceUrl();

@@ -1,6 +1,6 @@
 <template>
   <div class="page-body audit_news">
-  	 	<el-dialog title="审核页面" :visible.sync="dialogFormVisible">
+  	<el-dialog title="审核页面" :visible.sync="dialogFormVisible">
 			<el-form :model="form">
 				<el-form-item label="审核原因" :label-width="formLabelWidth">
 					<el-select v-model="form.region" placeholder="请选择区域" size="mini">
@@ -13,7 +13,6 @@
 				<el-form-item label="审核信息" :label-width="formLabelWidth">
 					<el-input v-model="form.name" auto-complete="off" size="mini"></el-input>
 				</el-form-item>
-
 			</el-form>
 			<div slot="footer" class="dialog-footer">
 				<el-button @click="dialogFormVisible = false">取 消</el-button>
@@ -56,7 +55,7 @@
     <div class="box">
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="全部" name="first">
-            <div>
+          <div>
             <el-table :data="audit_all" border stripe v-loading="loading" :row-class-name="btnTable" :header-row-class-name="btnTable" >
               <el-table-column label="序号" type="index" width='50'></el-table-column>
               <el-table-column label="标题" prop="title"></el-table-column>
@@ -95,10 +94,10 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1" 
-            :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper" 
-            :total="this.total_pages1" @size-change="handleSizeChange1">
-            </el-pagination>
+              <el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1" 
+              :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper" 
+              :total="this.total_pages1" @size-change="handleSizeChange1">
+              </el-pagination>
             </div>
           </div>
         </el-tab-pane>
@@ -141,9 +140,9 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
-                :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
-            </el-pagination>
+              <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+                  :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
+              </el-pagination>
             </div>
           </div>
         </el-tab-pane>
@@ -265,9 +264,9 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
-                :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
-            </el-pagination>
+              <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+                  :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
+              </el-pagination>
             </div>
           </div>
         </el-tab-pane>

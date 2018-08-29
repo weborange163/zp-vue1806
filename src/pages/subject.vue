@@ -39,18 +39,19 @@
 					append-to-body>
 					<el-form :model="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
 						<el-form-item label="原文标题">
-							<el-input v-model="bannerForm.title" :disabled="true"></el-input>
+							<el-input v-model="bannerForm.title" :disabled="true" size="mini"></el-input>
 						</el-form-item>
 						<el-form-item label="短标题" prop="title_short">
-							<el-input v-model="bannerForm.title_short"></el-input>
+							<el-input v-model="bannerForm.title_short" size="mini"></el-input>
 						</el-form-item>
-						<el-form-item label="banner图片" label-width="110px" required>
+						<el-form-item label="banner图片" label-width="110px" ref="icon" prop="icon">
 							<el-upload 
-								:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
+								action="" :multiple="false" :limit='1'
 								ref="upload" name="file"
 								list-type="picture-card"
 								:auto-upload="false" :on-exceed="handleExceed"
 								:on-preview="handlePictureCardPreview"
+								:on-change="fileChange"
 								:on-remove="handleRemove">
 								<i class="el-icon-plus"></i>
 							</el-upload>
@@ -59,10 +60,10 @@
 							</el-dialog>
 						</el-form-item>
 						<el-form-item label="类型">
-							<el-input v-model="bannerForm.type" :disabled="true"></el-input>
+							<el-input v-model="bannerForm.type" size="mini" :disabled="true"></el-input>
 						</el-form-item>
 						<el-form-item label="链接">
-							<el-input v-model="bannerForm.articleId" :disabled="true"></el-input>
+							<el-input v-model="bannerForm.articleId" size="mini" :disabled="true"></el-input>
 						</el-form-item>
 					</el-form>
 					<span slot="footer" class="dialog-footer">
@@ -130,7 +131,7 @@
         <el-table-column label="操作" width="220" fixed="right">
 					<template slot-scope="scope">
 						<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-						<el-button type="text" v-if="scope.row.status=='4' && scope.row.top_flag!='1'&&scope.row.recommend == '0'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
+						<el-button type="text" v-if="scope.row.status=='4' && scope.row.top_flag!='1'&&scope.row.recommend != '1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
 						<el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
             <el-button type="text" v-if="scope.row.status!='4'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
 						<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
@@ -138,7 +139,7 @@
 							<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 						</router-link>
             <el-button v-else disabled type="text"><i class="iconfont icon-edit"></i></el-button>
-						<el-button type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+						<el-button type="text" v-if="scope.row.status !='4'&&scope.row.recommend=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 						<el-button type="text" v-else disabled><i class="iconfont icon-delete"></i></el-button>
 					</template>
 				</el-table-column>
@@ -157,7 +158,15 @@ import {btnTable} from '@/utils/table-style.js'
 import { getBaceUrl } from '@/utils/auth'
 export default {
   data(){
+     var valiIcon = (rule, value, callback) => { // 图片验证
+        if (!this.hasFmt) {
+          callback(new Error('请上传图片'));
+        } else {
+          callback();
+        }
+      };
     return{
+      hasFmt:false,
 			bannerForm:{
 				type:'专题'
 			},
@@ -168,8 +177,12 @@ export default {
 			recoIndex:0,
 			bannerRules: {
 				title_short: [
-					{ required: true, message: '请输入短标题', trigger: 'blur' }
-				]
+          { required: true, message: '请输入短标题', trigger: 'blur' },
+          {min:1,max:10,message:'短标题在10字以内', trigger:'blur'}
+        ],
+        icon:[
+          {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
+        ]
 			},
 			bannerDialog:false,
 			recommendRadio:'',
@@ -220,47 +233,62 @@ export default {
     toBanner(){
       this.$refs.bannerForm.validate((valid) => {
         if(valid){
-          this.uploadData={
-            tokenId:this.$store.state.user.tokenId,
-            titleShort:this.bannerForm.title_short,
-            bannerType:'2',
-            linkId:this.bannerForm.link,
-            articleId:this.bannerForm.articleId,
-          }
-          setTimeout(() => {
-            this.$refs.upload.submit();
-            this.$message({
-              type: 'success',
-              message: '推荐banner成功!'
-            });
-            setTimeout(() => {
-              this.getSubjectList();
-            }, 1000);
-            this.bannerDialog = false;
-          }, 0);
+          let param = new FormData();
+          param.append('tokenId',this.$store.state.user.tokenId);
+          param.append('titleShort',this.bannerForm.title_short);
+          param.append('linkId',this.bannerForm.link);
+          param.append('bannerType','2');
+          param.append('articleId',this.bannerForm.articleId);
+          param.append('file',this.bannerForm.file,this.bannerForm.filename);
+          this.$post('bannerInfo/save',param).then(res => {
+            console.log(res);
+            if(res.code == 0){
+              this.$message({
+                type: 'success',
+                message: res.msg
+              });
+              setTimeout(() => {
+                this.getSubjectList();
+              }, 1000);
+              this.bannerDialog = false;
+            }else{
+              this.$message({
+                type: 'warning',
+                message: res.msg?res.msg:'出错了'
+              });
+            }
+            
+          })
         }
       })
     },
 		// 确定推荐到置顶/banner
-			sureReco(){
-				if(this.recommendRadio == '1'){	// 推荐到置顶
-					console.log(this.recoIndex)
-					var params = {
-						tokenId:this.$store.state.user.tokenId,
-						id: this.subjectList[this.recoIndex].id,
-						topFlag:'1'
-					}
-					this.$post('/specialInfo/top',params).then(res => {
-						console.log(res,res.code);
-						if(res.code == '2' || res.code == '0'){
-							this.$message({
-								message: res.msg,
-								type: 'warning'
-							});
-						}
-						this.getSubjectList();
-					})
-					 this.dialogVisible1=false;
+    sureReco(){
+      if(this.recommendRadio == '1'){	// 推荐到置顶
+        console.log(this.recoIndex)
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          id: this.subjectList[this.recoIndex].id,
+          topFlag:'1'
+        }
+        this.$post('/specialInfo/top',params).then(res => {
+          console.log(res,res.code);
+          if(res.code == '2'){
+            this.$message({
+              message: res.msg,
+              type: 'warning'
+            });
+          }else if(res.code == '0'){
+            this.$message({
+              type: 'success',
+              message: '操作成功!'
+            });
+            setTimeout(() => {
+              this.getSubjectList();
+            }, 1000);
+          }
+        })
+          this.dialogVisible1=false;
 				}else if(this.recommendRadio == '2'){	// 推荐到banner
           // console.log('推荐到banner');
           if(this.subjectList[this.recoIndex].recommend !='0'){   // 判断是否是已经推荐到了banner列表,
@@ -341,7 +369,12 @@ export default {
 						message: '本条消息已经置顶,需取消置顶才能操作',
 						type: 'warning'
 					});
-				}else{
+				}else if(row.recommend == '1'){
+          this.$message({
+						message: '本条消息已经被推荐到了banner并上线,请去banner列表查看',
+						type: 'warning'
+					});
+        }else{
 					this.dialogVisible1 = true;
 					this.recoIndex = index;	// 保存当前的index
 					console.log(row,this.recoIndex);
@@ -377,19 +410,6 @@ export default {
       // this.inputs='';
       // this.value6='';
       // this.value='';
-    },
-    //刷新列表
-    getSubjectList1(){
-      var params = {
-        tokenId:this.$store.state.user.tokenId,
-        limit:this.per_page,
-        offset:this.currentPage,
-      }
-      this.$post('specialInfo/list',params).then(res => {
-        console.log(res.data[0].rows);
-        this.subjectList = res.data[0].rows;
-        this.total_pages = res.data[0].total;
-      })
     },
     handleCurrentChange(val) {
       // console.log(`当前页: ${val}`);
@@ -508,9 +528,7 @@ export default {
 					});
 				});
 			},
-			getFullUrl(){
-				return (this.baceUrl+'/bannerInfo/save')
-			},
+			
 			handleRemove(file, fileList) {
         console.log(file, fileList);
       },
@@ -522,9 +540,18 @@ export default {
 				console.log(file)
         this.dialogImageUrl = file.url;
         this.dialogVisible2 = true;
-			},
-			handleExceed(files, fileList) {
-        this.$message.warning(`当前限制选择 1 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+      },
+      fileChange(file,fileList){
+        this.$refs['icon'].clearValidate(); // 图片验证
+        this.bannerForm.filename = file.name;
+        this.bannerForm.file = file.raw;
+        console.log(file.raw)
+        if(fileList.length>0){
+          this.hasFmt = true;
+        }
+      },
+      handleExceed(files, fileList){
+        this.$message.warning('当前限制选择 1 个文件');
       },
 //					上线
 			top_flag2(index, rows) {

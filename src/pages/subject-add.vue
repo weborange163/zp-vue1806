@@ -232,10 +232,9 @@ export default {
                   message: '添加成功!'
                 });
                   this.$router.push({name: 'subject'});
-                }, 1000);
+                }, 500);
               }
             })          
-						
           } else {
             console.log('error submit!!');
             return false;

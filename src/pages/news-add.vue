@@ -21,10 +21,10 @@
 				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1','1')">保存并提交审核</el-button>
 			</div>
-			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
+			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
-						<el-input type="textarea" autosize v-model="form1.title" placeholder="请输入标题"></el-input>
+						<el-input type="textarea" autosize v-model="form1.title" placeholder="请输入标题" style="width:420px;"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
 						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
@@ -67,7 +67,7 @@
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author"></el-input>
 					</el-form-item>
-					<el-form-item class="fabuStyle" label="发布账号:" prop="userId" label-width="82">
+					<el-form-item class="fabuStyle" label="发布账号:" prop="userId">
 						<el-select v-model="form1.userId" placeholder="请选择发布账号">
 							<el-option 
                 v-for="item in accounts"
@@ -77,7 +77,7 @@
               ></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="附加选项:" prop="imgType" label-width="82">
+					<el-form-item label="附加选项:" prop="imgType">
 							<el-radio-group v-model="form1.imgType" @change="radioChange">
 								<el-radio label="1">上传缩略图</el-radio>
 								<el-radio label="2">提取第一个图为缩略图</el-radio>
@@ -128,6 +128,7 @@ import axios from 'axios'
         if (value === '') {
           callback();
         } else {
+          console.log(value)
           var v = value.replace(/，/ig,',');
           var arr = v.split(',');
           arr.map(item => {
@@ -138,7 +139,7 @@ import axios from 'axios'
             }
           })
         }
-      }
+      };
 			return{
         accounts:[],
         fileList:[],
@@ -189,7 +190,8 @@ import axios from 'axios'
             { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
           ],
           content: [
-            { required: true, message: '请输入内容', trigger: 'change' }
+            { required: true, message: '请输入内容', trigger: 'blur' },
+            {pattern:/[0-9\u4e00-\u9fa5]+/g,message:'内容必须有中文或者数字',trigger:'blur'}
           ],
           sourceType: [
             { required: true, message: '请选择来源', trigger: 'change'}
@@ -235,7 +237,9 @@ import axios from 'axios'
         if(val == '2'){
           this.hasFmt = true;
         }else{
-          this.hasFmt=false;
+          if(!this.fileList){
+            this.hasFmt=false;
+          }
         }
       },
 			// 富文本图片上传
@@ -293,8 +297,8 @@ import axios from 'axios'
             param.append('author',this.form1.author);
             param.append('userId',this.form1.userId);
             param.append('imgType',this.form1.imgType);
-            param.append('tagLabels',this.form1.tagLabels);
-            param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
+            param.append('tagLabels',this.form1.tagLabels.replace(/，/ig,','));
+            // param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
             param.append('publishSource','1');
             param.append('status',status);
             if(this.form1.imgType == '1'){
@@ -306,6 +310,10 @@ import axios from 'axios'
             console.log(this.form1.newsFile)
             this.$post('news/add',param).then(res =>{
                 if(res.code == 0){
+                  this.$message({
+                    message: res.msg,
+                    type: 'success'
+                  });
                   setTimeout(() => {
                     this.$router.push({name: 'news'});
                   }, 1000);
@@ -396,8 +404,5 @@ import axios from 'axios'
 	}
   .source_style .el-form-item__error{
     left: -50px;
-  }
-  .fabuStyle .el-form-item__error{
-    left: 80px;
   }
 </style>

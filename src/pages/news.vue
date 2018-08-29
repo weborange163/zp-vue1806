@@ -43,6 +43,8 @@
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
 									<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
+									<i class="iconfont icon-link" style="color:#FEB210;vertical-align: middle;" v-if="scope.row.specialNewsStatus != '0'"></i>
+
 									<!-- <el-popover trigger="hover" placement="top" v-if="scope.row.link">
 										<p>{{ scope.row.link }}</p>
 										<div slot="reference" class="name_wrapper">
@@ -71,11 +73,11 @@
 							</el-table-column>
 							<el-table-column label="上线时间" prop="online_time" width="140"></el-table-column>
 							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
-							<el-table-column label="操作" width="200" fixed="right">
+							<el-table-column label="操作" width="240" fixed="right">
 								<template slot-scope="scope">
 									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
 									<el-button class="marR10" type="text" v-if="scope.row.status == '0'" @click="toAudit(scope.row)">提交审核</el-button>
-									<el-button class="marR10" type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'&&scope.rowrecommend != '1'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'&&scope.row.recommend != '0'&&scope.row.specialNewsStatus!='0'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
 						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
 									<el-button class="marR10" type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
 									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
@@ -85,7 +87,7 @@
 									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									<el-button class="marR10" type="text" v-if="scope.row.status !='4'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status !='4'&&scope.row.recommend=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button class="marR10" type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
 							</el-table-column>
@@ -126,7 +128,7 @@
 							<el-table-column label="操作" width="200" fixed="right">
 								<template slot-scope="scope">
 									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
-									<el-button class="marR10" type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'&&scope.rowrecommend != '1'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'&&scope.row.recommend != '0'&&scope.row.specialNewsStatus !='0'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
 						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
                   <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
@@ -178,8 +180,9 @@
 									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									<el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-								</template>
+									<el-button type="text" v-if="scope.row.status !='4'&&scope.row.recommend=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+                  <el-button class="marR10" type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
+                </template>
 							</el-table-column>
 						</el-table>
           </div>
@@ -286,7 +289,7 @@
 						</el-form-item>
 						<el-form-item label="banner图片" label-width="110px" required>
 							<el-upload 
-								:action="getFullUrl()" :data="uploadData" :multiple="false" :limit='1'
+								action="" :data="uploadData" :multiple="false" :limit='1'
 								ref="upload" name="file"
 								list-type="picture-card"
 								:auto-upload="false" :on-exceed="handleExceed"
@@ -320,8 +323,15 @@
 	import { HTMLDecode,getBaceUrl } from '@/utils/auth'
 
 	export default {
-		name: 'home',
+    name: 'home',
 		data() {
+      var valiIcon = (rule, value, callback) => { // 图片验证
+        if (!this.hasFmt) {
+          callback(new Error('请上传图片'));
+        } else {
+          callback();
+        }
+      };
 			return {
 				bannerForm:{
 					title:'',
@@ -334,7 +344,11 @@
 				},
 				bannerRules: {
 					title_short: [
-            { required: true, message: '请输入短标题', trigger: 'blur' }
+            { required: true, message: '请输入短标题', trigger: 'blur' },
+            {min:1,max:10,message:'短标题在10字以内', trigger:'blur'}
+          ],
+          icon:[
+            {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
           ]
 				},
 				bannerDialog:false,
@@ -564,15 +578,22 @@
             param.append('articleId',this.bannerForm.articleId);
             console.log(param)
             this.$post('bannerInfo/save',param).then(res =>{
-              console.log(res)
-              this.$message({
-                type: 'success',
-                message: '添加成功!'
-              });
-              setTimeout(() => {
-              	this.newsList();
-              }, 1000);
-              this.bannerDialog = false;
+              console.log(res);
+              if(res.code == 0){
+                this.$message({
+                  type: 'success',
+                  message: res.msg
+                });
+                setTimeout(() => {
+                  this.newsList();
+                }, 1000);
+                this.bannerDialog = false;
+              }else{
+                this.$message({
+                  type: 'warning',
+                  message: res.msg?res.msg:'出错了'
+                });
+              }
             })
           }
         })

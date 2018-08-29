@@ -30,7 +30,7 @@
           :visible.sync="newDialog"
           append-to-body>
           <el-form :model="sourceForm" :rules="sourceRules" ref="sourceForm" label-width="110px" class="sourceForm">
-            <el-form-item label="转载来源" prop="title">
+            <el-form-item label="转载来源" prop="name">
               <el-input v-model="sourceForm.name" size="mini" style="width:70%;"></el-input>
             </el-form-item>
           </el-form>
@@ -62,7 +62,7 @@ export default {
         name:''
       },
       sourceRules:{
-        title:[
+        name:[
           { required: true, message: '请输入转载来源', trigger: 'blur' },
           // { min: 2, max: 14, message: '长度在 2 到 14 个字', trigger: 'blur' }
         ]
