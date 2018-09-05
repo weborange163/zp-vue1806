@@ -38,7 +38,7 @@
             <i class="el-icon-plus"></i>
           </el-upload>
           <el-dialog :visible.sync="dialogVisible">
-            <img width="100%" :src="dialogImageUrl" alt="">
+            <img width="100%" :src="imgFullSrc" alt="">
           </el-dialog>
         </el-form-item>
         <el-form-item label="tag标签" prop="tag">
@@ -126,10 +126,11 @@ export default {
       subjectRules:{
         title: [
             { required: true, message: '请输入专题名称', trigger: 'blur' },
-            { min: 3, max: 15, message: '长度在 3 到 5 个字符', trigger: 'blur' }
+            { min: 1, max: 30, message: '长度在 1 到 30 个字', trigger: 'blur' }
           ],
         description:[
-          { required: true, message: '请输入专题描述', trigger: 'blur' }
+          { required: true, message: '请输入专题描述', trigger: 'blur' },
+          { min: 1, max: 500, message: '长度在 1 到 500 个字', trigger: 'blur' }
         ],
         icon:[
           {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
@@ -147,12 +148,12 @@ export default {
         console.log(res)
 				this.subjectForm=res.data[0]
 				this.imgSrc = this.subjectForm.coverImgId;
-					this.status = this.subjectForm.status;
-          this.imgFullSrc = this.baceUrl + this.imgSrc;
-          this.artData = this.subjectForm.specialNews;
-          console.log(this.subjectForm);
-          console.log(this.searchLinkArt);
-					this.fileList.push({url:this.imgFullSrc})
+        this.status = this.subjectForm.status;
+        this.imgFullSrc = this.subjectForm.coverImgUrl;
+        this.artData = this.subjectForm.specialNews;
+        console.log(this.subjectForm);
+        console.log(this.searchLinkArt);
+        this.fileList.push({url:this.imgFullSrc})
 				
 			})
     // console.log(this.baceUrl)http://localhost:8089/specialInfo/add

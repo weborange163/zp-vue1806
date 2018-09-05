@@ -303,7 +303,7 @@
 				this.$get('bannerInfo/show', params).then(res => {
           this.bannerForm = res.data[0];
 					this.imgSrc=this.bannerForm.coverImgId
-					this.imgFullSrc = this.baceUrl + this.imgSrc
+					this.imgFullSrc = this.bannerForm.coverImgUrl;
 //						alert(this.imgFullSrc)
 					this.fileList.push({url:this.imgFullSrc})
 				})
@@ -406,7 +406,7 @@
             this.bannerForm1.statusText ='已下线线'
           }
 					this.imgSrc=this.bannerForm1.coverImgId
-					this.imgFullSrc = this.baceUrl + this.imgSrc  //http://192.168.1.91:8080/images/showImage?id=453610293595996160
+					this.imgFullSrc = this.bannerForm1.coverImgUrl  //http://192.168.1.91:8080/images/showImage?id=453610293595996160
 					console.log(this.imgFullSrc);
 				})
 				

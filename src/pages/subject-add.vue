@@ -115,11 +115,11 @@ export default {
       subjectRules:{
         title: [
             { required: true, message: '请输入专题名称', trigger: 'blur' },
-            { min: 1, max: 30, message: '长度在 1 到 30 个字符', trigger: 'blur' }
+            { min: 1, max: 30, message: '长度在 1 到 30 个字', trigger: 'blur' }
           ],
         description:[
           { required: true, message: '请输入专题描述', trigger: 'blur' },
-          { min: 1, max: 500, message: '长度在 1 到 500 个字符', trigger: 'blur' }
+          { min: 1, max: 500, message: '长度在 1 到 500 个字', trigger: 'blur' }
         ],
         icon:[
           {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证

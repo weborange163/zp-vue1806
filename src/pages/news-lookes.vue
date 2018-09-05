@@ -110,8 +110,8 @@
               <tr class="el-table__row">
                 <td><div class="cell">状态</div></td>
                 <td><div class="cell">
-                  <span v-if="form1.status == '0'">新建</span><span v-if="form1.status == '1'">待审核</span><span v-if="form1.status == '3'">审核中</span>
-                  <span v-if="form1.status == '4'">已上线</span><span v-if="form1.status == '5'">已下线</span>
+                  <span v-if="form1.status == '0'">新建</span><span v-if="form1.status == '1'">待审核</span><span v-if="form1.status == '2'">审核中</span>
+                  <span v-if="form1.status == '3'">审核不通过</span><span v-if="form1.status == '4'">已上线</span><span v-if="form1.status == '5'">已下线</span>
                   </div></td>
               </tr>
             </tbody>
@@ -158,7 +158,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
                 <td><div class="cell">{{form1.checkPerson}}</div></td>
-                <td><div class="cell">{{form1.checkMessage}}</div></td>
+                <td><div class="cell">{{form1.checkReason}}</div></td>
               </tr>
             </tbody>
           </table>

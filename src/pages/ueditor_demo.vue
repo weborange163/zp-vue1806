@@ -11,10 +11,10 @@
 </template>
 
 <script>
-  import UEditor from '@/utils/ueditor/ueditor.vue'
+  // import UEditor from '@/utils/ueditor/ueditor.vue'
 
   export default{
-      name: 'hello',
+      /* name: 'hello',
       components: {UEditor},
       data(){
         return {
@@ -44,7 +44,7 @@
           console.log(content);
           alert(content);
         }
-      }
+      } */
   }
 
 </script>

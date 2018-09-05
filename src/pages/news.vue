@@ -36,15 +36,16 @@
 							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
 							<el-button class="light_btn" size="mini" @click="newsList()">刷新</el-button>
 						</div>
-						<el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
+						<el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 							<!--<el-table-column label="#" type="index"></el-table-column>-->
 							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-									<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
-									<i class="iconfont icon-link" style="color:#FEB210;vertical-align: middle;" v-if="scope.row.specialNewsStatus != '0'"></i>
-
+									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
+									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#333;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '2'"></i>
 									<!-- <el-popover trigger="hover" placement="top" v-if="scope.row.link">
 										<p>{{ scope.row.link }}</p>
 										<div slot="reference" class="name_wrapper">
@@ -77,7 +78,7 @@
 								<template slot-scope="scope">
 									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
 									<el-button class="marR10" type="text" v-if="scope.row.status == '0'" @click="toAudit(scope.row)">提交审核</el-button>
-									<el-button class="marR10" type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'&&scope.row.recommend != '0'&&scope.row.specialNewsStatus!='0'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.top_flag != '1'&&scope.row.recommend !='1'&&scope.row.specialNewsStatus!=1" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
 						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
 									<el-button class="marR10" type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
 									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
@@ -87,7 +88,7 @@
 									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									<el-button class="marR10" type="text" v-if="scope.row.status !='4'&&scope.row.recommend=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus==0" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button class="marR10" type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
 							</el-table-column>
@@ -102,12 +103,22 @@
 				</el-tab-pane>
         <el-tab-pane label="已上线" name="second">
           <div class="tab2">
-            <el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
+            <div class="text-right marBo4">
+							<router-link :to="{name:'news-add'}">
+								<el-button class="light_btn" size="mini">添加新闻</el-button>
+							</router-link>
+							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
+							<el-button class="light_btn" size="mini" @click="newsList()">刷新</el-button>
+						</div>
+            <el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-									<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
+									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
+									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#333;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '2'"></i>
 									<p style="display:inline-block;">{{ scope.row.title }}</p>
 								</template>
 							</el-table-column>
@@ -125,16 +136,16 @@
 								</template>
 							</el-table-column>
 							<el-table-column label="文章ID" prop="article_id"  width="80"></el-table-column>
-							<el-table-column label="操作" width="200" fixed="right">
+							<el-table-column label="操作" width="240" fixed="right">
 								<template slot-scope="scope">
 									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
-									<el-button class="marR10" type="text" v-if="scope.row.status =='4' && scope.row.top_flag != '1'&&scope.row.recommend != '0'&&scope.row.specialNewsStatus !='0'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.top_flag != '1'&&scope.row.recommend !='1'&&scope.row.specialNewsStatus!=1" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
 						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
                   <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
 									<el-button class="marR10" type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
-									<el-button class="marR10" type="text" disabled><i class="iconfont icon-delete unclick"></i></el-button>
+                  <el-button class="marR10" type="text" disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
 							</el-table-column>
 						</el-table>
@@ -153,7 +164,10 @@
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-									<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
+									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
+									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#333;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '2'"></i>
 									<p style="display:inline-block;">{{ scope.row.title }}</p>
 								</template>
 							</el-table-column>
@@ -180,7 +194,7 @@
 									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									<el-button type="text" v-if="scope.row.status !='4'&&scope.row.recommend=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
                   <el-button class="marR10" type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
                 </template>
 							</el-table-column>
@@ -227,7 +241,7 @@
 									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
                     <el-button class="marR10" type="text" ><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									<el-button class="marR10" type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 									<el-button class="marR10" type="text" @click="toAudit(scope.row)">提交审核</el-button>
 								</template>
 							</el-table-column>
@@ -334,6 +348,7 @@
       };
 			return {
 				bannerForm:{
+          loading:false,
 					title:'',
 					file:'',
 					filename:'',
@@ -408,7 +423,7 @@
 			}
 		},
 		created(){
-			this.newsList(this.params);
+			this.newsList();
 			this.baceUrl = getBaceUrl();
 		},
 		mounted() {
@@ -534,29 +549,41 @@
 			},
 			//新闻列表
 			newsList(){
+        this.loading=true;
 				// if(!params){
 					//console.log(params)
-						var params={
-						tokenId:this.$store.state.user.tokenId,
-						limit:this.per_page1,
-            offset:this.currentPage1,
-            status:this.status,
-						publishSource:this.value1,
-						timeType:this.value2,
-        		simpleParameter:this.inputs,
-	////					开始也就是逗号前面的
-						startTime:this.value6[0],
-	////					结束也就是逗号后面的
-						endTime:this.value6[1],
-					}
-				// }
-				// console.log(params)
-				this.$post('/news/list',params).then(res => {
-					// console.log(res.data[0].rows)
-					this.tableData = res.data[0].rows;
-					this.total_pages1 = res.data[0].total;
-				});
-			},
+        var params={
+          tokenId:this.$store.state.user.tokenId,
+          limit:this.per_page1,
+          offset:this.currentPage1,
+          status:this.status,
+          publishSource:this.value1,
+          timeType:this.value2,
+          simpleParameter:this.inputs,
+          startTime:this.value6[0],
+          endTime:this.value6[1],
+        }
+      if(this.status==''){
+        params.queryType = 'LineAndCreate' ;
+        delete params.status;
+      }else{
+        params.status=this.status;
+        delete params.queryType;
+      }
+      // console.log(params)
+      this.$post('/news/list',params).then(res => {
+        // console.log(res.data[0].rows)
+        if(res.code == 0){
+          this.loading=false;
+          this.$message({
+          message: '成功获取新闻列表',
+          type: 'success'
+        });
+          this.tableData = res.data[0].rows;
+          this.total_pages1 = res.data[0].total;
+        }
+      });
+    },
 			//tab1 分页
 			handleCurrentChange1(val) {
         // console.log(val);

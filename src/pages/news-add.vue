@@ -28,9 +28,9 @@
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
 						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
-						:width="quill.width" :getContent="onEditorChange"
+						:width="quill.width" :getContent="onEditorChange" :toolbar="quill.toolbar"
 						:has-border="quill.border" :zIndex="quill.zIndex"
-						:sync-output="quill.syncOutput"
+						:sync-output="quill.syncOutput" 
 						:theme="quill.theme"
 						:disabled="quill.disabled"
 						:fullscreen="quill.full"
@@ -93,7 +93,7 @@
 							:on-remove="handleRemove">
 							<i class="el-icon-plus"></i>
 						</el-upload>
-						<el-dialog :visible.sync="dialogVisible">
+						<el-dialog :visible.sync="dialogVisible" width="30%">
 							<img width="100%" :src="dialogImageUrl" alt="">
 						</el-dialog>
 					</el-form-item>
@@ -111,6 +111,7 @@
 <script>
 //import MQuillEditor from 'm-quill-editor'
 import { getBaceUrl } from '@/utils/auth'
+import myVali from '@/utils/myVali'
 import axios from 'axios'
 	export default{
 		components: {
@@ -156,8 +157,21 @@ import axios from 'axios'
         disabled: false,
         full: false,
         toolbar: [
-          [{ 'header': 1 }, { 'header': 2 }],
-          ['bold', 'italic', 'underline', 'strike', 'link']
+          // [{'size': ['small', false, 'large', 'huge']}],
+          ['bold', 'italic', 'underline', 'strike', 'link', {'header': [1, 2, 3, 4, 5, 6, false]}],
+          // [{ 'header': 1 }, { 'header': 2 }],
+          // [{'header': [1, 2, 3, 4, 5, 6, false]}],
+          ['blockquote', 'code-block'],
+          [{'list': 'ordered'}, {'list': 'bullet'}],
+          [{ 'script': 'sub'}, { 'script': 'super' }],
+          [{ 'indent': '-1'}, { 'indent': '+1' }],
+          // [{ 'direction': 'rtl' }],
+          [{'color': []}, {'background': []}],
+          // [{align: []}],
+          [{ 'align': [false, 'right', 'center', 'justify'] }],
+          // [{align: ''}, {align: 'right'}, {align: 'center'}, {align: 'justify'}],
+          ['image', 'video'],
+          // ['clean']
         ]
       },
 				uploadData:{},
@@ -186,8 +200,7 @@ import axios from 'axios'
             {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
           ],
           title: [
-            { required: true, message: '请输入标题', trigger: 'blur' },
-            { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
+            {required:true, validator: myVali.checkTitle, trigger: 'blur' }  // 图片验证
           ],
           content: [
             { required: true, message: '请输入内容', trigger: 'blur' },
@@ -251,7 +264,7 @@ import axios from 'axios'
 				console.log(file.name)
 				
 				this.$post('images/upload',params).then(res => {
-					let url = this.baceUrl + res.data[0].showUrl;
+					let url = res.data[0].showUrl;
 					// console.log(url)
 					insert(url, 'center')
 					console.log(res);
@@ -405,4 +418,5 @@ import axios from 'axios'
   .source_style .el-form-item__error{
     left: -50px;
   }
+  
 </style>

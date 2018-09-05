@@ -2,8 +2,8 @@
 	<div class="page-body market_edit" style="min-width:980px;">
 		<el-dialog center width="22%" :visible.sync="bannerDialog" append-to-body>
 			<el-form :data="form2"  ref="form2" label-width="110px" class="form2">
-				<p id="p1" >{{form2.title }}</p>
-				<p id="p2">{{form2.content }}</p>
+				<p id="p1" v-html="form2.title"></p>
+				<p id="p2" v-html="form2.content"></p>
 			</el-form>
 		</el-dialog>
 		
@@ -19,17 +19,18 @@
 				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button>
 				<el-button size="small" class="light_btn" @click="saveAudit('form2','1')">仅保存</el-button>
+        <el-button size="small" class="light_btn" @click="saveAudit('form2',2)">保存并提交审核</el-button>
 			</div>
 			<el-form ref="form2" :model="form2" :rules='rules2' label-width="84px" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title">
-						<el-input type="textarea" autosize v-model="form2.title" placeholder="请输入标题"></el-input>
+						<el-input style="width:420px" type="textarea" autosize v-model="form2.title" placeholder="请输入标题"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
 						<m-quill-editor ref="myQuillEditor" v-model="form2.content"
              :width="quill.width" :getContent="onEditorChange" 
              :has-border="quill.border" :zIndex="quill.zIndex"
-             :sync-output="quill.syncOutput" 
+             :sync-output="quill.syncOutput"  :toolbar="quill.toolbar"
              :theme="quill.theme" 
              :disabled="quill.disabled" 
              :fullscreen="quill.full" 
@@ -75,7 +76,7 @@
               <i class="el-icon-plus"></i>
             </el-upload>
             <el-dialog :visible.sync="dialogVisible">
-              <img width="100%" :src="imgFullSrc" alt="">
+              <img width="100%" :src="form2.showUrl" alt="">
             </el-dialog>
           </el-form-item>
 					<el-form-item label="Tag标签:" prop="tagLabel">
@@ -104,8 +105,8 @@
               <tr class="el-table__row">
                 <td><div class="cell">状态</div></td>
                 <td><div class="cell">
-                  <span v-if="form2.status == '0'">新建</span><span v-if="form2.status == '1'">待审核</span><span v-if="form2.status == '3'">审核中</span>
-                  <span v-if="form2.status == '4'">已上线</span><span v-if="form2.status == '5'">已下线</span>
+                  <span v-if="form2.status == '1'">新建</span><span v-if="form2.status == '2'">待审核</span><span v-if="form2.status == '4'">审核不通过</span>
+                  <span v-if="form2.status == '5'">已上线</span><span v-if="form2.status == '6'">已下线</span>
                   </div></td>
               </tr>
             </tbody>
@@ -165,6 +166,7 @@
 	</div>
 </template>
 <script>
+  import myVali from '@/utils/myVali'
 	import { getBaceUrl } from '@/utils/auth'
 	export default {
 		data() {
@@ -191,27 +193,30 @@
         }
       };
 			return {
+        // aaa:'<p class="ql-indent-1">999999</p>',
         hasFmt:true,
         accounts:[],
 				dialogVisible: false,
-				bannerDialog:false,
+        bannerDialog:false,
 				quill: {
 					width: 420,
 					border: true,
           height: 150,
           zIndex:101,
-					content: 'wellcome ~',
+					content: '',
 					syncOutput: true,
 					theme: 'snow', //bubble snow
 					disabled: false,
 					full: false,
 					toolbar: [
-						[{
-							'header': 1
-						}, {
-							'header': 2
-						}],
-						['bold', 'italic', 'underline', 'strike', 'link']
+						['bold', 'italic', 'underline', 'strike', 'link', {'header': [1, 2, 3, 4, 5, 6, false]}],
+            ['blockquote', 'code-block'],
+            [{'list': 'ordered'}, {'list': 'bullet'}],
+            [{ 'script': 'sub'}, { 'script': 'super' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{'color': []}, {'background': []}],
+            [{ 'align': [false, 'right', 'center', 'justify'] }],
+            ['image', 'video'],
 					]
 				},
 
@@ -225,13 +230,14 @@
 				form2: {
 					title: '',
 					content: '',
-					column: '新闻资讯',
+					column: '行情',
 					sourceType: '1',
 					source: '',
 					status: '',
 					author: '',
-					userId: '1',
-					imgType: '1',
+					userId: '',
+          imgType: '1',
+          showUrl:'',
 					newsFile: '',
 					tagLabel: '',
 					keyWords: '',
@@ -239,8 +245,7 @@
         },
         rules2: {
           title: [
-            { required: true, message: '请输入标题', trigger: 'blur' },
-            { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
+            {required:true, validator: myVali.checkTitle, trigger: 'blur' }  // 图片验证
           ],
           content: [
             { required: true, message: '请输入内容', trigger: 'change' },
@@ -272,11 +277,11 @@
 		},
 		mounted() {
       this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
-        console.log(res)
+        // console.log(res)
         this.accounts = res.data;
       });
       this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
-    		console.log(res.data)
+    		// console.log(res.data)
     		this.classifyTypeAll = res.data
     	});
 			this.$get('/industry/get', {
@@ -284,12 +289,12 @@
 				id: this.$route.params.id
 			}).then(res => {
 				console.log(res.data[0].industry)
-				this.form2 = res.data[0].industry
-				this.imgSrc = this.form2.showUrl
+        this.form2 = res.data[0].industry;
+				// this.imgSrc = this.form2.showUrl
 				this.status = this.form2.status;
 				this.classifyType = this.form2.classifyType
-				this.imgFullSrc = this.baceUrl + this.imgSrc
-				this.fileList.push({url:this.imgFullSrc})
+				// this.imgFullSrc = this.baceUrl + this.imgSrc
+				this.fileList.push({url:this.form2.showUrl})
         let selectid = this.classifyType;
         
 			})
@@ -312,9 +317,8 @@
 				params.append('file', file, file.name);
 				// params.append('name',file.name);
 				//				console.log(file.name)
-
 				this.$post('images/upload', params).then(res => {
-					let url = this.baceUrl + res.data[0].showUrl;
+					let url = res.data[0].showUrl;
 					// console.log(url)
 					insert(url, 'center')
 					//					console.log(res);
@@ -407,10 +411,7 @@
 				alert('放大');
 
 			},
-			watch: {
-				// 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
-				'$route': 'getParams'
-			},
+			
 				 fanhui(){
         this.$confirm('返回编辑内容将重置是否继续？')
           .then(_ => {
@@ -419,7 +420,11 @@
           })
           .catch(_ => {});
       }
-		}
+    },
+    watch: {
+				// 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
+				'$route': 'getParams'
+			},
 	};
 </script>
 <style type="text/css">

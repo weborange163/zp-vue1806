@@ -54,7 +54,7 @@ export default new Router({
         {path:'/accounts',name:'accounts',component: page('accounts')},
         {path:'/content-data',name:'content-data',component: page('content-data')},
         {path:'/third-party',name:'third-party',component: page('third-party')},
-        {path:'/editor',name:'editor',component: page('ueditor_demo')},
+        // {path:'/editor',name:'editor',component: page('ueditor_demo')},
 
 
 

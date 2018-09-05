@@ -157,7 +157,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
                 <td><div class="cell">{{form1.checkPerson}}</div></td>
-                <td><div class="cell">{{form1.checkMessage}}</div></td>
+                <td><div class="cell">{{form1.checkReason}}</div></td>
               </tr>
             </tbody>
           </table>

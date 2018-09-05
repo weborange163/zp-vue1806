@@ -1,8 +1,8 @@
 <template>
-	<div class="page-body news_edit" style="min-width:1080px;">
-		<el-dialog center width="375px"  :visible.sync="bannerDialog" id='div1'>
-			<el-form :data="form1" :model="form1" ref="form1" label-width="110px" class="form1">
-				<p id="p1" >{{form1.title }}</p>
+	<div class="page-body news_edit" style="min-width:980px;">
+		<el-dialog center width="30%"  :visible.sync="bannerDialog" id='div1' append-to-body>
+			<el-form :data="form1" ref="form1" label-width="110px" class="form1">
+				<p id="p1" v-html="form1.title"></p>
 				<p id="p2" v-html="form1.content"></p>
 			</el-form>
 		</el-dialog>
@@ -19,44 +19,53 @@
 			<div class="text-right marR100">
 				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="bannerDialog = true;" >预览</el-button>
-				<el-button size="small" class="light_btn" @click="editNews('form1',form1.status)">保存</el-button>
+				<el-button size="small" class="light_btn" @click="editNews('form1','0')">保存</el-button>
+				<el-button size="small" class="light_btn"  @click="editNews('form1','1')">保存并提交审核</el-button>
 			</div>
 			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
-						<el-input v-model="form1.title" type="textarea" autosize style="width:420px;" ></el-input>
+						<el-input v-model="form1.title" type="textarea" autosize style="width:420px;"  placeholder="请输入标题"></el-input>
 					</el-form-item>
 					<el-form-item label="文章内容" prop="content" class="editor">
 						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
-						:width="quill.width" :getContent="onEditorChange"
+						:width="quill.width" :getContent="onEditorChange" :toolbar="quill.toolbar"
 						:has-border="quill.border" :zIndex="quill.zIndex"
-						:sync-output="quill.syncOutput"
+						:sync-output="quill.syncOutput" 
 						:theme="quill.theme"
 						:disabled="quill.disabled"
 						:fullscreen="quill.full"
 						@upload="uploadImg" @blur="onEditorBlur($event)"
 						></m-quill-editor>
 					</el-form-item>
-					<!-- <div id="test" class="ql-editor"></div> -->
 				</div>
+        
 				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
 					<el-form-item label="发布到:">
-						<el-input v-model="type" disabled></el-input>
+						<el-input v-model="form1.column" disabled></el-input>
 					</el-form-item>
-					<el-form-item label="来源:" prop="sourceType">
-						<el-radio-group v-model="form1.sourceType" @change="test()">
-							<el-radio label="1">原创</el-radio>
-							<el-radio label="2">转载</el-radio>
-						</el-radio-group>
-						<el-select v-if="form1.sourceType == 2" v-model="form1.source" placeholder="请选择来源" style="margin-left:20px;width:140px;">
-							<el-option
-								v-for="item in cities"
-								:key="item.id"
-								:label="item.name"
-								:value="item.id">
-							</el-option>
-						</el-select>
-					</el-form-item>
+          <el-row>
+          <el-col :span="14">
+            <el-form-item label="来源:" prop="sourceType">
+              <el-radio-group v-model="form1.sourceType" @change="test()">
+                <el-radio label="1">原创</el-radio>
+                <el-radio label="2">转载</el-radio>
+              </el-radio-group>
+            </el-form-item>
+          </el-col>
+          <el-col :span="10">
+            <el-form-item v-if="form1.sourceType == 2" prop="source">
+              <el-select  v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+                <el-option
+                  v-for="item in cities"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id">
+                </el-option>
+              </el-select>
+            </el-form-item>
+          </el-col>
+        </el-row>
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author"></el-input>
 					</el-form-item>
@@ -166,7 +175,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
                 <td><div class="cell">{{form1.checkPerson}}</div></td>
-                <td><div class="cell">{{form1.checkMessage}}</div></td>
+                <td><div class="cell">{{form1.checkReason}}</div></td>
               </tr>
             </tbody>
           </table>
@@ -179,6 +188,7 @@
 <script>
 //import MQuillEditor from 'm-quill-editor'
 import { getBaceUrl } from '@/utils/auth'
+import myVali from '@/utils/myVali'
 import axios from 'axios'
 	export default{
 		components: {
@@ -220,33 +230,39 @@ import axios from 'axios'
 					status:'',
 					author:'',
 					userId:'1',
-					imgType:'1',
+					imgType:'',
 					newsFile:'',
 					tagLabels:'',
 					keyWords:'',
 					coverImgId:''
 				},
-				type:'新闻',
+        // type:'新闻',
+        
 				pkg:'',
-      quill: {
-        width: 420,
-				border: true,
-        height:150,
-        zIndex:101,
-        content: 'wellcome ~',
-        syncOutput: false,
-        theme: 'snow', //bubble snow
-        disabled: false,
-        full: false,
-        toolbar: [
-          [{ 'header': 1 }, { 'header': 2 }],
-          ['bold', 'italic', 'underline', 'strike', 'link']
-        ]
-      },
-      bannerDialog: false,
-			idDetail:'',
-			hasFmt:true,
-				uploadData:{},
+        quill: {
+          width: 420,
+          border: true,
+          height:150,
+          zIndex:101,
+          syncOutput: true,
+          theme: 'snow', //bubble snow
+          disabled: false,
+          full: false,
+          toolbar: [
+            ['bold', 'italic', 'underline', 'strike', 'link', {'header': [1, 2, 3, 4, 5, 6, false]}],
+            ['blockquote', 'code-block'],
+            [{'list': 'ordered'}, {'list': 'bullet'}],
+            [{ 'script': 'sub'}, { 'script': 'super' }],
+            [{ 'indent': '-1'}, { 'indent': '+1' }],
+            [{'color': []}, {'background': []}],
+            [{ 'align': [false, 'right', 'center', 'justify'] }],
+            ['image', 'video'],
+          ]
+        },
+        bannerDialog: false,
+        idDetail:'',
+        hasFmt:true,
+        uploadData:{},
         baceUrl:'',
         accounts:[],
 				// content:'111',
@@ -259,8 +275,7 @@ import axios from 'axios'
             {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
           ],
           title: [
-            { required: true, message: '请输入标题', trigger: 'blur' },
-            { min: 3, max: 45, message: '长度在 3 到 45 个字符', trigger: 'blur' }
+            {required:true, validator: myVali.checkTitle, trigger: 'blur' }  // 图片验证
           ],
           content: [
             { required: true, message: '请输入内容', trigger: 'change' },
@@ -287,11 +302,8 @@ import axios from 'axios'
 		created(){
 			this.baceUrl = getBaceUrl();
 			this.getParams();
-		
-			// console.log(this.baceUrl)
 		},
 		mounted() {
-      this.showNews();
 			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
     		console.log(res.data)
     		this.cities = res.data
@@ -300,8 +312,7 @@ import axios from 'axios'
         console.log(res)
         this.accounts = res.data;
       });
-		//	var test =  document.getElementById('test');
-			//test.innerHTML=this.form1.content;
+      this.showNews();
 		},
 		methods:{
       radioChange(val){
@@ -384,11 +395,12 @@ import axios from 'axios'
 					id:this.idDetail
 				}
 				this.$get('news/show',params).then(res => {
+          // console.log(res.data[0]);
 					this.form1 = res.data[0];
-					console.log(this.form1)
+					// console.log(this.form1)
 					this.imgSrc = this.form1.coverImgId;
 					this.status = this.form1.status;
-					this.imgFullSrc = this.baceUrl + this.imgSrc;
+					this.imgFullSrc = this.form1.coverImgUrl;
 					console.log(this.imgFullSrc)
 					this.fileList.push({url:this.imgFullSrc})
 				});
@@ -409,36 +421,39 @@ import axios from 'axios'
 				console.log(file.name)
 				
 				this.$post('images/upload',params).then(res => {
-					let url = this.baceUrl + res.data[0].showUrl;
+					let url =  res.data[0].showUrl;
 					// console.log(url)
 					insert(url, 'center')
 					console.log(res);
 				})
 			},
-			getFullUrl(){
-				return (this.baceUrl+'/news/edit')
-			},
 			test(){
 				console.log(this.form1.source);
-			},
-			// 获取富文本的内容
-			onEditorBlur(t) {
-				this.form1.content =  t.container.innerHTML;
-				console.log(t)
-				console.log(t.container.innerHTML)
-				// console.log('editor blur!', quill, html, text)
-				console.log(this.form1.content)
       },
+      // 获取富文本的内容
+			onEditorBlur({
+				quill,
+				html,
+				text
+			}) {},
+			// 获取富文本的内容
+			onEditorBlur(quill) {
+        console.log( quill);
+        // this.form1.content = quill.container.innerHTML;
+				console.log(this.form1.content);
+			},
       onEditorFocus(quill) {
         console.log('editor focus!', quill)
       },
       onEditorReady(quill) {
         console.log('editor ready!', quill)
       },
-      onEditorChange(val) {
-        console.log('editor change!', val)
-				// this.content = html
-      },
+      onEditorChange({
+				val
+			}) {
+				console.log('editor change!', val);
+				//					this.content = html;
+			},
       handleExceed(files, fileList){
         this.$message.warning('当前限制选择 1 个文件');
       },

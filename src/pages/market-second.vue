@@ -105,8 +105,8 @@
               <tr class="el-table__row">
                 <td><div class="cell">状态</div></td>
                 <td><div class="cell">
-                  <span v-if="form2.status == '0'">新建</span><span v-if="form2.status == '1'">待审核</span><span v-if="form2.status == '3'">审核中</span>
-                  <span v-if="form2.status == '4'">已上线</span><span v-if="form2.status == '5'">已下线</span>
+                  <span v-if="form2.status == '1'">新建</span><span v-if="form2.status == '2'">待审核</span><span v-if="form2.status == '4'">审核不通过</span>
+                  <span v-if="form2.status == '5'">已上线</span><span v-if="form2.status == '6'">已下线</span>
                   </div></td>
               </tr>
             </tbody>
@@ -283,13 +283,22 @@
          	checkMessage:this.form.name
 				};
 				this.$post('industry/save', params).then(res => {
-					if(res.code === 0) {
+					if(res.code == 0) {
 						// console.log(1111111, res);
-						
-					}
-					setTimeout(() => {
+						 this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+            setTimeout(() => {
 						this.$router.push({name: 'audit-market'});
 						}, 1000);
+					}else{
+            this.$message({
+              message: res.msg?res.msg:'失败',
+              type: 'error'
+            });
+          }
+					
 				});
 
 

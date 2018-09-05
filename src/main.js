@@ -6,7 +6,6 @@ import ElementUI from 'element-ui'
 import Axios from '@/utils/http'
 import { post, get } from '@/api/index' //引入封装的ajax请求
 import NProgress from 'nprogress'
-import VueQuillEditor from 'vue-quill-editor'
 import MQuillEditor from 'vue-m-quill-editor'
 
 
@@ -49,7 +48,7 @@ import MContainer from '@/m/container'
 console.log(process.env)
 
 Vue.use(ElementUI)
-Vue.use(VueQuillEditor, /* { default global options } */)
+// Vue.use(VueQuillEditor, /* { default global options } */)
 Vue.use(MQuillEditor)
 Vue.use(DropdownPlugin)
 Vue.use(NavbarPlugin)

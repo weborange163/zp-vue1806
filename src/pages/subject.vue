@@ -108,7 +108,8 @@
         <el-table-column label="专题标题" prop="title" >
 					<template slot-scope="scope">
 						<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-            <i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.recommend != '0'"></i>
+            <i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;"  v-if="scope.row.recommend == '1'"></i>
+						<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
             <p style="display:inline-block;">{{ scope.row.title }}</p>
 					</template>
 				</el-table-column>
@@ -135,10 +136,10 @@
 						<el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
             <el-button type="text" v-if="scope.row.status!='4'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
 						<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
-						<router-link v-if="scope.row.status !='4'" :to="{name:'subject-edit',params:{rowInfo:scope.row}}">
+						<router-link :to="{name:'subject-edit',params:{rowInfo:scope.row}}">
 							<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 						</router-link>
-            <el-button v-else disabled type="text"><i class="iconfont icon-edit"></i></el-button>
+            <!-- <el-button v-else disabled type="text"><i class="iconfont icon-edit"></i></el-button> -->
 						<el-button type="text" v-if="scope.row.status !='4'&&scope.row.recommend=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
 						<el-button type="text" v-else disabled><i class="iconfont icon-delete"></i></el-button>
 					</template>
@@ -187,7 +188,7 @@ export default {
 			bannerDialog:false,
 			recommendRadio:'',
       subjectList:[],
-      per_page:5,
+      per_page:10,
       currentPage:1,
       total_pages:0,
       currentPage:1,

@@ -16,6 +16,40 @@ body{
 .tableOverstyle .el-table .cell{
   white-space: normal;
 }
+.ql-editor .ql-indent-1:not(.ql-direction-rtl)
+{
+  padding-left: 0 !important;
+  text-indent: 2em !important;
+}
+.ql-editor .ql-indent-2:not(.ql-direction-rtl){
+  padding-left: 0 !important;
+  text-indent: 4em !important;
+}
+.ql-editor .ql-indent-3:not(.ql-direction-rtl)
+{
+  padding-left: 0 !important;
+  text-indent: 6em !important;
+}
+.ql-editor .ql-indent-4:not(.ql-direction-rtl){
+  padding-left: 0 !important;
+  text-indent: 8em !important;
+}.ql-editor .ql-indent-5:not(.ql-direction-rtl)
+{
+  padding-left: 0 !important;
+  text-indent: 10em !important;
+}
+.ql-editor .ql-indent-6:not(.ql-direction-rtl){
+  padding-left: 0 !important;
+  text-indent: 12em !important;
+}.ql-editor .ql-indent-7:not(.ql-direction-rtl)
+{
+  padding-left: 0 !important;
+  text-indent: 14em !important;
+}
+.ql-editor .ql-indent-8:not(.ql-direction-rtl){
+  padding-left: 0 !important;
+  text-indent: 16em !important;
+}
 div{
   box-sizing: border-box;
 }

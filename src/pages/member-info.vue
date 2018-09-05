@@ -30,7 +30,7 @@
                         <td><div class="cell">昵称</div></td>
                         <td><div class="cell">{{data1.nickName}}</div></td>
                         <td><div class="cell">性别</div></td>
-                        <td><div class="cell">{{data1.sex}}</div></td>
+                        <td><div class="cell">{{data1.sex==1?'男':'女'}}</div></td>
                       </tr>
                       <tr class="el-table__row">
                         <td><div class="cell">用户ID</div></td>
@@ -45,8 +45,8 @@
                         <td><div class="cell">{{data1.birthday}}</div></td>
                       </tr>
                       <tr class="el-table__row">
-                        <td><div class="cell">身份证</div></td>
-                        <td><div class="cell">{{data1.idCard}}</div></td>
+                        <td><div class="cell">身份</div></td>
+                        <td><div class="cell">{{data1.identity}}</div></td>
                         <td><div class="cell">简介</div></td>
                         <td><div class="cell">{{data1.userDesc}}</div></td>
                       </tr>

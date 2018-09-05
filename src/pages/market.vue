@@ -108,19 +108,152 @@
 					<div style="margin-top:20px;">
 						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage1"
              :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
-              @size-change="this.per_page1" :total="this.total_pages1">
+              @size-change="handleSizeChange1" :total="this.total_pages1">
 						</el-pagination>
 					</div>
-					<!--<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage1" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="prev, pager, next" :total="this.total_pages1">
-						</el-pagination>
-					</div>-->
+					
 				</el-tab-pane>
-				<el-tab-pane label="新建" name="second">
+        <el-tab-pane label="已上线" name="second">
+					<div class="tab1">
+						<el-table :data="newArticle" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
+							<el-table-column label="序号" align="center" type="index" width="50">
+							</el-table-column>
+							<el-table-column label="标题" prop="title">
+								<template slot-scope="scope">
+									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+									<el-popover trigger="hover" placement="top" v-if="scope.row.link">
+										<p>{{ scope.row.link }}</p>
+										<div slot="reference" class="name_wrapper">
+											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
+										</div>
+									</el-popover>
+									<p style="display:inline-block;">{{ scope.row.title }}</p>
+								</template>
+							</el-table-column>
+
+							<el-table-column label="所属分类" prop="classify_type_name" width="120"></el-table-column>
+							<el-table-column label="创建人" prop="create_user_id" width="80"></el-table-column>
+							<el-table-column label="发布状态" prop="onlineTime" width="80">
+								<template slot-scope="scope">
+									<p v-if="scope.row.status=='1'" class="dshx">新建</p>
+									<p v-if="scope.row.status=='5'" class="yshx">已上线</p>
+									<p v-if="scope.row.status=='6'" class="yxx">已下线</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="上线时间" prop="online_time" width="120"></el-table-column>
+							<el-table-column label="发布来源" prop="publish_source" width="80">
+								<template slot-scope="scope">
+									<p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">app</p>
+								</template>
+
+							</el-table-column>
+							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
+							<el-table-column label="操作" width="220" fixed="right">
+								<template slot-scope="scope">
+									<!--v-if="scope.row.isUping"-->
+									<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
+									<el-button type="text" v-else-if="scope.row.status!='5'" :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+									<el-button type="text" v-else-if="scope.row.top_flag=='0'&& scope.row.status == '5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+									<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="toAudit(scope.$index, scope.row)"> 提交审核 </el-button>
+									<!--v-if="scope.row.status =='已上线'"-->
+									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag=='1' " :disabled="true" style="margin-right:8px;vertical-align:middle;">下线</el-button>
+									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
+									<el-button type="text" v-if="scope.row.status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
+									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
+										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
+									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
+									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
+										<el-button type="text" v-if="(scope.row.status=='6'||scope.row.status=='1')&&scope.row.publish_source!=3"><i class="iconfont icon-edit"></i></el-button>
+									</router-link>
+									<el-button type="text" v-if="scope.row.status!='5'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-else disabled  @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</div>
+					<div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage2"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="this.per_page2" :total="this.total_pages2">
+						</el-pagination>
+					</div>
+				</el-tab-pane>
+        <el-tab-pane label="已下线" name="third">
+					<div class="tab1">
+						<el-table :data="newArticle" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
+							<el-table-column label="序号" align="center" type="index" width="50">
+							</el-table-column>
+							<el-table-column label="标题" prop="title">
+								<template slot-scope="scope">
+									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+									<el-popover trigger="hover" placement="top" v-if="scope.row.link">
+										<p>{{ scope.row.link }}</p>
+										<div slot="reference" class="name_wrapper">
+											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
+										</div>
+									</el-popover>
+									<p style="display:inline-block;">{{ scope.row.title }}</p>
+								</template>
+							</el-table-column>
+
+							<el-table-column label="所属分类" prop="classify_type_name" width="120"></el-table-column>
+							<el-table-column label="创建人" prop="create_user_id" width="80"></el-table-column>
+							<el-table-column label="发布状态" prop="onlineTime" width="80">
+								<template slot-scope="scope">
+									<p v-if="scope.row.status=='1'" class="dshx">新建</p>
+									<p v-if="scope.row.status=='5'" class="yshx">已上线</p>
+									<p v-if="scope.row.status=='6'" class="yxx">已下线</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="上线时间" prop="online_time" width="120"></el-table-column>
+							<el-table-column label="发布来源" prop="publish_source" width="80">
+								<template slot-scope="scope">
+									<p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">app</p>
+								</template>
+
+							</el-table-column>
+							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
+							<el-table-column label="操作" width="220" fixed="right">
+								<template slot-scope="scope">
+									<!--v-if="scope.row.isUping"-->
+									<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
+									<el-button type="text" v-else-if="scope.row.status!='5'" :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+									<el-button type="text" v-else-if="scope.row.top_flag=='0'&& scope.row.status == '5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
+									<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="toAudit(scope.$index, scope.row)"> 提交审核 </el-button>
+									<!--v-if="scope.row.status =='已上线'"-->
+									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag=='1' " :disabled="true" style="margin-right:8px;vertical-align:middle;">下线</el-button>
+									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
+									<el-button type="text" v-if="scope.row.status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
+									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
+										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
+									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
+									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
+										<el-button type="text" v-if="(scope.row.status=='6'||scope.row.status=='1')&&scope.row.publish_source!=3"><i class="iconfont icon-edit"></i></el-button>
+									</router-link>
+									<el-button type="text" v-if="scope.row.status!='5'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-else disabled  @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+					</div>
+					<div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage2"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="this.per_page2" :total="this.total_pages2">
+						</el-pagination>
+					</div>
+				</el-tab-pane>
+				<el-tab-pane label="新建" name="fourth">
 					<div class="tab2">
 						<div class="text-right marBo4">
 							<el-button class="light_btn" @click="toAudits">批量提交审核</el-button>
-							<el-button class="light_btn" @click.native.prevent="getMarket1()">刷新</el-button>
+							<el-button class="light_btn" @click.native.prevent="creatList()">刷新</el-button>
 						</div>
 						<el-table :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="newArticle" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55" align="center">
@@ -165,19 +298,12 @@
 						</el-table>
 					</div>
 					
-					
 					<div style="margin-top:20px;">
 						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2"
-             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
-              @size-change="this.per_page2" :total="this.total_pages1">
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="this.per_page2" :total="this.total_pages2">
 						</el-pagination>
 					</div>
-					
-
-					<!--<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="prev, pager, next" :total="this.total_pages2">
-						</el-pagination>
-					</div>-->
 
 				</el-tab-pane>
 			</el-tabs>
@@ -215,26 +341,6 @@
         </span>
 			</el-dialog>
 
-			<!--移动端展示-->
-			<el-dialog title="移动端展示" :visible.sync="apps" center width="20%" :before-close="handleClose">
-				<h1 style="text-align: center;">打算打算打算</h1>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-				<p style="text-align: center;">奥术大师大所大所大所大所大所</p>
-
-				<!--<el-radio v-model="recommendRadio" label="1">推荐到banner</el-radio><br/>-->
-				<!--<el-radio v-model="recommendRadio" label="2">置顶-列表区</el-radio>-->
-				<span slot="footer" class="dialog-footer">
-          <el-button @click="apps = false">取 消</el-button>
-          <el-button type="primary" @click="apps = false">确 定</el-button>
-        </span>
-			</el-dialog>
 		</div>
 	</div>
 </template>
@@ -245,6 +351,7 @@
 		name: 'market',
 		data() {
 			return {
+        status:'1',
 				multipleSelection: [],
 				newArticle: [{
 					num: 1,
@@ -257,7 +364,6 @@
 				dialogVisible: false,
 				dialogVisible1: false,
 				loading: false,
-				apps: false,
 				per_page: 10, //每页显示几条
 				total_pages: 100, // 总页数
 				current_page: 1, // 页面默认展示的当前页码
@@ -268,31 +374,9 @@
 				per_page2: 10,
 				total_pages1: 0,
 				classifyType: '',
-				upData: [{
-						title: '1马上就要过端午节了,公司发了粽子给大家,'
-					},
-					{
-						title: '2测试一下是否会出现省略号测试一下是否会出现省略号测试一下是否会出现省略号'
-					},
-					{
-						title: '3测试一下是否会出现省略号测试一下是否会出现省略号测试一下是否会出现省略号'
-					},
-					{
-						title: '4测试一下是否会出现省略号测试一下是否会出现省略号测试一下是否会出现省略号'
-					}
+				upData: [
 				],
-				tableData: [{
-					title: '王小虎在北京开演唱会哈哈哈坎坎坷坷扩扩扩扩扩扩哈或或或',
-					author: '管理员1',
-					status: '已上线',
-					source: 'pc后台',
-					isUping: true,
-					id: '13823',
-					link: 'www.baidu.com',
-					go: 'app',
-					gotimes: '2018',
-					classification: '11111'
-				}],
+				tableData: [],
 				options: [{
 					value: '选项1',
 					label: '全部'
@@ -462,24 +546,28 @@
 			},
 			
 			handleClick(tab, event) {
+        this.value='';
+				this.value1='';
+        this.value2='';
 				console.log(tab, event);
 				if(tab.name == 'second') {
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						limit: this.per_page2,
-						offset: this.currentPage2,
-						status: '1'
-					}
-					this.creatList(params)
-				}
+					this.status='5';
+					this.creatList();
+				}else if(tab.name == 'third'){
+	        this.status='6';
+					this.creatList();
+        }else if(tab.name == 'fourth'){
+          this.status='1';
+					this.creatList();
+        }else if(tab,name == 'first'){
+          this.status='';
+					this.getMarket();
+        }
 
 			},
 			//推荐到
 			recommend(row) {
 				this.dialogVisible1 = true;
-			},
-			recommend1(row) {
-				this.apps = true;
 			},
 			//取消置顶
 			cancelUp(index, rows) {
@@ -662,16 +750,17 @@
 				console.log(`当前页: ${val}`);
 			},
 			//新建的行情列表
-			creatList(params) {
-				if(!params) {
+			creatList() {
 					//console.log(params)
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						limit: this.per_page2,
 						offset: this.currentPage2,
-						status: '1'
+            status: this.status,
+            classifyType: this.value=='全部'?'':this.value,
+            publishSource: this.value1=='全部'?'':this.value1,
+            timeType: this.value2=='全部'?'':this.value2,
 					}
-				}
 				this.$post('/industry/list', params).then(res => {
 					this.newArticle = res.data[0].rows;
 					this.total_pages2 = res.data[0].total;
@@ -681,7 +770,14 @@
 			handleCurrentChange2(val) {
 				this.currentPage2 = val;
 
-			},
+      },
+      handleSizeChange1(val){
+        this.per_page1 = val;
+        this.getMarket();
+      },
+      handleSizeChange2(val){
+
+      },
 			//删除
 			deleteRow(index, rows) {
 				// rows.splice(index, 1);

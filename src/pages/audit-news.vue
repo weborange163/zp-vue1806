@@ -1,22 +1,24 @@
 <template>
   <div class="page-body audit_news">
-  	<el-dialog title="审核页面" :visible.sync="dialogFormVisible">
-			<el-form :model="form">
-				<el-form-item label="审核原因" :label-width="formLabelWidth">
-					<el-select v-model="form.region" placeholder="请选择区域" size="mini">
-						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
+  	<el-dialog title="审核页面" :visible.sync="dialogFormVisible" width="30%">
+			<el-form :model="form" :rules="rules" label-width="80px">
+				<el-form-item label="审核原因" prop="region" >
+					<el-select size="mini" v-model="form.region" placeholder="请选择不通过的原因" style="width:100%" @change="selectChange">
 						<el-option label="您发布的内容排版、错字过于混乱" value="您发布的内容排版、错字过于混乱"></el-option>
+						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
 						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
 						<el-option label="您发布的内容不符合栏目属性" value="您发布的内容不符合栏目属性"></el-option>
+            <el-option label="其他" value="其他"></el-option>
 					</el-select>
 				</el-form-item>
-				<el-form-item label="审核信息" :label-width="formLabelWidth">
-					<el-input v-model="form.name" auto-complete="off" size="mini"></el-input>
+				<el-form-item label="审核信息">
+					<el-input size="mini" type="textarea" v-model="form.name" auto-complete="off" :disabled="qita"
+          placeholder="审核原因选择其他,可以填写审核信息"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
-				<el-button @click="dialogFormVisible = false">取 消</el-button>
-				<el-button type="primary" @click="toAudits1()" >确 定</el-button>
+				<el-button size="mini" @click="dialogFormVisible = false">取 消</el-button>
+				<el-button size="mini" type="primary" @click="toAudits1()" >确 定</el-button>
 			</div>
 		</el-dialog>
   	<el-dialog title="是否通过审核" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose2">
@@ -105,7 +107,7 @@
           <div>
             <div class="text-right marBo4">
 							<el-button class="light_btn" @click="toAudited">批量审核</el-button>
-							<el-button class="light_btn">刷新</el-button>
+							<el-button class="light_btn" @click="getTabList">刷新</el-button>
 						</div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -279,6 +281,7 @@ import { btnTable } from '@/utils/table-style.js'
 export default {
   data(){
     return{
+      qita:true,
       loading:false,
       per_page1:10,
       currentPage1:1,
@@ -293,14 +296,13 @@ export default {
       dialogVisible1: false,
       form: {
         name: '',
-        region: '',
-        date1: '',
-        date2: '',
-        delivery: false,
-        type: [],
-        resource: '',
-        desc: ''
+        region: '您发布的内容排版、错字过于混乱',
       },
+      rules:{
+          region:[
+            {required:true}
+          ]
+        },
 			formLabelWidth: '120px',
       btnTable:btnTable,
       value: '',
@@ -332,6 +334,15 @@ export default {
     this.getAuditlist();
   },
   methods: {
+    selectChange(val){
+        console.log(val);
+        if(val == '其他'){
+          this.qita = false;
+        }else{
+          this.qita = true;
+          this.form.name='';
+        }
+      },
   	//	通过
 		toAudits(){
 			if(this.recommendRadio == '1'){	// 通过
@@ -372,11 +383,18 @@ export default {
         checkMessage:this.form.name
       }
       this.$post('news/check',params).then(res => {
-        console.log(res,res.code);
-        this.getAuditlist();
+        if(res.code == 0){
+          this.$message({
+          message: res.msg,
+          type: 'info'
+        });
+          console.log(res,res.code);
+          this.getTabList();
+           this.dialogFormVisible = false;
+        }
 
       })
-      this.dialogFormVisible = false;
+     
 		},
   	//关闭不通过弹窗
   	handleClose2(done) {
@@ -443,10 +461,16 @@ export default {
         }
       // }
       this.$post('news/list',params).then(res =>{
-        this.loading = false;
+        if(res.code == 0){
+          this.loading = false;
+          /* this.$message({
+          message: '成功获取列表',
+          type: 'success'
+        }); */
         // console.log(res.data[0].rows)
         this.audit_all = res.data[0].rows;
         this.total_pages1 = res.data[0].total;
+        }
       })
     },
     // tab切换获取相应的数据
@@ -466,10 +490,16 @@ export default {
       // }
       // console.log(params);
       this.$post('news/list',params).then(res =>{
-        this.loading = false;
+        if(res.code==0){
+          this.loading = false;
+          this.$message({
+            message: '成功获取列表',
+            type: 'success'
+          });
         // console.log(res.data[0].rows)
         this.audit_no = res.data[0].rows;
         this.total_pages2 = res.data[0].total;
+        }
       })
     },
     // 切换tab 
@@ -508,7 +538,7 @@ export default {
     handleCurrentChange2(val){
       this.currentPage2=val;
       console.log(`当前页: ${val}`);
-      this.getAuditlist();
+      this.getTabList();
     },
     
     handleSizeChange1(val){

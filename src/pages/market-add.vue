@@ -16,13 +16,13 @@
             <el-form ref="form2" :model="form2" label-width="84px" :rules="rules2" class="up_form clearfix">
               <div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
                 <el-form-item label="文章标题" prop="title">
-                    <el-input type="textarea" autosize v-model="form2.title" placeholder="请输入标题"></el-input>
+                    <el-input style="width:420px" type="textarea" autosize v-model="form2.title" placeholder="请输入标题"></el-input>
                 </el-form-item>
                 <el-form-item label="文章内容" prop="content" class="editor">
                   <m-quill-editor ref="myQuillEditor" v-model="form2.content"
-                  :width="quill.width" :getContent="onEditorChange"
+                  :width="quill.width" :getContent="onEditorChange" :toolbar="quill.toolbar"
                   :has-border="quill.border" :zIndex="quill.zIndex"
-                  :sync-output="quill.syncOutput"
+                  :sync-output="quill.syncOutput" 
                   :theme="quill.theme"
                   :disabled="quill.disabled"
                   :fullscreen="quill.full"
@@ -83,7 +83,8 @@
     </div>
 </template>
 <script>
-import { getBaceUrl } from '@/utils/auth'
+import { getBaceUrl } from '@/utils/auth';
+import myVali from '@/utils/myVali'
 export default {
   data() {
     var valiIcon = (rule, value, callback) => { // 图片验证
@@ -123,12 +124,17 @@ export default {
         disabled: false,
         full: false,
         toolbar: [
-          [{ 'header': 1 }, { 'header': 2 }],
-          ['bold', 'italic', 'underline', 'strike', 'link']
+          ['bold', 'italic', 'underline', 'strike', 'link', {'header': [1, 2, 3, 4, 5, 6, false]}],
+          ['blockquote', 'code-block'],
+          [{'list': 'ordered'}, {'list': 'bullet'}],
+          [{ 'script': 'sub'}, { 'script': 'super' }],
+          [{ 'indent': '-1'}, { 'indent': '+1' }],
+          [{'color': []}, {'background': []}],
+          [{ 'align': [false, 'right', 'center', 'justify'] }],
+          ['image', 'video'],
         ]
       },
       baceUrl:'',
-      editorOption: {},
       dialogImageUrl: '',
       dialogVisible: false,
       classifyTypeAll:'',
@@ -154,8 +160,7 @@ export default {
 	    value: '',
       rules2: {
         title: [
-          { required: true, message: '请输入标题', trigger: 'blur' },
-          { min: 1, max: 50, message: '长度在 1 到 50 个字符', trigger: 'blur' }
+          {required:true, validator: myVali.checkTitle, trigger: 'blur' }  // 图片验证
         ],
         content: [
           { required: true, message: '请输入内容', trigger: 'change' },
@@ -213,7 +218,7 @@ export default {
 				console.log(file.name)
 				
 				this.$post('images/upload',params).then(res => {
-					let url = this.baceUrl + res.data[0].showUrl;
+					let url = res.data[0].showUrl;
 					// console.log(url)
 					insert(url, 'center')
 					console.log(res);

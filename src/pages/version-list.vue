@@ -144,6 +144,7 @@
         <el-table-column label="序号" type="index" width='50'></el-table-column>
 				<el-table-column prop="version_code" label="版本号" width='80'></el-table-column>
 				<el-table-column prop="plugin_name" label="插件名称" width='80'></el-table-column>
+        <el-table-column prop="package_name" label="插件包名" width="160"></el-table-column>
 				<el-table-column prop="download_url" label="下载地址"></el-table-column>
 				<el-table-column prop="file_size" label="插件大小" width='80'></el-table-column>
 				<el-table-column prop="update_time" label="修改时间" width='160'></el-table-column>
@@ -156,20 +157,23 @@
         </el-table-column>
 				<el-table-column label="操作" width="240" fixed="right">
 					<template slot-scope="scope">
-            <el-button type="text" @click="downPlug(scope.row.download_url)">下载</el-button>
+            <el-button class="marR10" type="text" @click="downPlug(scope.row.download_url)">下载</el-button>
 						<router-link :to="{name:'version-detail',params:{id:scope.row.id}}">
-							<el-button type="text">查看</el-button>
+							<el-button class="marR10" type="text">查看</el-button>
 						</router-link>
-						<el-button type="text" v-if="scope.row.status == '2'" @click="onOff('3',scope.row.id)">下线</el-button>
-            <el-button type="text" v-else @click="onOff('2',scope.row.id)" >上线</el-button>
-						<el-button type="text" v-if="scope.row.status=='1'" @click="editPlug(scope.row)"><i class="iconfont icon-edit"></i></el-button>
-						<el-button type="text" @click="deletePlug(scope.row.id)"><i class="iconfont icon-delete"></i></el-button>
+						<el-button type="text" class="marR10" v-if="scope.row.status == '2'" @click="onOff('3',scope.row.id)">下线</el-button>
+            <el-button type="text" class="marR10" v-else @click="onOff('2',scope.row.id)" >上线</el-button>
+						<el-button type="text" class="marR10" v-if="scope.row.status=='1'" @click="editPlug(scope.row)"><i class="iconfont icon-edit"></i></el-button>
+						<el-button type="text" v-if="scope.row.status != '2'" @click="deletePlug(scope.row.id)"><i class="iconfont icon-delete"></i></el-button>
+            <el-button v-else type="text" disabled><i class="iconfont icon-delete"></i></el-button>
 					</template>
 				</el-table-column>
 			</el-table>
 			<!-- 分页 -->
 			<div class="marT20" v-if="bag.platformType == '1'">
-        <el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="prev, pager, next" :total="this.total_pages">
+        <el-pagination class="text-right" background @current-change="handleCurrentChange" 
+        :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" 
+        layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages" @size-change="handleSizeChange">
         </el-pagination>
       </div>
 		</div>
@@ -527,6 +531,10 @@
 			handleCurrentChange(val) {
         this.currentPage = val;
         // this.getList();
+      },
+      handleSizeChange(val){
+        this.per_page = vla;
+        this.getPlugList();
       },
       handlePictureCardPreview(file) {
       console.log(file)

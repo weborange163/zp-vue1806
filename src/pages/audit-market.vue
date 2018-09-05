@@ -363,17 +363,18 @@ export default {
         }
         this.$post('industry/checkByIds',params).then(res => {
           console.log(res,res.code);
-          var params = {
-            tokenId:this.$store.state.user.tokenId,
-            limit:this.per_page2,
-            offset:this.currentPage2,
-            status:'2'
+          if(res.code == 0){
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+            this.getTabList();
+          }else{
+            this.$message({
+              message: res.msg?res.msg:'失败',
+              type: 'error'
+            });
           }
-          this.$post('/industry/listChick',params).then(res =>{
-            console.log(res.data[0].rows)
-            this.audit_no	 = res.data[0].rows;
-            this.total_pages2 = res.data[0].total;
-          })
         })
         this.dialogFormVisible = false;
 		},
