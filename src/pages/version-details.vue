@@ -72,7 +72,8 @@
 								<div class="cell">升级模式</div>
 							</td>
 							<td>
-								<div class="cell">{{plug.upgradeMode}}</div>
+								<div class="cell" v-if="plug.upgradeMode == 0">可选升级</div>
+                <div class="cell" v-else>强制升级</div>
 							</td>
 							<td>
 								<div class="cell">所属应用包</div>
@@ -86,7 +87,9 @@
 								<div class="cell">状态</div>
 							</td>
 							<td>
-								<div class="cell">{{plug.status}}</div>
+								<div class="cell" v-if="plug.status == '1'">新建</div>
+                <div class="cell" v-if="plug.status == '2'">已上线</div>
+                <div class="cell" v-if="plug.status == '3'">已下线</div>
 							</td>
 							<td rowspan="2">
 								<div class="cell">版本提示</div>
@@ -265,7 +268,7 @@
 		color: rgba(51, 51, 51, 1);
 		margin-top: 6px;
   }
-  .version-details .cell{
+  .version-details td .cell{
     overflow: auto;
     white-space: normal;
   }

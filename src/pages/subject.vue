@@ -110,12 +110,12 @@
 						<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
             <i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;"  v-if="scope.row.recommend == '1'"></i>
 						<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
-            <p style="display:inline-block;">{{ scope.row.title }}</p>
+            <span>{{ scope.row.title }}</span>
 					</template>
 				</el-table-column>
         <el-table-column label="专题封面" prop="cover_img_id" width="80">
 					<template slot-scope="scope">
-						<img :src="scope.row.imgsrc" alt="">
+						<img :src="scope.row.cover_img_url" alt="">
 					</template>
 				</el-table-column>
         <el-table-column label="发布状态" width="80">
@@ -338,9 +338,20 @@ export default {
 				this.loading = true;
 				this.$get('/specialInfo/publishWaitTop',{tokenId:this.$store.state.user.tokenId}).then(res =>{
 					this.loading = false;
-					console.log(res)
+					if(res.code == '0'){
+            this.$message({
+							type: 'success',
+							message: res.msg
+            });
+            this.upData = res.data;
+          }else{
+             this.$message({
+							type: 'errpr',
+							message: res.msg?res.msg:'排序失败'
+            });
+          }
 					
-					this.upData = res.data;
+					
 				})
 			},
 			//提交置顶排序(弹框点击发布)
@@ -398,11 +409,6 @@ export default {
       this.$post('specialInfo/list',params).then(res => {
 				if(res.code == 0){
           console.log(res.data[0].rows);
-          var listarr = res.data[0].rows;
-          listarr.map(item => {
-            item.imgsrc = this.baceUrl + item.cover_img_id;
-
-          });
           this.subjectList = res.data[0].rows;
           this.total_pages = res.data[0].total;
           this.loading2=false;

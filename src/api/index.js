@@ -1,4 +1,4 @@
-
+// request.js就是配置的ajax文件
 import request from '@/utils/request'
 
 export function post(url,data) {

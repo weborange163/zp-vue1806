@@ -81,7 +81,7 @@
 						</el-radio-group>
 					</el-form-item>
 					<el-form-item label="封面图" required v-if="form1.imgType == 1">
-						<img class="wh80" :src="imgFullSrc" alt="封面图展示">
+						<img class="wh80" :src="imgSrc" alt="封面图展示">
 					</el-form-item>
 					<el-form-item label="Tag标签:">
 						<el-input :disabled="true" placeholder="用逗号隔开，单个标签少于12字节" v-model="form1.tagLabels"></el-input>
@@ -157,7 +157,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
                 <td><div class="cell">{{form1.checkPerson}}</div></td>
-                <td><div class="cell">{{form1.checkReason}}</div></td>
+                <td><div class="cell"><p v-if="form1.status=='3'">{{form1.checkReason=='其他'?form1.checkMessage:form1.checkReason}}</p></div></td>
               </tr>
             </tbody>
           </table>
@@ -225,7 +225,6 @@
 				cities: [],
 				idDetail:'',
 				imgSrc:'',
-				imgFullSrc:'',
 				fileList:[],
 				//弹框
 				dialogTableVisible: false,
@@ -312,11 +311,8 @@
 				this.$get('news/show',params).then(res => {
 					this.form1 = res.data[0];
 					console.log(this.form1)
-					this.imgSrc = this.form1.coverImgId;
+					this.imgSrc = this.form1.coverImgUrl;
 					this.status = this.form1.status;
-					this.imgFullSrc = this.baceUrl + this.imgSrc;
-					// console.log(this.imgFullSrc)
-					// this.fileList.push({url:this.imgFullSrc})
 				});
       },
       selectChange(val){

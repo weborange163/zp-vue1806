@@ -52,10 +52,10 @@
 											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
 										</div>
 									</el-popover> -->
-									<p style="display:inline-block;">{{ scope.row.title }}</p>
+									<span>{{ scope.row.title }}</span>
 								</template>
 							</el-table-column>
-							<el-table-column label="创建人" prop="createUser" width="200"></el-table-column>
+							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="发布状态" width="80">
 								<template slot-scope="scope">
 									<p v-if="scope.row.status=='0'" >新建</p>
@@ -119,8 +119,8 @@
 									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
 									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
 									<i class="iconfont icon-zhuanti" style="color:#333;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '2'"></i>
-									<p style="display:inline-block;">{{ scope.row.title }}</p>
-								</template>
+								  <span>{{ scope.row.title }}</span>
+                </template>
 							</el-table-column>
 							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="发布状态" width="80">
@@ -168,7 +168,7 @@
 									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
 									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
 									<i class="iconfont icon-zhuanti" style="color:#333;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '2'"></i>
-									<p style="display:inline-block;">{{ scope.row.title }}</p>
+									<span>{{ scope.row.title }}</span>
 								</template>
 							</el-table-column>
 							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>

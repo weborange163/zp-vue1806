@@ -15,11 +15,11 @@
 		</el-breadcrumb>
     </div>
     <div class="box">
-			<div class="text-right marBo4">
+			<div class="text-right marBo4" style="margin-right:50px;">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<!-- <el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button> -->
-				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','3')">仅保存</el-button>
-				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','4')">保存并上线</el-button>
+				<el-button size="small" class="light_btn" @click="addSubject('subjectForm',subjectForm.status)">保存</el-button>
+				<!-- <el-button size="small" class="light_btn" @click="addSubject('subjectForm','4')">保存并上线</el-button> -->
 			</div>
       <el-form :model="subjectForm" :rules="subjectRules" ref="subjectForm" label-width="100px" style="max-width:800px;">
         <el-form-item label="专题标题" prop="title">
@@ -100,6 +100,7 @@ export default {
     };
     return{
       hasFmt:true,
+      hasChangeFile:false,
       editStatus:'2',
     	fileList:[],	// 预览图片
     	imgFullSrc:'',
@@ -253,7 +254,9 @@ export default {
             param.append('title',this.subjectForm.title);
             param.append('tagLabels',this.subjectForm.tagLabels);
             param.append('newsArticleIds',ids.join(','));
-            param.append('file',this.subjectForm.file,this.subjectForm.filename);
+            if(this.hasChangeFile){
+              param.append('file',this.subjectForm.file,this.subjectForm.filename);
+            }
             param.append('id',this.$route.params.rowInfo.id);
             param.append('editStatus',this.editStatus);
             this.$post('specialInfo/edit',param).then(res => {
@@ -321,8 +324,11 @@ export default {
         });
     },
     handleRemove(file, fileList) {
-      this.hasFmt=false;
-      console.log(file, fileList);
+      this.hasChangeFile=true;
+       if(fileList.length == 0){
+        this.hasFmt =false;
+      }
+      // console.log(file, fileList);
     },
     handlePictureCardPreview(file) {
       this.dialogImageUrl = file.url;
@@ -348,19 +354,6 @@ export default {
 .subject-add .quill-editor .ql-container{
 		min-height: 150px;
   }
-#p1{
-		text-align: center;
-		font-size: 20px;
-	}
-	#p2{
-		 margin: 0 auto; width: 100%;height: auto;margin-top: 2px;text-indent:2em;overflow: hidden; overflow-y: auto;
-	}
-	#p2 img{
-		display: block;
-		margin: 0 auto;
-		margin-left: 2px;
-		margin-right: 2px;
-	}
 	#div1{
     height: 740px !important;
     overflow-y: auto !important;

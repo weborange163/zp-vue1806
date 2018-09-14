@@ -1,7 +1,7 @@
 <template>
 	<div class="page-body news_lookes" style="min-width:1200px;">
 		<el-dialog center width="375px"  :visible.sync="detailDialog" id='div1'>
-			<el-form :data="form1" ref="form1" label-width="110px" class="form1">
+			<el-form :data="form1" ref="form1" label-width="110px" class="form1 ql-editor">
 				<p id="p1" >{{form1.title }}</p>
 				<p id="p2" v-html="form1.content"></p>
 			</el-form>
@@ -27,7 +27,7 @@
 					<el-form-item label="文章标题" prop="title" >
 						<el-input type="textarea" autosize v-model="form1.title" :disabled="true"></el-input>
 					</el-form-item>
-					<el-form-item label="文章内容" prop="content" class="editor">
+					<el-form-item label="文章内容" prop="content" class="editor ql-show">
 						<div id="content" class="ql-editor" v-html="form1.content"></div>
 					<!-- 	<m-quill-editor ref="myQuillEditor" v-model="form1.content"
 						:width="quill.width" :getContent="onEditorChange"
@@ -158,7 +158,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
                 <td><div class="cell">{{form1.checkPerson}}</div></td>
-                <td><div class="cell">{{form1.checkReason}}</div></td>
+                <td><div class="cell"><p v-if="form1.status=='3'">{{form1.checkReason=='其他'?form1.checkMessage:form1.checkReason}}</p></div></td>
               </tr>
             </tbody>
           </table>
@@ -214,13 +214,13 @@ import axios from 'axios'
 		created(){
 			this.baceUrl = getBaceUrl();
 			this.getParams();
-			console.log(this.idDetail)
+			// console.log(this.idDetail);
 			this.showNews();
 			// this.getImgUrl();
 		},
 		mounted() {
 			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
-    		console.log(res.data)
+    		// console.log(res.data)
     		this.cities = res.data
       });
       this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
@@ -303,10 +303,10 @@ import axios from 'axios'
 				}
 				this.$get('news/show',params).then(res => {
 					this.form1 = res.data[0];
-          console.log(this.form1);
+          // console.log(this.form1);
 					this.imgSrc = this.form1.coverImgId;
 					this.status = this.form1.status;
-					this.imgFullSrc = this.baceUrl + this.imgSrc;
+					this.imgFullSrc = this.form1.coverImgUrl;
 				});
 			},
 			getParams () {
@@ -346,7 +346,12 @@ import axios from 'axios'
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
 			}
-		},
+    },
+    beforeRouteLeave(to, from, next) {
+        to.meta.keepAlive = true;
+        // console.log(111)
+        next();
+    },
 		watch: {
     // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
       '$route': 'getParams'
@@ -371,19 +376,6 @@ import axios from 'axios'
 		overflow-y: auto;
 	}
 	
-	#p1{
-		text-align: center;
-		font-size: 20px;
-	}
-	#p2{
-		 margin: 0 auto; height: 500px;margin-top: 2px;text-indent:2em; overflow-y: auto !important;
-	}
-	#p2 img{
-		display: block;
-		margin: 0 auto;
-		width: 320px !important;
-		
-	}
 	.news_lookes .el-dialog--center .el-dialog__body{
 		padding: 0 ;
 	}

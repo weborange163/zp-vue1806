@@ -220,7 +220,8 @@ import axios from 'axios'
 			return{
 				fileList:[],	// 预览图片
 				imgFullSrc:'',
-				imgSrc:'',
+        imgSrc:'',
+        hasChangeFile:false,
 				form1: {
 					title: '',
 					content:'',
@@ -362,11 +363,13 @@ import axios from 'axios'
             param.append('userId',this.form1.userId);
             param.append('imgType',this.form1.imgType);
             param.append('tagLabels',this.form1.tagLabels.replace(/，/ig,','));
-
             // param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
             param.append('publishSource','1');
             param.append('status',status);
-            if(this.form1.imgType == '1'){
+            if(this.form1.sourceType=='2'){
+              param.append('source',this.form1.source)
+            }
+            if(this.form1.imgType == '1'&&this.hasChangeFile){
               param.append('newsFile',this.form1.newsFile,this.form1.filename);
             }
             this.$post('news/edit',param).then(res =>{
@@ -458,6 +461,7 @@ import axios from 'axios'
         this.$message.warning('当前限制选择 1 个文件');
       },
 			handleRemove(file, fileList) {
+        this.hasChangeFile = true;
 				console.log(file, fileList);
 				if(fileList.length == 0){
 					this.hasFmt =false;
@@ -475,7 +479,11 @@ import axios from 'axios'
           })
           .catch(_ => {});
       }
-		},
+    },
+    beforeRouteLeave(to, from, next) {
+        to.meta.keepAlive = true;
+        next();
+    },
 		watch: {
     // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
       '$route': 'getParams'
@@ -503,19 +511,6 @@ import axios from 'axios'
 		width: 200px;
 		height: 200px;
 		display: block;
-	}
-	#p1{
-		text-align: center;
-		font-size: 20px;
-	}
-	#p2{
-		 margin: 0 auto; height: 500px;margin-top: 2px;text-indent:2em; overflow-y: auto !important;
-	}
-	#p2 img{
-		display: block;
-		margin: 0 auto;
-		width: 320px !important;
-		
 	}
 	.news_edit .el-dialog--center .el-dialog__body{
 		padding: 0;

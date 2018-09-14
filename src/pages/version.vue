@@ -9,6 +9,7 @@
         :value="item.value">
         </el-option>
       </el-select>
+      <el-input style="width:120px" size="mini" v-model="filterCode" placeholder="请输入code版本"></el-input>
       <el-button class="light_btn" size="mini" @click="getList">搜 索</el-button>
     </div>
     <div class="box">
@@ -147,6 +148,7 @@ export default {
         }
       };
     return{
+      filterCode:'',
       newDialog:false,
       newDialog1:false,
       imgDialog:false,
@@ -411,7 +413,8 @@ export default {
         tokenId: this.$store.state.user.tokenId,
         limit: this.per_page,
         offset: this.currentPage,
-        platformType:this.source
+        platformType:this.source,
+        versionCode:this.filterCode
       }
       if(this.source=='0'){
         params.platformType = '';

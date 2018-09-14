@@ -214,6 +214,7 @@ export default {
           if (valid) {
             let param = new FormData();
             var ids = [];
+            
             this.artData.map(item => {
               ids.push(item.articleId);
             });

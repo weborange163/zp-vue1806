@@ -75,7 +75,7 @@ export default {
       this.getFeedList();
     },
     getExcel(){
-      this.$confirm('确定要导出评论吗?', '提示', {
+      this.$confirm('确定要导出用户反馈吗?', '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'

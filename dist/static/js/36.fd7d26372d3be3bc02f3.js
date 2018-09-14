@@ -1,2 +1,0 @@
-webpackJsonp([36],{JKts:function(t,e){},KwAE:function(t,e,n){"use strict";Object.defineProperty(e,"__esModule",{value:!0});var s={render:function(){this.$createElement;this._self._c;return this._m(0)},staticRenderFns:[function(){var t=this.$createElement,e=this._self._c||t;return e("div",{staticClass:"page-body"},[e("h2",[this._v("广播管理")])])}]};var i=n("VU/8")({},s,!1,function(t){n("JKts")},null,null);e.default=i.exports}});
-//# sourceMappingURL=36.fd7d26372d3be3bc02f3.js.map

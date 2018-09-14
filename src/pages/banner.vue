@@ -161,7 +161,7 @@
 					</el-table-column>
 					<el-table-column label="图片" width='100'>
 						<template slot-scope="scope">
-							<img :src="scope.row.imgurl" alt="">
+							<img :src="scope.row.coverImgUrl" alt="">
 						</template>
 					</el-table-column>
 					<el-table-column label="上线时间" prop="online_time" width='100'></el-table-column>
@@ -442,11 +442,11 @@
 				})
 			},
 			//提交置顶排序(弹框点击发布)
-			toPublish() {
+			toPublish1() {
 				// console.log(this.upData)
 				var newsInfos = [];
 				this.upData.map((item, index) => {
-					//	newsInfos.push({id:item.id,orderNum:index+1})
+						// newsInfos.push({id:item.id,orderNum:index+1})
 					newsInfos.push(item.id);
 				})
 				var params = {
@@ -455,10 +455,52 @@
 					ids: newsInfos.join(',')
 				}
 				console.log(params);
-				this.$post('industry/publishOrederByIds', params).then(res => {
-					console.log(res)
+				this.$post('bannerInfo/publishIsOnline', params).then(res => {
+					if(res.code == '0'){
+            this.$message({
+							type: 'success',
+							message: res.msg
+            });
+            this.dialogVisible = false
+          }else{
+            this.$message({
+							type: 'error',
+							message: res.msg?res.msg:'发布失败'
+            });
+          }
 				})
-				this.dialogVisible = false
+      },
+      	//提交置顶排序(弹框点击发布)
+			toPublish() {
+				// console.log(this.upData)
+        var newsInfos = [];
+        var params = {
+					tokenId: this.$store.state.user.tokenId,
+				}
+				this.upData.map((item, index) => {
+          // newsInfos.push({id:item.id,orderNum:index+1});
+          params['bannerInfos['+index+'].id'] = item.id;
+          params['bannerInfos['+index+'].orderNum'] = index+1;
+        });
+        /* newsInfos.map((item,index) => {
+          params['bannerInfos['+index+'].id'] = item.id;
+          params['bannerInfos['+index+'].orderNum'] = item.orderNum;
+        }); */
+				console.log(params);
+				this.$post('bannerInfo/publishIsOnline', params).then(res => {
+					if(res.code == '0'){
+            this.$message({
+							type: 'success',
+							message: res.msg
+            });
+            this.dialogVisible = false
+          }else{
+            this.$message({
+							type: 'error',
+							message: res.msg?res.msg:'发布失败'
+            });
+          }
+				})
 			},
       // banner列表
 			getBannerlist(params) {
@@ -472,13 +514,7 @@
 				}
 				console.log(params)
 				this.$post('bannerInfo/list', params).then(res => {
-					console.log(res);
-					var listarr = res.data[0].rows;
-					listarr.map((item) => {
-						item.imgurl = this.baceUrl + item.cover_img_id
-					})
-          this.banner_data = listarr;
-					console.log(this.banner_data);
+          this.banner_data = res.data[0].rows;
 					this.total_pages = res.data[0].total;
 				})
 				this.search_info = ''

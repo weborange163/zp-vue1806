@@ -14,10 +14,12 @@
                 </el-option>
               </el-select>
             </el-col>
-            <el-date-picker size="mini"  v-model="value2" type="datetimerange" 
-              value-format="yyyy-MM-dd HH-mm-ss"
-              start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
+            <el-col :span='12'>
+              <el-date-picker size="mini"  v-model="value2" type="datetimerange" 
+                value-format="yyyy-MM-dd HH-mm-ss" style="width:100%" 
+                start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
               </el-date-picker>
+            </el-col>
           </el-row>
           <el-row :gutter="6">
             <el-col :span='7'>
@@ -30,17 +32,40 @@
                 </el-option>
               </el-select>
             </el-col>
-            <el-col :span='7'>
+            <el-col :span='6'>
               <el-input size="mini" type="number" placeholder="请输入起始年龄" v-model="value4"></el-input>
             </el-col>
-            <el-col :span='7'>
+            <el-col :span='6'>
               <el-input size="mini" type="number" placeholder="请输入结束年龄" v-model="value5"></el-input>
             </el-col>
           </el-row>
         </el-col>
-        <el-col :span='9' :offset="0" style="margin-top:26px;">
-          <el-row :gutter="6" type="flex" justify="end">
-            <el-col :span='14'>
+        <el-col :span='10' :offset="0">
+          <el-row style="margin-bottom:8px;">
+            <el-select size="mini" placeholder="会员身份" v-model="identityValue" style="width:30%;margin-right:2%;">
+              <el-option
+                v-for="item in identitySelect"
+                :key="item.value" :label="item.label"
+                :value="item.value">
+              </el-option>
+            </el-select>
+            <el-select size="mini" placeholder="选择省" v-model="provinceVal" style="width:30%;margin-right:2%;" @change="provinceChange">
+              <el-option
+                v-for="item in provinceArr"
+                :key="item.areaNo" :label="item.areaName"
+                :value="item.areaNo">
+              </el-option>
+            </el-select>
+            <el-select size="mini" placeholder="选择市" v-model="cityVal" style="width:30%;">
+                <el-option
+                v-for="item in cityArr"
+                :key="item.areaNo" :label="item.areaName"
+                :value="item.areaNo">
+              </el-option>
+            </el-select>
+          </el-row>
+          <el-row :gutter="6" >
+            <el-col :span='18'>
               <el-input size="mini" v-model="value6" placeholder="请输入用户名/用户ID/手机号"></el-input>
             </el-col>
             <el-col :span='3'>
@@ -183,6 +208,26 @@ export default {
           name:'',
           shortDes:''
         },
+        provinceArr:[],
+        cityArr:[],
+        provinceVal:'',
+        cityVal:'',
+        identityValue:'',
+        identitySelect:[{
+          value: '0',
+          label: '全部'
+          }, {
+            value: '100001',
+            label: '普通会员'
+          }, {
+            value: '100003',
+            label: '认证会员'
+          },
+          {
+            value:'100002',
+            label:'内部小号'
+          }
+        ],
         rules:{
           tel: [
             { required: true, message: '请输入手机号', trigger: 'blur' },
@@ -238,6 +283,10 @@ export default {
     },
     created() {
       this.showList();
+      this.$post('/area/findProvince',{tokenId:this.$store.state.user.tokenId}).then(res => {
+        console.log(res)
+        this.provinceArr=res.data;
+      });
     },
     methods: {
       showList(){
@@ -247,20 +296,19 @@ export default {
           limit: this.per_page,
           offset: this.currentPage,
           status:this.value,
-          simpleParameter:this.value6,
           queryType:this.value,
-          sex:this.value3,
+          sex:this.value3==0?'':this.value3,
           ageStart:this.value4,
           ageEnd:this.value5,
           simpleParameter:this.value6,
+          levelCode:this.identityValue=='0'?'':this.identityValue,
+          provinceId:this.provinceVal=='000000'?'':this.provinceVal,
+          cityId:this.cityVal
         };
         if(this.value == 0){
           params.queryType ='';
           params.startTime ='';
           params.endTime = ''
-        }
-        if(this.value3==0){
-          params.sex=''
         }
         if(this.value2){
           params.startTime = this.value2[0];
@@ -286,6 +334,16 @@ export default {
             this.loading=false;
           }
         })
+      },
+      provinceChange(val){
+        // console.log(val);
+        this.cityVal='';
+        if(val){
+          this.$post('/area/findCityByProvinceNo',{tokenId:this.$store.state.user.tokenId,areaNo:this.provinceVal}).then(res => {
+            this.cityArr = res.data;
+            console.log(this.cityArr)
+          })
+        }
       },
       //设置身份
       setIdentity(index,row){
@@ -330,10 +388,12 @@ export default {
             userId: row.userId
           }
           this.$post('members/getPermissions',params).then(res => {
+            this.checkList=[];
             // console.log(res);
             if(res.data[0]){
               this.checkList= (res.data[0].prohibitCodes).split(','); // "100003,100005"
             }
+              
           });
         })
       },

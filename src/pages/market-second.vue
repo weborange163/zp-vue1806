@@ -77,7 +77,7 @@
 					</el-form-item>
 					<!--上传图片-->
 					<el-form-item label="封面图" v-if="form2.imgType=='1'">
-						<img class="wh80" :src="imgFullSrc" alt="封面图展示" >
+						<img class="wh80" :src="imgSrc" alt="封面图展示" >
 					</el-form-item>
 					<el-form-item label="Tag标签:" >
 						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form2.tagLabel" :disabled="true"></el-input>
@@ -153,7 +153,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form2.checkTime}}</div></td>
                 <td><div class="cell">{{form2.checkPerson}}</div></td>
-                <td><div class="cell">{{form2.checkMessage}}</div></td>
+                <td><div class="cell"><p v-if="form2.status == '4'">{{form2.checkCause=='其他'?form2.checkMessage:form2.checkCause}}</p></div></td>
               </tr>
             </tbody>
           </table>
@@ -169,7 +169,6 @@
 		data() {
 			return {
         qita:true,
-        imgFullSrc:'',
 				baceUrl: '',
 				editorOption: {},
 				dialogImageUrl: '',
@@ -229,7 +228,6 @@
         this.status = this.form2.status;
         this.classifyType = this.form2.classifyType
         this.imgSrc = this.form2.showUrl;
-				this.imgFullSrc = this.baceUrl + this.imgSrc
         let selectid = this.classifyType;
         this.$get('/industryCategory/findIndustryCategoryList', {
 					tokenId: this.$store.state.user.tokenId
@@ -254,14 +252,21 @@
 					status: '5',
 				};
 				this.$post('industry/save', params).then(res => {
-					if(res.code === 0) {
-						console.log(1111111, res);
-					}
+					if(res.code == 0) {
+            setTimeout(() => {
+            this.$message({
+              message: res.msg?res.msg:'成功',
+              type: 'success'
+            });
+            this.$router.push({name: 'audit-market'});
+            }, 1000);
+          }else{
+            this.$message({
+              message: res.msg?res.msg:'失败',
+              type: 'error'
+            });
+          }
 				});
-				setTimeout(() => {
-						this.$router.push({name: 'audit-market'});
-						}, 1000);
-//				return true;
 			},
       selectChange(val){
         // console.log(val);
@@ -313,20 +318,15 @@
 		line-height: 30px;
 		max-width: 300px;
 	}
-	
 	.up_form .quill-editor .ql-container {
 		min-height: 550px;
 	}
-	/*.app-container .app-page-body{
-		min-height: 890px !important;
-	}*/
 		.quill-editor .ql-toolbar.ql-snow{
 		height: 60px;
 	}
 	.editor .el-form-item__content {
 		line-height: 20px;
 	}
-	
 	.up_form .el-input__inner{
 		height: 30px;
 		line-height: 30px;

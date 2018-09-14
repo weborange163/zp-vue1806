@@ -28,7 +28,8 @@
 				</el-col>
 				<el-col :span="5" :offset="2">
 					<el-input size="mini" v-model="inputs" placeholder="标题、创建人、会员id、文章id" style="width:70%;margin-right:5%;"></el-input>
-					<el-button size="mini" class="light_btn" style="width:20%;" @click.native.prevent="getMarket()">搜索</el-button>
+					<el-button v-if="activeTab=='first'" size="mini" class="light_btn" style="width:20%;" @click.native.prevent="getMarket()">搜索</el-button>
+					<el-button v-else size="mini" class="light_btn" style="width:20%;" @click.native.prevent="creatList()">搜索</el-button>
 				</el-col>
 			</el-row>
 		</div>
@@ -57,7 +58,7 @@
 											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
 										</div>
 									</el-popover>
-									<p style="display:inline-block;">{{ scope.row.title }}</p>
+									<span>{{ scope.row.title }}</span>
 								</template>
 							</el-table-column>
 
@@ -127,10 +128,9 @@
 											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
 										</div>
 									</el-popover>
-									<p style="display:inline-block;">{{ scope.row.title }}</p>
+									<span>{{ scope.row.title }}</span>
 								</template>
 							</el-table-column>
-
 							<el-table-column label="所属分类" prop="classify_type_name" width="120"></el-table-column>
 							<el-table-column label="创建人" prop="create_user_id" width="80"></el-table-column>
 							<el-table-column label="发布状态" prop="onlineTime" width="80">
@@ -195,7 +195,7 @@
 											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
 										</div>
 									</el-popover>
-									<p style="display:inline-block;">{{ scope.row.title }}</p>
+									<span>{{ scope.row.title }}</span>
 								</template>
 							</el-table-column>
 
@@ -436,7 +436,7 @@
 			}
 		},
 		created() {
-			console.log(1111111111, getToken())
+			// console.log(1111111111, getToken())
 			this.getMarket()
 
 		},
@@ -549,6 +549,8 @@
         this.value='';
 				this.value1='';
         this.value2='';
+        this.inputs='';
+        this.value6='';
 				console.log(tab, event);
 				if(tab.name == 'second') {
 					this.status='5';

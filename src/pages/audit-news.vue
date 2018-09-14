@@ -57,6 +57,9 @@
     <div class="box">
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="全部" name="first">
+          <div class="text-right marBo4">
+							<el-button class="light_btn" @click="getAuditlist">刷新</el-button>
+						</div>
           <div>
             <el-table :data="audit_all" border stripe v-loading="loading" :row-class-name="btnTable" :header-row-class-name="btnTable" >
               <el-table-column label="序号" type="index" width='50'></el-table-column>
@@ -149,6 +152,9 @@
           </div>
         </el-tab-pane>
         <el-tab-pane label="审核中" name="third">
+          <div class="text-right marBo4">
+            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+          </div>
         	<div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -190,6 +196,9 @@
           </div>
         </el-tab-pane>
         <el-tab-pane label="审核通过" name="fourth">
+          <div class="text-right marBo4">
+            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+          </div>
         	<div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -231,6 +240,9 @@
           </div>
         </el-tab-pane>
         <el-tab-pane label="审核未通过" name="fifth">
+          <div class="text-right marBo4">
+            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+          </div>
         	<div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -361,8 +373,19 @@ export default {
               offset:this.currentPage2
             }
             this.$post('news/list',params).then(res =>{
-              this.audit_no = res.data[0].rows;
-              this.total_pages2 = res.data[0].total;
+              if(res.code == '0'){
+                this.audit_no = res.data[0].rows;
+                this.total_pages2 = res.data[0].total;
+                this.$message({
+                  message: res.msg,
+                  type: 'success'
+                });
+              }else{
+                this.$message({
+                  message: '提交失败',
+                  type: 'error'
+                });
+              }
             })
 					})
 					// this.tableData[this.recoIndex].top_flag = "1";
@@ -506,6 +529,7 @@ export default {
     handleClick(tab, event) {
       this.currentPage1=1;
       this.currentPage2=1;
+      this.per_page2=10;
       this.search_pra='';
       this.value6='';
       this.value='';
@@ -546,7 +570,7 @@ export default {
       this.getAuditlist();
     },
     handleSizeChange2(val){
-      this.status='1'
+      // this.status='1'
       this.per_page2 = val;
       this.getTabList();
     },

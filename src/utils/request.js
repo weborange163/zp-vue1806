@@ -6,17 +6,15 @@ import 'nprogress/nprogress.css'// progress bar style
 //读取token
 import { getToken } from '@/utils/auth'
 import qs from 'qs'
-
 // 创建axios实例
 const service = axios.create({
   baseURL: process.env.BASE_API, // api的base_url
-  timeout: 30000, // 请求超时时间
+  timeout: 1000*60*5, // 请求超时时间
   // withCredentials: true
   /* headers: {
     "Content-Type": "application/x-www-form-urlencoded"
   } */
 })
-
 // request interceptor 请求拦截
 service.interceptors.request.use(config => {
   NProgress.start()
@@ -35,7 +33,6 @@ service.interceptors.request.use(config => {
   console.log(error) // for debug
   Promise.reject(error)
 })
-
 // respone interceptor 响应拦截
 service.interceptors.response.use(
   /**
@@ -67,10 +64,9 @@ service.interceptors.response.use(
 //       }
 //       return Promise.reject(res.msg)
 //     } else { // code: 200
-NProgress.done()
-	console.log(response)
+    NProgress.done()
+	// console.log(response)
     return response.data
-   
 //     }
   },
 	error => { // Status Code:500 502
@@ -82,7 +78,5 @@ NProgress.done()
     })
     NProgress.done()
     return Promise.reject(error)
-    
 })
-
 export default service

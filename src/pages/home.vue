@@ -25,11 +25,11 @@
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
-						<dd>{{registerNum}}</dd>
+						<dd>{{registerYesterdayNum}}</dd>
 					</dl>
 					<dl class="dl2">
 						<dt>今日</dt>
-						<dd>{{registerYesterdayNum}}</dd>
+						<dd>{{registerNum}}</dd>
 					</dl>
 					<p class="gap_vertical"></p>
 				</div>
@@ -40,11 +40,11 @@
 				<div class="main-div">
 					<dl class="dl1">
 						<dt>昨日</dt>
-						<dd>{{newsNum}}</dd>
+						<dd>{{newsYesterdayNum}}</dd>
 					</dl>
 					<dl class="dl2">
 						<dt>今日</dt>
-						<dd>{{newsYesterdayNum}}</dd>
+						<dd>{{newsNum}}</dd>
 					</dl>
 					<p class="gap_vertical"></p>
 				</div>
@@ -96,8 +96,6 @@
 			</div>
 		</div>
 	</div>
-
-
 <!--<div class="error-panel animated fadeInUp">
   <h1 class="error-code">404</h1>
   <p class="error-description">Page Not Found</p>

@@ -402,17 +402,5 @@ import { getBaceUrl } from '@/utils/auth'
 		height: 200px;
 		display: block;
 	}
-	#p1{
-		text-align: center;
-		font-size: 20px;
-	}
-	#p2{
-		 margin: 0 auto; height: 500px !important;margin-top: 2px;text-indent:2em; overflow-y: auto !important;
-	}
-	#p2 img{
-		display: block;
-		margin: 0 auto;
-		width: 320px !important;
-		
-	}
+
 </style>

@@ -56,6 +56,9 @@
     <div class="box">
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="全部" name="first">
+          <div class="text-right marBo4">
+							<el-button class="light_btn" @click="getAuditAll">刷新</el-button>
+						</div>
           <div>
             <el-table :data="audit_all" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
               <el-table-column label="序号" type="index" width='50'></el-table-column>
@@ -105,7 +108,7 @@
           <div>
           	<div class="text-right marBo4">
 							<el-button class="light_btn" @click="toAudited">批量审核</el-button>
-							<el-button class="light_btn">刷新</el-button>
+							<el-button class="light_btn" @click="getTabList">刷新</el-button>
 						</div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -145,6 +148,9 @@
         </el-tab-pane>
         <!--审核中-->
         <el-tab-pane label="审核中" name="Audit">
+          <div class="text-right marBo4">
+            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+          </div>
           <div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -163,7 +169,6 @@
                     <p v-if="scope.row.publish_source=='3'" >APP</p>
                     <p v-if="scope.row.publish_source=='2'" >数据爬取</p>
                 </template>
-              	
               </el-table-column>
               <el-table-column label="创建时间" prop="create_time" width="200"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
@@ -182,6 +187,9 @@
         
         <!--审核通过-->
         <el-tab-pane label="审核通过" name="adopt">
+          <div class="text-right marBo4">
+            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+          </div>
           <div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -218,6 +226,9 @@
         </el-tab-pane>
         <!--审核失败-->
         <el-tab-pane label="审核不通过" name="fail">
+          <div class="text-right marBo4">
+            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+          </div>
           <div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
@@ -329,54 +340,60 @@ export default {
 						status: '5',
 					}
 					this.$post('industry/checkByIds',params).then(res => {
-						console.log(res,res.code);
-						var params = {
-						tokenId:this.$store.state.user.tokenId,
-						limit:this.per_page2,
-						offset:this.currentPage2,
-						status:'2'
-					}
-			this.$post('/industry/listChick',params).then(res =>{
-				
-        console.log(res.data[0].rows)
-        this.audit_no	 = res.data[0].rows;
-        this.total_pages2 = res.data[0].total;
-      })
+						// console.log(res,res.code);
+						if(res.code == '0'){
+              var params = {
+                tokenId:this.$store.state.user.tokenId,
+                limit:this.per_page2,
+                offset:this.currentPage2,
+                status:'5'
+              }
+              this.$message({
+                message: res.msg?res.msg:'成功',
+                type: 'success'
+              });
+              this.getTabList();
+            }else{
+              this.$message({
+                message: res.msg?res.msg:'失败',
+                type: 'error'
+              });
+            }
 						
 					})
 					// this.tableData[this.recoIndex].top_flag = "1";
 					this.dialogVisible1 = false;
 				}else if(this.recommendRadio == '2'){
 					this.dialogVisible1 = false;
-				this.dialogFormVisible = true	
+				  this.dialogFormVisible = true	
 				}
 		},
 		//不通过
-			toAudits1(){
-        console.log(this.recoIndex)
-        var params = {
-          ids:this.ids.join(','),
-          tokenId: this.$store.state.user.tokenId,
-          status: '4',
-          checkCause:this.form.region,
-          checkMessage:this.form.name
+    toAudits1(){
+      console.log(this.recoIndex)
+      var params = {
+        ids:this.ids.join(','),
+        tokenId: this.$store.state.user.tokenId,
+        status: '4',
+        checkCause:this.form.region,
+        checkMessage:this.form.name
+      }
+      this.$post('industry/checkByIds',params).then(res => {
+        console.log(res,res.code);
+        if(res.code == 0){
+          this.$message({
+            message: res.msg,
+            type: 'success'
+          });
+          this.getTabList();
+        }else{
+          this.$message({
+            message: res.msg?res.msg:'失败',
+            type: 'error'
+          });
         }
-        this.$post('industry/checkByIds',params).then(res => {
-          console.log(res,res.code);
-          if(res.code == 0){
-            this.$message({
-              message: res.msg,
-              type: 'success'
-            });
-            this.getTabList();
-          }else{
-            this.$message({
-              message: res.msg?res.msg:'失败',
-              type: 'error'
-            });
-          }
-        })
-        this.dialogFormVisible = false;
+      })
+      this.dialogFormVisible = false;
 		},
   	//关闭不通过弹窗
   	handleClose2(done) {
@@ -498,14 +515,14 @@ export default {
     handleCurrentChange2(val){
     	this.currentPage2=val;
       console.log(`当前页: ${val}`);
-      this.getAuditAll();
+      this.getTabList();
     },
     handleSizeChange1(val){
       this.per_page1 = val;
       this.getAuditAll();
     },
     handleSizeChange2(val){
-      this.status='1'
+      // this.status='1'
       this.per_page2 = val;
       this.getTabList();
     },

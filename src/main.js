@@ -10,6 +10,7 @@ import MQuillEditor from 'vue-m-quill-editor'
 
 
 import axios from 'axios'
+Vue.prototype.$ajax = axios 
 //import VueAxios from 'vue-axios'
 
 import App from './App'

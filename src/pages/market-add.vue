@@ -249,7 +249,9 @@ export default {
             param.append('publishSource','1');
             param.append('status',status);
             param.append('classifyType',this.form2.classifyType);
-            param.append('newsFile',this.form2.file,this.form2.filename);
+            if(this.form2.imgType == '1'){
+               param.append('newsFile',this.form2.file,this.form2.filename);
+            }
             this.$post('industry/save', param).then(res => {
               if (res.code == 0) {
                 this.$message({

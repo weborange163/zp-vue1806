@@ -62,7 +62,7 @@
 					</el-form-item>
 					<!--上传图片-->
 					<el-form-item label="封面图" v-if="form2.imgType=='1'">
-						<img class="wh80" :src="imgFullSrc" alt="封面图展示" >
+						<img class="wh80" :src="form2.showUrl" alt="封面图展示" >
 					</el-form-item>
 					<el-form-item label="Tag标签:" >
 						<el-input placeholder="用逗号隔开，单个标签少于12字节" v-model="form2.tagLabel" :disabled="true"></el-input>
@@ -138,7 +138,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form2.checkTime}}</div></td>
                 <td><div class="cell">{{form2.checkPerson}}</div></td>
-                <td><div class="cell">{{form2.checkMessage}}</div></td>
+                <td><div class="cell"><p v-if="form2.status == '4'">{{form2.checkCause=='其他'?form2.checkMessage:form2.checkCause}}</p></div></td>
               </tr>
             </tbody>
           </table>
@@ -220,10 +220,9 @@ import { getBaceUrl } from '@/utils/auth'
 			}).then(res => {
 				this.form2 = res.data[0].industry
 //				alert(this.form2.content)
-				this.imgSrc = this.form2.showUrl
 				this.status = this.form2.status;
-				this.classifyType = this.form2.classifyType
-				this.imgFullSrc = this.baceUrl + this.imgSrc
+				this.classifyType = this.form2.classifyType;
+				this.imgFullSrc = this.form2.showUrl;
 				let selectid = this.classifyType;
 				//				alert(selectid)
 				//  	下拉菜单
@@ -275,12 +274,6 @@ import { getBaceUrl } from '@/utils/auth'
           });          
         });
       },
-			//获取封面图路径
-			getImgUrl() {
-				this.imgFullSrc = this.baceUrl + this.imgSrc;
-				console.log(this.imgSrc)
-				console.log(this.imgFullSrc)
-			},
 			fileOver() {
 				this.$message('只允许添加一张图片,如果替换请删除后再上传');
 			},
@@ -349,19 +342,7 @@ import { getBaceUrl } from '@/utils/auth'
 		min-height: 550px;
 		overflow-y: auto;
 	}
-	#p1{
-		text-align: center;
-		font-size: 20px;
-	}
-	#p2{
-		 margin: 0 auto; height: 500px !important;margin-top: 2px;text-indent:2em; overflow-y: auto !important;
-	}
-	#p2 img{
-		display: block;
-		margin: 0 auto;
-		width: 320px !important;
-		
-	}
+
 	
 
 </style>

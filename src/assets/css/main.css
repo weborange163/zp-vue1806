@@ -50,6 +50,12 @@ body{
   padding-left: 0 !important;
   text-indent: 16em !important;
 }
+.ql-editor blockquote{
+  border-left: 4px solid #ccc;
+  margin-bottom: 5px;
+  margin-top: 5px;
+  padding-left: 16px !important;
+}
 div{
   box-sizing: border-box;
 }
@@ -211,6 +217,7 @@ body .el-table th.gutter{
   border-radius: 0;
 }
 .el-table .cell{
+  width: 100%;
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
@@ -244,7 +251,9 @@ body .el-table th.gutter{
   font-size: 20px;
 }
 #p2{
-   margin: 0 auto; height: 500px;margin-top: 2px;text-indent:2em; overflow-y: auto !important;
+  padding-top: 14px;
+  margin: 0 auto; height: 500px;margin-top: 2px;
+  overflow-y: auto !important;
 }
 #p2 img{
   display: block;

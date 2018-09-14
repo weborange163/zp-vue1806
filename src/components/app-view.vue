@@ -21,8 +21,14 @@
       <app-header @switch="handleSideSwitch" @set-theme="handleSetTheme" @hide-side="handleSwitchHideSide"></app-header>
     </el-header>
     <el-main class="app-body">
-      <el-container style="height: 100%;min-height: 700px;background:#fff;" id="appBody">
-        <el-main class="app-page-body" style="width:100%;"><router-view></router-view></el-main>
+      <el-container style="min-height: 700px;background:#fff;" id="appBody">
+        <el-main class="app-page-body" style="width:100%;">
+          <keep-alive>
+            <router-view v-if="$route.meta.keepAlive"></router-view>
+          </keep-alive>
+          <router-view v-if="!$route.meta.keepAlive"></router-view>
+          <!-- <router-view></router-view> -->
+        </el-main>
         <!-- <el-footer class="app-footer" :height="footerHeight + 'px'">
            <app-footer></app-footer> 
         </el-footer> -->

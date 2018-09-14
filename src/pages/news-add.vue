@@ -261,30 +261,17 @@ import axios from 'axios'
 				let params = new FormData(); // 创建form对象
 				params.append('file',file,file.name);
 				// params.append('name',file.name);
-				console.log(file.name)
-				
+				// console.log(file.name)
 				this.$post('images/upload',params).then(res => {
 					let url = res.data[0].showUrl;
-					// console.log(url)
-					insert(url, 'center')
-					console.log(res);
+					console.log(insert);
+					insert(url, 'center');
+					// console.log(res);
 				})
 			},
 			getFullUrl(){
 				return (this.baceUrl+'/news/add')
 			},
-			aaa(){
-				var params = {
-					tokenId:this.$store.state.user.tokenId,
-					title:'111'
-				}
-				this.$post('news/add',params).then(res =>{
-						if(res.code == 0){
-							console.log(1111111,res)
-						}
-					})
-			},
-		
 			// 新建新闻
 			creatNews(formName,status){
 				this.$refs[formName].validate((valid) => {

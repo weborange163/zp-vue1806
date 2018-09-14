@@ -14,7 +14,7 @@
           <el-table-column prop="name"  label="分类名称"></el-table-column>
           <el-table-column  label="icon" width='100'>
             <template slot-scope="scope">
-							<img :src="scope.row.imgurl" alt="">
+							<img :src="scope.row.picture_url" alt="">
 						</template>
           </el-table-column>
           <el-table-column label="状态" width="100">
@@ -92,6 +92,7 @@ export default {
         }
       };
     return{
+      hasChangeFile:false,
       fileList:[],
       isEdit:false,
       editId:'',
@@ -168,7 +169,7 @@ export default {
       this.newDialog = true;
       this.classForm.title = row.name;
       this.classForm.radio = row.status;
-      this.fileList.push({url:row.imgurl});
+      this.fileList.push({url:row.picture_url});
       this.hasFmt = true;
       this.editId = row.id;
       this.isEdit=true;
@@ -180,11 +181,13 @@ export default {
         if(valid){
           let param = new FormData();
           param.append('tokenId',this.$store.state.user.tokenId);
-          param.append('newsFile',this.classForm.file,this.classForm.filename);
           param.append('name',this.classForm.title);
           param.append('status',this.classForm.radio);
           if(this.isEdit){
             param.append('id',this.editId);
+          }
+          if(this.hasChangeFile){
+            param.append('newsFile',this.classForm.file,this.classForm.filename);
           }
           this.$post('industryCategory/save',param).then(res =>{
             console.log(res)
@@ -262,11 +265,7 @@ export default {
       this.$get('industryCategory/list',params).then(res => {
         console.log(res)
         if(res.code==0){
-          var listarr = res.data[0].rows;
-					listarr.map((item) => {
-						item.imgurl = this.baceUrl + '/images/showImage?id=' + item.picture_id;
-					})
-          this.tableData = listarr;
+          this.tableData = res.data[0].rows;
           this.loading=false;
           this.total_pages = res.data[0].total;
         }
@@ -303,7 +302,8 @@ export default {
       this.$message.warning('当前限制选择 1 个文件');
     },
     handleRemove(file, fileList) {
-      console.log(file, fileList);
+      this.hasChangeFile=true;
+      // console.log(file, fileList);
       if(fileList.length == 0){
         this.hasFmt =false;
       }

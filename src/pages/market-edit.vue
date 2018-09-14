@@ -269,7 +269,7 @@
         } ,
 				uploadData: {},
         value: '',
-        imgFullSrc:''
+        hasChangeFile:false // 兼容firefox 如果不传图片,编辑保存时会报错
 			};
 		},
 		created() {
@@ -345,8 +345,10 @@
             param.append('publishSource','1');
             param.append('status',status);
             param.append('classifyType',this.form2.classifyType);
-            param.append('newsFile',this.form2.file,this.form2.filename);
             param.append('id',this.$route.params.id);
+            if(this.hasChangeFile && this.form2.imgType=='1'){
+              param.append('newsFile',this.form2.file,this.form2.filename);
+            }
             this.$post('industry/save', param).then(res => {
               if (res.code == 0) {
                 this.$message({
@@ -393,6 +395,7 @@
 			// 文件上传的删除  和放大!
 			handleRemove(file, fileList) {
         this.hasFmt=false;
+        this.hasChangeFile=true;
 				console.log(file, fileList);
       },
       fileChange(file,fileList){

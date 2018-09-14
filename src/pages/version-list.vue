@@ -140,6 +140,11 @@
 			</div>
 
 			<p class="title-p" v-if="bag.platformType == '1'">插件信息</p>
+      <div style="margin-bottom:10px;" v-if="bag.platformType == '1'">
+        <el-input style="width:120px" size="mini" v-model="filterBag" placeholder="请输入包名"></el-input>
+        <el-input style="width:120px" size="mini" v-model="filterCode" placeholder="请输入code版本"></el-input>
+        <el-button class="light_btn" size="mini" @click="getPlugList">搜 索</el-button>
+      </div>
 			<el-table :data="plugData" :row-class-name="miniTable" :header-row-class-name="miniTable" border v-if="bag.platformType == '1'">
         <el-table-column label="序号" type="index" width='50'></el-table-column>
 				<el-table-column prop="version_code" label="版本号" width='80'></el-table-column>
@@ -249,6 +254,8 @@
         }
       };
 			return {
+        filterBag:'',
+        filterCode:'',
         loading2:false,
         idDetail:'',
 				per_page:10,
@@ -521,6 +528,8 @@
           appId:this.idDetail,
           limit: this.per_page,
           offset: this.currentPage,
+          packageName:this.filterBag,
+          versionCode:this.filterCode
         }
         this.$post('pluginUpgrade/list',params).then(res => {
           console.log(res);
@@ -530,10 +539,11 @@
       },
 			handleCurrentChange(val) {
         this.currentPage = val;
+        this.getPlugList();
         // this.getList();
       },
       handleSizeChange(val){
-        this.per_page = vla;
+        this.per_page = val;
         this.getPlugList();
       },
       handlePictureCardPreview(file) {
@@ -607,7 +617,7 @@
 	.el-table th {
 		padding: 4px 0px;
   }
-  .version-list .cell{
+  .version-list td .cell{
     overflow: auto;
     white-space: normal;
   }
