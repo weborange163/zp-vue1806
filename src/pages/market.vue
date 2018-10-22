@@ -2,34 +2,26 @@
 	<div class="page-body news">
 		<div class="page-header">
 			<el-row>
-				<el-col :span="3">
-					<el-select size="mini" v-model="value" name="classifyType" placeholder="请选择分类" style="width:95%">
-						<el-option label="全部" value="全部"></el-option>
-						</el-option>
-						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
-						</el-option>
-					</el-select>
-				</el-col>
-        <el-col :span="3">
-          <el-select size="mini" v-model="value1" placeholder="请选择发布来源" style="width:95%">
+				<el-col :span="4">
+					发布来源:
+					<el-select v-model="value1" placeholder="发布来源" style="width:60%" size="mini">
 						<el-option v-for="item in optionss" :key="item.value1" :label="item.label" :value="item.value1">
 						</el-option>
 					</el-select>
-        </el-col>
+				</el-col>
 				<el-col :span="3">
-					<el-select size="mini" v-model="value2" placeholder="时间类型">
+					<el-select v-model="value2" placeholder="时间类型" size="mini">
 						<el-option v-for="item in optionsss" :key="item.value2" :label="item.label" :value="item.value2">
 						</el-option>
 					</el-select>
 				</el-col>
-				<el-col :span="8" class="padLe4">
-					<el-date-picker size="mini"  v-model="value6" type="datetimerange" value-format="yyyy-MM-dd HH:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期">
+				<el-col :span="6" class="padLe4">
+					<el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
 					</el-date-picker>
 				</el-col>
-				<el-col :span="5" :offset="2">
-					<el-input size="mini" v-model="inputs" placeholder="标题、创建人、会员id、文章id" style="width:70%;margin-right:5%;"></el-input>
-					<el-button v-if="activeTab=='first'" size="mini" class="light_btn" style="width:20%;" @click.native.prevent="getMarket()">搜索</el-button>
-					<el-button v-else size="mini" class="light_btn" style="width:20%;" @click.native.prevent="creatList()">搜索</el-button>
+				<el-col :span="6" :offset="4">
+					<el-input size="mini" v-model="inputs" placeholder="标题、创建人、文章ID" style="width:70%;margin-right:5%;"></el-input>
+					<el-button class="light_btn" style="width:20%;" size="mini" @click.native.prevent="newsList()">搜索</el-button>
 				</el-col>
 			</el-row>
 		</div>
@@ -38,275 +30,242 @@
 				<el-tab-pane label="全部" name="first">
 					<div class="tab1">
 						<div class="text-right marBo4">
-							<router-link :to="{name:'market-add'}">
-								<el-button class="light_btn" size="mini">添加行情</el-button>
+							<router-link :to="{name:'market-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
+								<el-button class="light_btn" size="mini">添加</el-button>
 							</router-link>
-							<el-button class="light_btn" @click="publishWaitTop()" size="mini">置顶排序</el-button>
-							<el-button class="light_btn" @click.native.prevent="getMarket()" size="mini">刷新</el-button>
+							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
+							<el-button class="light_btn" size="mini" @click="newsList()">刷新</el-button>
 						</div>
-						<el-table :data="tableData" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
+						<el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 							<!--<el-table-column label="#" type="index"></el-table-column>-->
-							<!--<el-table-column label="序号" prop="user_id" width='50'></el-table-column>-->
-							<el-table-column label="序号" align="center" type="index" width="50">
-							</el-table-column>
+							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-									<el-popover trigger="hover" placement="top" v-if="scope.row.link">
+									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
+									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#333;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '2'"></i>
+									<!-- <el-popover trigger="hover" placement="top" v-if="scope.row.link">
 										<p>{{ scope.row.link }}</p>
 										<div slot="reference" class="name_wrapper">
 											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
 										</div>
-									</el-popover>
+									</el-popover> -->
 									<span>{{ scope.row.title }}</span>
 								</template>
 							</el-table-column>
-
-							<el-table-column label="所属分类" prop="classify_type_name" width="120"></el-table-column>
-							<el-table-column label="创建人" prop="create_user_id" width="80"></el-table-column>
-							<el-table-column label="发布状态" prop="onlineTime" width="80">
+							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
+							<el-table-column label="发布状态" width="80">
 								<template slot-scope="scope">
-									<p v-if="scope.row.status=='1'" class="dshx">新建</p>
-									<p v-if="scope.row.status=='5'" class="yshx">已上线</p>
-									<p v-if="scope.row.status=='6'" class="yxx">已下线</p>
+									<p v-if="scope.row.status=='0'" >新建</p>
+									<p v-if="scope.row.status=='4'" class="yshx">已上线</p>
+									<p v-if="scope.row.status=='5'" class="yxx">已下线</p>
+									<p v-if="scope.row.status=='1'" class="dshx">待审核</p>
+									<p v-if="scope.row.status=='3'" class="yxx">审核不通过</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="上线时间" prop="online_time" width="120"></el-table-column>
-							<el-table-column label="发布来源" prop="publish_source" width="80">
+							<el-table-column label="发布来源"  width="80">
 								<template slot-scope="scope">
 									<p v-if="scope.row.publish_source=='1'">pc后台</p>
 									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
-									<p v-if="scope.row.publish_source=='3'">app</p>
+									<p v-if="scope.row.publish_source=='3'">APP端</p>
 								</template>
-
 							</el-table-column>
+							<el-table-column label="上线时间" prop="online_time" width="140"></el-table-column>
 							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
-							<el-table-column label="操作" width="220" fixed="right">
+							<el-table-column label="操作" width="240" fixed="right">
 								<template slot-scope="scope">
-									<!--v-if="scope.row.isUping"-->
-									<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-									<el-button type="text" v-else-if="scope.row.status!='5'" :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-									<el-button type="text" v-else-if="scope.row.top_flag=='0'&& scope.row.status == '5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-									<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="toAudit(scope.$index, scope.row)"> 提交审核 </el-button>
-									<!--v-if="scope.row.status =='已上线'"-->
-									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag=='1' " :disabled="true" style="margin-right:8px;vertical-align:middle;">下线</el-button>
-									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
-									<el-button type="text" v-if="scope.row.status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
-									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
-										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status == '0'" @click="toAudit(scope.row)">提交审核</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.top_flag != '1'&&scope.row.recommend !='1'&&scope.row.specialNewsStatus!=1" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
+									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
+										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
-									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
-									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
-										<el-button type="text" v-if="(scope.row.status=='6'||scope.row.status=='1')&&scope.row.publish_source!=3"><i class="iconfont icon-edit"></i></el-button>
+                  <el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.content_type != '3'" @click.native.prevent="recommend(scope.$index, scope.row)">
+                    <i class="iconfont icon-share"></i>
+                  </el-button>
+                  <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled> <i class="iconfont icon-share"></i></el-button>
+									<router-link :to="{name:'news-edit',params:{id:scope.row.id,argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
+										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									<el-button type="text" v-if="scope.row.status!='5'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" v-else disabled  @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus==0" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button class="marR10" type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
 							</el-table-column>
 						</el-table>
 					</div>
-					
 					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage1"
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="this.currentPage1"
              :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
               @size-change="handleSizeChange1" :total="this.total_pages1">
 						</el-pagination>
 					</div>
-					
 				</el-tab-pane>
         <el-tab-pane label="已上线" name="second">
-					<div class="tab1">
-						<el-table :data="newArticle" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
-							<el-table-column label="序号" align="center" type="index" width="50">
-							</el-table-column>
-							<el-table-column label="标题" prop="title">
-								<template slot-scope="scope">
-									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-									<el-popover trigger="hover" placement="top" v-if="scope.row.link">
-										<p>{{ scope.row.link }}</p>
-										<div slot="reference" class="name_wrapper">
-											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
-										</div>
-									</el-popover>
-									<span>{{ scope.row.title }}</span>
-								</template>
-							</el-table-column>
-							<el-table-column label="所属分类" prop="classify_type_name" width="120"></el-table-column>
-							<el-table-column label="创建人" prop="create_user_id" width="80"></el-table-column>
-							<el-table-column label="发布状态" prop="onlineTime" width="80">
-								<template slot-scope="scope">
-									<p v-if="scope.row.status=='1'" class="dshx">新建</p>
-									<p v-if="scope.row.status=='5'" class="yshx">已上线</p>
-									<p v-if="scope.row.status=='6'" class="yxx">已下线</p>
-								</template>
-							</el-table-column>
-							<el-table-column label="上线时间" prop="online_time" width="120"></el-table-column>
-							<el-table-column label="发布来源" prop="publish_source" width="80">
-								<template slot-scope="scope">
-									<p v-if="scope.row.publish_source=='1'">pc后台</p>
-									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
-									<p v-if="scope.row.publish_source=='3'">app</p>
-								</template>
-
-							</el-table-column>
-							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
-							<el-table-column label="操作" width="220" fixed="right">
-								<template slot-scope="scope">
-									<!--v-if="scope.row.isUping"-->
-									<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-									<el-button type="text" v-else-if="scope.row.status!='5'" :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-									<el-button type="text" v-else-if="scope.row.top_flag=='0'&& scope.row.status == '5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-									<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="toAudit(scope.$index, scope.row)"> 提交审核 </el-button>
-									<!--v-if="scope.row.status =='已上线'"-->
-									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag=='1' " :disabled="true" style="margin-right:8px;vertical-align:middle;">下线</el-button>
-									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
-									<el-button type="text" v-if="scope.row.status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
-									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
-										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
-									</router-link>
-									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
-									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
-										<el-button type="text" v-if="(scope.row.status=='6'||scope.row.status=='1')&&scope.row.publish_source!=3"><i class="iconfont icon-edit"></i></el-button>
-									</router-link>
-									<el-button type="text" v-if="scope.row.status!='5'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" v-else disabled  @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-								</template>
-							</el-table-column>
-						</el-table>
-					</div>
-					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage2"
-             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper"
-              @size-change="this.per_page2" :total="this.total_pages2">
-						</el-pagination>
-					</div>
-				</el-tab-pane>
-        <el-tab-pane label="已下线" name="third">
-					<div class="tab1">
-						<el-table :data="newArticle" :row-class-name="btnTable" :header-row-class-name="btnTable" border stripe>
-							<el-table-column label="序号" align="center" type="index" width="50">
-							</el-table-column>
-							<el-table-column label="标题" prop="title">
-								<template slot-scope="scope">
-									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
-									<el-popover trigger="hover" placement="top" v-if="scope.row.link">
-										<p>{{ scope.row.link }}</p>
-										<div slot="reference" class="name_wrapper">
-											<i class="iconfont icon-link" style="color:#3658A7;vertical-align: middle;" v-if="scope.row.link"></i>
-										</div>
-									</el-popover>
-									<span>{{ scope.row.title }}</span>
-								</template>
-							</el-table-column>
-
-							<el-table-column label="所属分类" prop="classify_type_name" width="120"></el-table-column>
-							<el-table-column label="创建人" prop="create_user_id" width="80"></el-table-column>
-							<el-table-column label="发布状态" prop="onlineTime" width="80">
-								<template slot-scope="scope">
-									<p v-if="scope.row.status=='1'" class="dshx">新建</p>
-									<p v-if="scope.row.status=='5'" class="yshx">已上线</p>
-									<p v-if="scope.row.status=='6'" class="yxx">已下线</p>
-								</template>
-							</el-table-column>
-							<el-table-column label="上线时间" prop="online_time" width="120"></el-table-column>
-							<el-table-column label="发布来源" prop="publish_source" width="80">
-								<template slot-scope="scope">
-									<p v-if="scope.row.publish_source=='1'">pc后台</p>
-									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
-									<p v-if="scope.row.publish_source=='3'">app</p>
-								</template>
-
-							</el-table-column>
-							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
-							<el-table-column label="操作" width="220" fixed="right">
-								<template slot-scope="scope">
-									<!--v-if="scope.row.isUping"-->
-									<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
-									<el-button type="text" v-else-if="scope.row.status!='5'" :disabled="true" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-									<el-button type="text" v-else-if="scope.row.top_flag=='0'&& scope.row.status == '5'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp1(scope.$index, scope.row)"> 置顶 </el-button>
-									<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="toAudit(scope.$index, scope.row)"> 提交审核 </el-button>
-									<!--v-if="scope.row.status =='已上线'"-->
-									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag=='1' " :disabled="true" style="margin-right:8px;vertical-align:middle;">下线</el-button>
-									<el-button type="text" v-if="scope.row.status=='5' && scope.row.top_flag!='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
-									<el-button type="text" v-if="scope.row.status=='6'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
-									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
-										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
-									</router-link>
-									<!--<el-button type="text" v-if="scope.row.status =='已上线'" @click.native.prevent="recommend(scope.row)"><i class="iconfont icon-share"></i></el-button>-->
-									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
-										<el-button type="text" v-if="(scope.row.status=='6'||scope.row.status=='1')&&scope.row.publish_source!=3"><i class="iconfont icon-edit"></i></el-button>
-									</router-link>
-									<el-button type="text" v-if="scope.row.status!='5'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" v-else disabled  @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-								</template>
-							</el-table-column>
-						</el-table>
-					</div>
-					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange" :current-page="currentPage2"
-             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper"
-              @size-change="this.per_page2" :total="this.total_pages2">
-						</el-pagination>
-					</div>
-				</el-tab-pane>
-				<el-tab-pane label="新建" name="fourth">
-					<div class="tab2">
-						<div class="text-right marBo4">
-							<el-button class="light_btn" @click="toAudits">批量提交审核</el-button>
-							<el-button class="light_btn" @click.native.prevent="creatList()">刷新</el-button>
+          <div class="tab2">
+            <div class="text-right marBo4">
+							<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
+								<el-button class="light_btn" size="mini">添加新闻</el-button>
+							</router-link>
+							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
+							<el-button class="light_btn" size="mini" @click="newsList()">刷新</el-button>
 						</div>
-						<el-table :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="newArticle" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
+            <el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
+							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
+							<el-table-column label="标题" prop="title">
+								<template slot-scope="scope">
+									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
+									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#333;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '2'"></i>
+								  <span>{{ scope.row.title }}</span>
+                </template>
+							</el-table-column>
+							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
+							<el-table-column label="发布状态" width="80">
+                <template slot-scope="scope">
+									<p class="yshx">已上线</p>
+                </template>
+							</el-table-column>
+							<el-table-column label="发布来源"  width="120">
+								<template slot-scope="scope">
+									<p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">APP端</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="文章ID" prop="article_id"  width="80"></el-table-column>
+							<el-table-column label="操作" width="240" fixed="right">
+								<template slot-scope="scope">
+									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.top_flag != '1'&&scope.row.recommend !='1'&&scope.row.specialNewsStatus!=1" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
+                  <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
+										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
+                  <el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.content_type != '3'" @click.native.prevent="recommend(scope.$index, scope.row)">
+                    <i class="iconfont icon-share"></i>
+                  </el-button>
+                  <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled> <i class="iconfont icon-share"></i></el-button>
+                  <el-button class="marR10" type="text" disabled><i class="iconfont icon-delete unclick"></i></el-button>
+								</template>
+							</el-table-column>
+						</el-table>
+          </div>
+          <div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange1" :total="this.total_pages1">
+						</el-pagination>
+					</div>
+        </el-tab-pane>
+        <el-tab-pane label="已下线" name="third">
+          <div class="tab3">
+            <el-table :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
+							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
+							<el-table-column label="标题" prop="title">
+								<template slot-scope="scope">
+									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
+									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
+									<i class="iconfont icon-zhuanti" style="color:#333;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '2'"></i>
+									<span>{{ scope.row.title }}</span>
+								</template>
+							</el-table-column>
+							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
+							<el-table-column label="发布状态" width="80">
+                <template slot-scope="scope">
+									<p class="yxx">已下线</p>
+                </template>
+							</el-table-column>
+							<el-table-column label="发布来源"  width="80">
+								<template slot-scope="scope">
+									<p v-if="scope.row.publish_source=='1'">pc后台</p>
+									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">APP端</p>
+								</template>
+							</el-table-column>
+							<el-table-column label="文章ID" prop="article_id" width="120"></el-table-column>
+							<el-table-column label="操作" width="160" fixed="right">
+								<template slot-scope="scope">
+									<el-button type="text" class="marR10" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
+									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
+										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
+									<router-link :to="{name:'news-edit',params:{id:scope.row.id,argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
+										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
+									</router-link>
+									<el-button type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+                  <el-button class="marR10" type="text" v-else disabled><i class="iconfont icon-delete unclick"></i></el-button>
+                </template>
+							</el-table-column>
+						</el-table>
+          </div>
+          <div style="margin-top:20px;">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange1" :total="this.total_pages1">
+						</el-pagination>
+					</div>
+        </el-tab-pane>
+				<el-tab-pane label="新建" name="fourth">
+					<div class="tab4">
+						<div class="text-right marBo4">
+							<el-button class="light_btn" size="mini" @click="toAudits">批量提交审核</el-button>
+							<el-button class="light_btn" size="mini" @click="newsList">刷新</el-button>
+						</div>
+						<el-table :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55" align="center">
 							</el-table-column>
 							<el-table-column type="index" label="序号" width="50">
 							</el-table-column>
 							<el-table-column prop="title" label="标题">
 							</el-table-column>
-							<el-table-column prop="create_user_id" label="创建人" width="100">
+							<el-table-column prop="createUser" label="创建人" width="100">
 							</el-table-column>
 							<el-table-column label="状态" width="50">
 								<template slot-scope="scope">
-									<p v-if="scope.row.status=='1'" class="dshx">新建</p>
-									<p v-if="scope.row.status=='5'" class="yshx">已上线</p>
-									<p v-if="scope.row.status=='6'" class="yxx">已下线</p>
+									<p v-if="scope.row.status=='0'">新建</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="发布来源" width="100">
+							<el-table-column label="发布来源"  width="100">
 								<template slot-scope="scope">
 									<p v-if="scope.row.publish_source=='1'">pc后台</p>
-									<p v-if="scope.row.publish_source=='3'">app</p>
 									<p v-if="scope.row.publish_source=='2'">数据爬取</p>
+									<p v-if="scope.row.publish_source=='3'">移动端</p>
 								</template>
 							</el-table-column>
-							<el-table-column label="文章ID" prop="id"></el-table-column>
-							<el-table-column label="操作" width="300" fixed="right">
+							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
+							<el-table-column label="操作" width="200" fixed="right">
 								<template slot-scope="scope">
-									<router-link :to="{name:'market-lookes',params:{id:scope.row.id}}">
-										<el-button type="text"><i class="iconfont icon-see"></i></el-button>
+									<!-- <el-button class="marR10" type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button> -->
+									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
+										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
-									
-									<!--<el-button type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>-->
-									<router-link :to="{name:'market-edit',params:{id:scope.row.id}}">
-										<el-button type="text" v-if="scope.row.status!='5'"><i class="iconfont icon-edit"></i></el-button>
+                  <router-link :to="{name:'news-edit',params:{id:scope.row.id,argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
+                    <el-button class="marR10" type="text" ><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
-									
-									<!--<el-button type="text"><i class="iconfont icon-edit"></i></el-button>-->
-									<el-button type="text" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
-									<el-button type="text" @click.native.prevent="toAudit(scope.$index, scope.row)">提交审核</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
+									<el-button class="marR10" type="text" @click="toAudit(scope.row)">提交审核</el-button>
 								</template>
 							</el-table-column>
 						</el-table>
 					</div>
-					
 					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2"
-             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper"
-              @size-change="this.per_page2" :total="this.total_pages2">
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1"
+             :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange1" :total="this.total_pages1">
 						</el-pagination>
 					</div>
-
 				</el-tab-pane>
+
 			</el-tabs>
+
 			<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
 				<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 					<el-table-column prop="title" label="标题"></el-table-column>
@@ -332,67 +291,111 @@
           <el-button size="small" type="primary" @click="toPublish()">发 布</el-button>
         </span>
 			</el-dialog>
-			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" :before-close="handleClose">
-				<!--<el-radio v-model="recommendRadio" label="1">推荐到banner</el-radio><br/>-->
-				<el-radio v-model="recommendRadio" label="2">置顶-列表区</el-radio>
+			<el-dialog title="推荐到行情主页" :visible.sync="dialogVisible1" center width="30%" style="padding-left:20px;">
+				<el-radio v-model="recommendRadio" label="1" class="marBo4">置顶-行情推荐列表区</el-radio><br/>
+				<el-radio v-model="recommendRadio" label="2">推荐到banner</el-radio>
 				<span slot="footer" class="dialog-footer">
-          <el-button @click="dialogVisible1 = false">取 消</el-button>
-          <el-button type="primary" @click="dialogVisible1 = false">确 定</el-button>
+          <el-button @click="dialogVisible1 = false;recommendRadio=''" class="light_btn">取 消</el-button>
+          <el-button type="primary" @click="sureReco" class="light_btn">确 定</el-button>
         </span>
 			</el-dialog>
-
+			<el-dialog center
+					width="30%"
+					:visible.sync="bannerDialog"
+					append-to-body>
+					<el-form :model="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
+						<el-form-item label="原文标题">
+							<el-input size="mini" v-model="bannerForm.title" :disabled="true"></el-input>
+						</el-form-item>
+						<el-form-item label="短标题" prop="title_short">
+							<el-input size="mini" v-model="bannerForm.title_short"></el-input>
+						</el-form-item>
+						<el-form-item label="banner图片" label-width="110px" required>
+							<el-upload 
+								action="" :data="uploadData" :multiple="false" :limit='1'
+								ref="upload" name="file"
+								list-type="picture-card"
+								:auto-upload="false" :on-exceed="handleExceed"
+								:on-preview="handlePictureCardPreview"
+								:on-change="fileChange"
+								:on-remove="handleRemove">
+								<i class="el-icon-plus"></i>
+							</el-upload>
+							<el-dialog :visible.sync="dialogVisible2">
+								<img width="100%" :src="dialogImageUrl" alt="">
+							</el-dialog>
+						</el-form-item>
+						<el-form-item label="类型">
+							<el-input size="mini" v-model="bannerForm.type" :disabled="true"></el-input>
+						</el-form-item>
+						<el-form-item label="链接">
+							<el-input size="mini" v-model="bannerForm.articleId" :disabled="true"></el-input>
+						</el-form-item>
+					</el-form>
+					<span slot="footer" class="dialog-footer">
+						<el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
+						<el-button type="primary" @click="toBanner" class="light_btn">保 存</el-button>
+					</span>
+				</el-dialog>
+			<!-- 分页 -->
+			
 		</div>
 	</div>
 </template>
 <script type="text/javascript">
-	import { formatTime, parseTime } from '@/utils/index' //@ === src
-	import { getToken } from '@/utils/auth' //@ === src
+	import { HTMLDecode,getBaceUrl } from '@/utils/auth'
+
 	export default {
-		name: 'market',
+    name: 'home',
 		data() {
+      var valiIcon = (rule, value, callback) => { // 图片验证
+        if (!this.hasFmt) {
+          callback(new Error('请上传图片'));
+        } else {
+          callback();
+        }
+      };
 			return {
-        status:'1',
+				bannerForm:{
+          loading:false,
+					title:'',
+					file:'',
+					filename:'',
+					title_short:'',
+					articleId:'',
+					type:'新闻',
+					link:''
+				},
+				bannerRules: {
+					title_short: [
+            { required: true, message: '请输入短标题', trigger: 'blur' },
+            {min:1,max:10,message:'短标题在10字以内', trigger:'blur'}
+          ],
+          icon:[
+            {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
+          ]
+				},
+				bannerDialog:false,
+				loading:false,
 				multipleSelection: [],
-				newArticle: [{
-					num: 1,
-					title: 'test7mkaiemlaoapuemske93osksks',
-					author: 'web',
-					classification: 'app'
-				}],
 				activeTab: 'first',
-				recommendRadio: 1,
+				recommendRadio: '', // 推荐到banner/置顶的radio值
+				recoIndex:0,	// 点击推荐到时的表格的index
 				dialogVisible: false,
 				dialogVisible1: false,
-				loading: false,
-				per_page: 10, //每页显示几条
-				total_pages: 100, // 总页数
-				current_page: 1, // 页面默认展示的当前页码
-				currentPage1: 1, // 页面默认展示的当前页码
-				currentPage2: 1,
-				total_pages2: 0,
+        dialogVisible2: false,
+        status:'',
 				per_page1: 10,
-				per_page2: 10,
 				total_pages1: 0,
-				classifyType: '',
-				upData: [
-				],
-				tableData: [],
-				options: [{
-					value: '选项1',
+				currentPage1: 1, // 页面默认展示的当前页码
+				params:{},
+				upData: [],
+        tableData: [],
+			optionss: [
+        {
+					value1: '',
 					label: '全部'
-				}, {
-					value: '选项5',
-					label: '已上线'
-				}, {
-					value: '选项6',
-					label: '已下线'
-				}],
-				optionss: [
-					 {
-					value1: '全部',
-					label: '全部'
-				}
-				,{
+				},{
 					value1: '3',
 					label: 'APP'
 				}, {
@@ -402,317 +405,441 @@
 					value1: '2',
 					label: '数据爬取'
 				}],
-				optionsss: [
-          {	value2: '全部',
-          label: '全部'
-          },{
-					value2: '3',
+				optionsss: [{
+					value2: 'online',
 					label: '上线时间'
 				}, {
-					value2: '1',
+					value2: 'create',
 					label: '创建时间'
 				}, {
-					value2: '4',
+					value2: 'offline',
 					label: '下线时间'
 				}, {
-					value2: '2',
+					value2: 'audit',
 					label: '审核时间'
 				}],
 				value6: '',
 				inputs: '',
 				value: '',
-				value1: '',
-				value2: '',
+				value1:'',
+				value2:'',
 				dataList: [],
-				topFlag: '',
-				timeStart: '',
-				timeEnd: '',
 				ids:[],
+				baceUrl:'',
+				dialogImageUrl:'',
+        uploadData:{},
+        hasFmt:false,
+        fromparams:{},
+        argu:{}
 			}
+		},
+		created(){
+      this.baceUrl = getBaceUrl();
+      // console.log(this.$route.params);
+      if(this.$route.params.argu){
+        this.argu = this.$route.params.argu;
+        this.value1=this.argu.a;
+        this.value2=this.argu.b;
+        this.value6=this.argu.c;
+        this.inputs=this.argu.d;
+        this.activeTab=this.argu.e;
+        this.per_page1=this.argu.f;
+        this.currentPage1=this.argu.g;
+        if(this.activeTab == 'fourth'){ 	
+					this.status='0';
+        }
+        if(this.activeTab == 'second'){ 	
+					this.status='4';
+        }
+        if(this.activeTab == 'third'){ 	
+					this.status='5'
+        }
+        if(this.activeTab=='first'){
+          this.status='';
+        }
+        // console.log(this.currentPage1);
+      }
+      this.newsList();
+    },
+		mounted() {
+			// this.db();
 		},
 		computed: {
 			upDataLength: function() {
 				return this.upData.length - 1;
 			}
 		},
-		created() {
-			// console.log(1111111111, getToken())
-			this.getMarket()
-
-		},
-		mounted() {
-			this.$get('/industryCategory/findIndustryCategoryList', {
-				tokenId: this.$store.state.user.tokenId
-			}).then(res => {
-				console.log(res.data)
-				this.classifyType = res.data
-			})
-			// console.log(222222, this.$store.state.user, sessionStorage.getItem('tokenId'));
-		},
 		methods: {
-			//实现置顶排序的方法
-			changeIndex(index, rows, dir) {
-				if(dir == 'isUp') {
-					var a = rows[index]
-					var b = rows[index - 1]
-					rows.splice(index - 1, 1, a)
-					rows.splice(index, 1, b)
-				} else {
-					var a = rows[index]
-					var b = rows[index + 1]
-					rows.splice(index + 1, 1, a)
-					rows.splice(index, 1, b)
-				}
+			//上下线操作
+			onOff(row,status,type){
+				this.$confirm(`确定要${type}该新闻吗?`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						status:status,
+						id:row.id
+					}
+					this.$post('news/isOnline',params).then(res => {
+						console.log(res)
+						this.newsList();
+						this.$message({
+							type: 'success',
+							message: res.msg
+						});
+					})
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });          
+        });
+				console.log(row)
 			},
-
+			handleRemove(file, fileList) {
+        console.log(file, fileList);
+				if(fileList.length == 0){
+					this.hasFmt =false;
+				}
+      },
+      handlePictureCardPreview(file) {
+				console.log(file)
+        this.dialogImageUrl = file.url;
+        this.dialogVisible2 = true;
+			},
+			getFullUrl(){
+				return (this.baceUrl+'/bannerInfo/save')
+			},
 			// 置顶排序
-			publishWaitTop() {
+			publishWaitTop(){
 				this.dialogVisible = true;
 				this.loading = true;
-				this.$get('/industry/findIndustryList', {
-					tokenId: this.$store.state.user.tokenId,
-					status: '5',
-					topFlag: '1'
-				}).then(res => {
+				this.$get('news/publishWaitTop',{tokenId:this.$store.state.user.tokenId,articleType:'2'}).then(res =>{
 					this.loading = false;
 					console.log(res)
 					this.upData = res.data;
 				})
 			},
-			
-			
 			//提交置顶排序(弹框点击发布)
-			toPublish() {
+			toPublish(){
 				// console.log(this.upData)
-				var newsInfos = [];
+				var newsInfos =[];
 				this.upData.map((item, index) => {
-					//	newsInfos.push({id:item.id,orderNum:index+1})
+				//	newsInfos.push({id:item.id,orderNum:index+1})
 					newsInfos.push(item.id);
 				})
 				var params = {
-					tokenId: this.$store.state.user.tokenId,
+					tokenId:this.$store.state.user.tokenId,
 					// newsInfos:JSON.stringify(newsInfos)
-					ids: newsInfos.join(',')
+					ids:newsInfos.join(',')
 				}
 				console.log(params);
-				this.$post('/industry/publishOrederByIds', params).then(res => {
+				this.$post('news/publishTop',params).then(res => {
 					this.$message({
-						message: res.msg,
-						type: 'success'
-					});
+          message: res.msg,
+          type: 'success'
+        });
 				})
 				this.dialogVisible = false
-				this.getMarket()
-				//				alert(111)
 			},
-			//列表
-			getMarket() {
-        var params = {
-          tokenId: this.$store.state.user.tokenId,
-          limit: this.per_page1,
-          offset: this.currentPage1, 
-          title: this.inputs,
-          classifyType: this.value=='全部'?'':this.value,
-					publishSource: this.value1=='全部'?'':this.value1,
-          timeType: this.value2=='全部'?'':this.value2,
-        }
-        if(this.value6){
-          params.timeStart = this.value6[0];
-          params.timeEnd = this.value6[1];
-        }
-				this.$get('industry/list', params).then(res => {
-					console.log(res.data[0].rows)
-					this.tableData = res.data[0].rows
-					this.total_pages1 = res.data[0].total;
-				})
+			//提交审核
+			toAudit(row){
+				this.$confirm('是否提交到审核列表?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+					var params={
+						tokenId:this.$store.state.user.tokenId,
+						ids:row.id
+					}
+					this.$post('news/batchWaitCheck',params).then(res => {
+						this.newsList();
+						this.$message({
+							type: 'success',
+							message: '操作成功!'
+						});
+					})
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });          
+        });
+				
 			},
-			//刷新
-			
-			marketShow(row) {
+			//新闻预览
+			newsShow(row){
 				console.log(row.id);
 				var params = {
-					tokenId: this.$store.state.user.tokenId,
-					id: row.id
+					tokenId:this.$store.state.user.tokenId,
+					id:row.id
 				}
-				this.$get('industry/get', params).then(res => {
+				this.$get('news/show',params).then(res =>{
+					
 					console.log(res)
 				})
 			},
-			miniTable(row) {
-				return 'miniTable'
+			//新闻列表
+			newsList(){
+        this.loading=true;
+				// if(!params){
+					//console.log(params)
+        var params={
+          articleType:'2',
+          tokenId:this.$store.state.user.tokenId,
+          limit:this.per_page1,
+          offset:this.currentPage1,
+          status:this.status,
+          publishSource:this.value1,
+          timeType:this.value2,
+          simpleParameter:this.inputs,
+          startTime:this.value6[0],
+          endTime:this.value6[1],
+        }
+      if(this.status==''){
+        params.queryType = 'LineAndCreate' ;
+        delete params.status;
+      }else{
+        params.status=this.status;
+        delete params.queryType;
+      }
+      // console.log(params)
+      this.$post('/news/list',params).then(res => {
+        // console.log(res.data[0].rows)
+        if(res.code == 0){
+          this.loading=false;
+          this.$message({
+            message: '成功获取新闻列表',
+            type: 'success'
+          });
+          if(this.argu.g){
+            this.currentPage1=this.argu.g;
+            this.argu.g=0;
+          }
+          this.tableData = res.data[0].rows;
+          this.total_pages1 = res.data[0].total;
+        }
+      });
+    },
+			//tab1 分页
+			handleCurrentChange1(val) {
+        // console.log(val);
+				this.currentPage1 = val;
+				// console.log(this.params)
+				this.newsList();
+      },
+     
+     // 推荐到banner的确定按钮事件
+			toBanner(){
+        this.$refs.bannerForm.validate((valid) => {
+          if(valid){
+            let param = new FormData();
+            param.append('file',this.bannerForm.file,this.bannerForm.filename);
+            param.append('tokenId',this.$store.state.user.tokenId);
+            param.append('titleShort',this.bannerForm.title_short);
+            param.append('bannerType','3');
+            param.append('linkId',this.bannerForm.link);
+            param.append('articleId',this.bannerForm.articleId);
+            console.log(param)
+            this.$post('bannerInfo/save',param).then(res =>{
+              console.log(res);
+              if(res.code == 0){
+                this.$message({
+                  type: 'success',
+                  message: res.msg
+                });
+                setTimeout(() => {
+                  this.newsList();
+                }, 1000);
+                this.bannerDialog = false;
+              }else{
+                this.$message({
+                  type: 'warning',
+                  message: res.msg?res.msg:'出错了'
+                });
+              }
+            })
+          }
+        })
+        
 			},
-			btnTable(row) {
-				return 'btnTable'
+		//图片的验证
+			fileChange(file,fileList){
+				this.bannerForm.filename = file.name;
+				this.bannerForm.file = file.raw;
+				console.log(file.raw)
+				if(fileList.length>0){
+					this.hasFmt = true;
+				}
 			},
-			
+			// 批量提交审核
+			toAudits(){
+				if(this.ids == false){
+					this.$message({
+						message: '您没有勾选任何文章!',
+						type: 'warning'
+					});
+					return;
+				}
+				this.$confirm('确定要提交审核吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						ids:this.ids.join(',')
+					}
+					console.log(params)
+					this.$post('news/batchWaitCheck',params).then(res => {
+						console.log(res)
+						this.newsList();
+						this.$message({
+							type: 'success',
+							message: '提交成功!'
+						});
+					})
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });          
+        });
+				
+			},
+			// 复选框操作, 获取选中的新闻的article_id
+			handleSelectionChange(val) {
+				this.multipleSelection = val;
+				this.ids = [];
+				this.multipleSelection.map(item => {
+					this.ids.push(item.id);
+				})
+			},
+			// tab切换
 			handleClick(tab, event) {
-        this.value='';
-				this.value1='';
+        // console.log(tab.name, event);
+        this.currentPage1=1;
+        this.value1='';
         this.value2='';
         this.inputs='';
         this.value6='';
-				console.log(tab, event);
-				if(tab.name == 'second') {
-					this.status='5';
-					this.creatList();
-				}else if(tab.name == 'third'){
-	        this.status='6';
-					this.creatList();
-        }else if(tab.name == 'fourth'){
-          this.status='1';
-					this.creatList();
-        }else if(tab,name == 'first'){
-          this.status='';
-					this.getMarket();
+				if(tab.name == 'fourth'){ 	
+					this.status='0';
         }
-
+        if(tab.name == 'second'){ 	
+					this.status='4';
+        }
+        if(tab.name == 'third'){ 	
+					this.status='5'
+        }
+        if(tab.name=='first'){
+          this.status='';
+        }
+        this.newsList();
+			},
+			// 确定推荐到置顶/banner
+			sureReco(){
+				this.bannerForm={
+					title:'',
+					file:'',
+					filename:'',
+					title_short:'',
+					articleId:'',
+					type:'新闻',
+					link:''
+				};
+				if(this.recommendRadio == '1'){	// 推荐到置顶
+					console.log(this.recoIndex)
+					var params = {
+						tokenId:this.$store.state.user.tokenId,
+						id: this.tableData[this.recoIndex].id,
+						topFlag:'1'
+					}
+					this.$post('news/top',params).then(res => {
+						console.log(res,res.code);
+						if(res.code == '2'){
+							this.$message({
+								message: res.msg,
+								type: 'warning'
+							});
+						}else if(res.code == '0'){
+              this.$message({
+                type: 'success',
+                message: '操作成功!'
+              });
+              setTimeout(() => {
+                this.newsList();
+              }, 1000);
+            }
+					})
+					this.dialogVisible1 = false;
+				}else if(this.recommendRadio == '2'){	// 推荐到banner
+          // console.log('推荐到banner');
+          if(this.tableData[this.recoIndex].recommend !='0'){   // 判断是否是已经推荐到了banner列表,
+            this.$message({
+              message: '本条消息已经推荐到了banner,请去banner列表查看',
+              type: 'warning'
+            });
+            this.dialogVisible1 = false;
+            return;
+          }
+					// this.tableData[this.recoIndex].title,
+					this.bannerForm.title = this.tableData[this.recoIndex].title;
+					this.bannerForm.link = this.tableData[this.recoIndex].id;
+					this.bannerForm.articleId = this.tableData[this.recoIndex].article_id;
+					this.dialogVisible1 = false;
+					this.bannerDialog =true;
+				}else{
+					 this.$message('请选择置顶或者banner');
+				}
+				// this.dialogVisible1 = false;
 			},
 			//推荐到
-			recommend(row) {
-				this.dialogVisible1 = true;
+			recommend(index,row) {
+				if(row.top_flag == '1'){
+					this.$message({
+						message: '本条消息已经置顶,需取消置顶才能操作',
+						type: 'warning'
+					});
+				}else if(row.recommend == '1'){
+          this.$message({
+						message: '本条消息已经被推荐到了banner并上线,请去banner列表查看',
+						type: 'warning'
+					});
+        }else{
+					this.dialogVisible1 = true;
+					this.recoIndex = index;	// 保存当前的index
+					console.log(row,this.recoIndex);
+				}
 			},
 			//取消置顶
-			cancelUp(index, rows) {
+			cancelUp(row) {
 				this.$confirm('确定要取消置顶吗?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'
 				}).then(() => {
 					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						id: rows.id,
-						topFlag: '0'
+						tokenId:this.$store.state.user.tokenId,
+						id: row.id,
+						topFlag:'0'
 					}
-					this.$post('/industry/downTop', params).then(res => {
-						// console.log(res)
+					console.log(params.id)
+					this.$post('news/top',params).then(res => {
+						console.log(res);
 						this.$message({
 							type: 'success',
-							message: '取消成功!'
+							message: '操作成功!'
 						});
-						this.getMarket();
+						this.newsList();
 					})
 				}).catch(() => {
 					this.$message({
 						type: 'info',
-						message: '取消失败'
-					});
-				});
-			},
-			//置顶
-			cancelUp1(index, rows) {
-				this.$confirm('确定要置顶吗?', '提示', {
-					confirmButtonText: '确定',
-					cancelButtonText: '取消',
-					type: 'warning'
-				}).then(() => {
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						id: rows.id,
-						topFlag: '1'
-					}
-					this.$post('/industry/onTop', params).then(res => {
-						// console.log(res)
-						if(res.code == '0') {
-							this.$message({
-								type: 'success',
-								message: '置顶成功!'
-							});
-						}
-						if(res.code == '1') {
-							this.$message({
-								message: res.msg,
-								type: 'warning'
-							});
-						}
-						this.getMarket();
-					})
-				}).catch(() => {
-					this.$message({
-						type: 'info',
-						message: '置顶失败'
-					});
-				});
-			},
-			//			下线
-			top_flag1(index, rows) {
-				this.$confirm('确定要下线吗?', '提示', {
-					confirmButtonText: '确定',
-					cancelButtonText: '取消',
-					type: 'warning'
-				}).then(() => {
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						id: rows.id,
-						status: '6'
-					}
-					this.$post('/industry/onAndOffLine', params).then(res => {
-						// console.log(res)
-						this.$message({
-							type: 'success',
-							message: '下线成功!'
-						});
-						this.getMarket();
-					})
-				}).catch(() => {
-					this.$message({
-						type: 'info',
-						message: '下线失败'
-					});
-				});
-			},
-			//					上线
-			top_flag2(index, rows) {
-				this.$confirm('确定上线吗?', '提示', {
-					confirmButtonText: '确定',
-					cancelButtonText: '取消',
-					type: 'warning'
-				}).then(() => {
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						id: rows.id,
-						status: '5'
-					}
-					this.$post('/industry/onAndOffLine', params).then(res => {
-						// console.log(res)
-						this.$message({
-							type: 'success',
-							message: '上线成功!'
-						});
-						this.getMarket();
-					})
-				}).catch(() => {
-					this.$message({
-						type: 'info',
-						message: '上线失败'
-					});
-				});
-			},
-			//提交审核
-			toAudit(index, rows) {
-				this.$confirm('确定要提交审核吗?', '提示', {
-					confirmButtonText: '确定',
-					cancelButtonText: '取消',
-					type: 'warning'
-				}).then(() => {
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						id: rows.id,
-						status: '2'
-					}
-					this.$post('/industry/save', params).then(res => {
-						// console.log(res)
-						this.$message({
-							type: 'success',
-							message: '提交成功!'
-            });
-            setTimeout(() => {
-						  this.getMarket();
-            },500)
-					})
-				}).catch(() => {
-					this.$message({
-						type: 'info',
-						message: '提交失败'
+						message: '已取消操作'
 					});
 				});
 			},
@@ -733,6 +860,7 @@
 			handleClose(done) {
 				this.$confirm('确认关闭？')
 					.then(_ => {
+
 						done();
 					})
 					.catch(_ => {});
@@ -745,42 +873,8 @@
 					return item.id === id
 				})
 			},
-			handleCurrentChange(val) {
-				this.currentPage1 = val;
-				//    	alert(this.currentPage1)
-				this.getMarket()
-				console.log(`当前页: ${val}`);
-			},
-			//新建的行情列表
-			creatList() {
-					//console.log(params)
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						limit: this.per_page2,
-						offset: this.currentPage2,
-            status: this.status,
-            classifyType: this.value=='全部'?'':this.value,
-            publishSource: this.value1=='全部'?'':this.value1,
-            timeType: this.value2=='全部'?'':this.value2,
-					}
-				this.$post('/industry/list', params).then(res => {
-					this.newArticle = res.data[0].rows;
-					this.total_pages2 = res.data[0].total;
-				})
-			},
-			//tab2 分页
-			handleCurrentChange2(val) {
-				this.currentPage2 = val;
-
-      },
-      handleSizeChange1(val){
-        this.per_page1 = val;
-        this.getMarket();
-      },
-      handleSizeChange2(val){
-
-      },
-			//删除
+			
+			//删除新闻
 			deleteRow(index, rows) {
 				// rows.splice(index, 1);
 				this.$confirm('此操作将永久删除该新闻, 是否继续?', '提示', {
@@ -789,16 +883,16 @@
 					type: 'warning'
 				}).then(() => {
 					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						id: rows.id
+						tokenId:this.$store.state.user.tokenId,
+						id:rows.id
 					}
-					this.$post('/industry/delete', params).then(res => {
+					this.$post('news/delete',params).then(res => {
 						// console.log(res)
 						this.$message({
 							type: 'success',
 							message: '删除成功!'
 						});
-						this.getMarket();
+						this.newsList();
 					})
 				}).catch(() => {
 					this.$message({
@@ -808,56 +902,34 @@
 				});
 				console.log(index, rows);
 			},
-			handleSelectionChange(val) {
-				this.multipleSelection = val;
-				console.log(this.multipleSelection);
-				this.ids = [];
-				this.multipleSelection.map(item => {
-					this.ids.push(item.id);
-				})
+			miniTable(row) {
+				return 'miniTable'
 			},
-
-			// 批量提交审核
-			toAudits() {
-				if(this.ids == false) {
-					this.$message({
-						message: '请勾选需要提交审核的文章!',
-						type: 'warning'
-					});
-					return;
-				}
-				this.$confirm('确定要提交审核吗?', '提示', {
-					confirmButtonText: '确定',
-					cancelButtonText: '取消',
-					type: 'info'
-				}).then(() => {
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						ids: this.ids.join(','),
-						 status:'2',
-					}
-
-					this.$post('/industry/toCheckByIds', params).then(res => {
-						console.log(res)
-						this.creatList();
-						this.$message({
-							type: 'success',
-							message: '提交成功!'
-						});
-					})
-				}).catch(() => {
-					this.$message({
-						type: 'info',
-						message: '操作已取消'
-					});
-				});
-
+			btnTable(row) {
+				return 'btnTable'
 			},
-		
+			handleExceed(files, fileList) {
+        this.$message.warning(`当前限制选择 1 个文件`);
+      },
+      handleSizeChange1(val) {
+        // console.log(`每页 ${val} 条`);
+        this.per_page1 = val;
+        this.newsList();
+      },
 		}
 	}
 </script>
 <style type="text/css">
+	.bannerForm .el-upload--picture-card{
+		width: 80px;
+		height: 80px;
+		line-height: 88px;
+	}
+	.bannerForm .el-upload-list--picture-card .el-upload-list__item{
+		width: 80px;
+		height: 80px;
+		line-height: 88px;
+	}
 	.el-range-editor.el-input__inner {
 		padding: 0;
 	}
@@ -881,18 +953,6 @@
 		display: inline-block;
 	}
 	
-	.yshx {
-		color: #00C621;
-	}
-	
-	.dshx {
-		color: #FEB210;
-	}
-	
-	.yxx {
-		color: #999;
-	}
-	
 	.el-table,
 	.el-table .el-button {
 		font-size: 12px;
@@ -900,10 +960,6 @@
 	
 	.el-table th {
 		font-size: 14px;
-	}
-	
-	.el-table th {
-		text-align: center;
 	}
 	
 	.el-table_1_column_7 .iconfont {
@@ -916,5 +972,8 @@
 		line-height: 8px;
 		padding-top: 9px;
 		padding-bottom: 9px;
-	}
+  }
+  body .el-table th.gutter{
+    display: table-cell !important;
+}
 </style>

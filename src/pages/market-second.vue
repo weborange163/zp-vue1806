@@ -8,12 +8,12 @@
 						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
 						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
 						<el-option label="您发布的内容不符合栏目属性" value="您发布的内容不符合栏目属性"></el-option>
-            <el-option label="其他" value="其他"></el-option>
+            <el-option label="其它" value="其它"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="审核信息">
 					<el-input size="mini" type="textarea" v-model="form.name" auto-complete="off" :disabled="qita"
-          placeholder="审核原因选择其他,可以填写审核信息"></el-input>
+          placeholder="审核原因选择其它,可以填写审核信息"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -30,7 +30,7 @@
 		</div>
 		<div class="box">
 			<div class="text-right">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<!--<el-button size="small" class="light_btn">预览</el-button>-->
 				 <!--@click="toAudit()"-->
 				<el-button size="small" class="light_btn" @click="dialogFormVisible = true">不通过</el-button>
@@ -49,6 +49,31 @@
 				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
 					<el-form-item label="发布到:" required>
 						<el-input :disabled="true" v-model="classifyTypes"></el-input>
+					</el-form-item>
+           <el-row>
+            <el-col :span="14">
+              <el-form-item label="来源:" prop="sourceType" required>
+                <el-radio-group v-model="form2.sourceType" :disabled="true">
+                  <el-radio label="1" >原创</el-radio>
+                  <el-radio label="2" >转载</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+            <el-col :span="10">
+              <el-form-item v-if="form2.sourceType == 2" prop="source" class="source_style">
+                <el-select filterable v-model="form2.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+                  <el-option
+                    v-for="item in cities"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="作者:">
+						<el-input v-model="form2.author" :disabled="true"></el-input>
 					</el-form-item>
 					<el-form-item label="所属分类:" prop="userId" required>
 					<el-select v-model="value" name="classifyType" placeholder="请选择"  style='padding-left: 6px;' :disabled="true">
@@ -153,7 +178,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form2.checkTime}}</div></td>
                 <td><div class="cell">{{form2.checkPerson}}</div></td>
-                <td><div class="cell"><p v-if="form2.status == '4'">{{form2.checkCause=='其他'?form2.checkMessage:form2.checkCause}}</p></div></td>
+                <td><div class="cell"><p v-if="form2.status == '4'">{{form2.checkCause=='其它'?form2.checkMessage:form2.checkCause}}</p></div></td>
               </tr>
             </tbody>
           </table>
@@ -169,6 +194,7 @@
 		data() {
 			return {
         qita:true,
+        cities:[],
 				baceUrl: '',
 				editorOption: {},
 				dialogImageUrl: '',
@@ -180,7 +206,8 @@
 					title: '',
 					content: '',
 					userId: '1',
-					imgType: '1',
+          imgType: '1',
+          sourceType: '1',
 					tagLabel: '',
 					resource: '',
 					source: '',
@@ -190,6 +217,7 @@
 					img: ''
         },
         imgSrc:'',
+        argu:{},
 				uploadData: {},
 				value: '',
         datas: '',
@@ -209,7 +237,8 @@
 			};
 		},
 		created() {
-			this.baceUrl = getBaceUrl();
+      this.baceUrl = getBaceUrl();
+      this.argu=this.$route.params.argu;
 			// console.log(this.baceUrl)
 
 		},
@@ -217,7 +246,11 @@
       this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
         console.log(res)
         this.accounts = res.data;
-      })
+      });
+      this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
+    		// console.log(res.data)
+    		this.cities = res.data
+      });
 			//  	修改查看
 			this.$get('/industry/get', {
 				tokenId: this.$store.state.user.tokenId,
@@ -258,7 +291,12 @@
               message: res.msg?res.msg:'成功',
               type: 'success'
             });
-            this.$router.push({name: 'audit-market'});
+            this.$router.push({
+              name: 'audit-market',
+              params: {
+                argu: this.argu
+              }
+            });
             }, 1000);
           }else{
             this.$message({
@@ -270,12 +308,21 @@
 			},
       selectChange(val){
         // console.log(val);
-        if(val == '其他'){
+        if(val == '其它'){
           this.qita = false;
         }else{
           this.qita = true;
           this.form.name='';
         }
+      },
+      fanhui(){
+        this.$router.push({
+          name: 'audit-market',
+          params: {
+            argu: this.argu
+          }
+      });
+           
       },
 			//不通过
 			toAudit() {
@@ -295,7 +342,12 @@
               type: 'success'
             });
             setTimeout(() => {
-						this.$router.push({name: 'audit-market'});
+						this.$router.push({
+              name: 'audit-market',
+              params: {
+                argu: this.argu
+              }
+            });
 						}, 1000);
 					}else{
             this.$message({
@@ -305,10 +357,11 @@
           }
 					
 				});
-
-
 			},
-
+      beforeRouteLeave(to, from, next) {
+        to.meta.keepAlive = false;
+        next();
+    },
 		}
 	};
 </script>

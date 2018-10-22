@@ -302,6 +302,10 @@ table img{
   width: 80px;
   height: 80px;
 }
+.ql-tooltip.ql-editing.ql-flip{
+  /* top:auto !important; */
+  /* left: 0 !important; */
+}
 .yshx {
   color: #00C621;
 }

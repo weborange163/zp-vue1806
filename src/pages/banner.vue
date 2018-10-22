@@ -141,7 +141,7 @@
 					<el-table-column label="序号" type="index" width='50'></el-table-column>
 					<el-table-column label="原文标题">
 						<template slot-scope="scope">
-							<p v-if="scope.row.banner_type=='1'" >{{scope.row.title_original}}</p>
+							<p v-if="scope.row.banner_type=='1'||scope.row.banner_type=='3'" >{{scope.row.title_original}}</p>
 							<p v-if="scope.row.banner_type=='2'" >{{scope.row.title_original1}}</p>
 						</template>
 					</el-table-column>
@@ -157,6 +157,7 @@
 						<template slot-scope="scope">
 							<p v-if="scope.row.banner_type=='1'">新闻</p>
 							<p v-if="scope.row.banner_type=='2'">专题</p>
+							<p v-if="scope.row.banner_type=='3'">行情</p>
 						</template>
 					</el-table-column>
 					<el-table-column label="图片" width='100'>

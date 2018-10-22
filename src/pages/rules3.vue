@@ -14,7 +14,7 @@
         </el-table>
         <div class="marT20">
           <el-pagination class="text-right" background @current-change="handleCurrentChange" 
-          :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" 
+          :current-page="currentPage" :page-sizes="[20, 30, 50,100]" :page-size="this.per_page" 
           layout="total, sizes, prev, pager, next, jumper" :total="this.total" @size-change="handleSizeChange">
           </el-pagination>
         </div>
@@ -30,7 +30,7 @@ export default {
       miniTable:miniTable,
       input:'',
       tableData:[],
-      per_page: 10,
+      per_page: 30,
       total: 0,
       currentPage: 1,
     }

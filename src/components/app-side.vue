@@ -15,7 +15,7 @@
 <script type="text/javascript">
 import VMenu from './vmenu'
 //import MyMenu from './mymenu'
-import menus from './menus'
+// import menus from './menus'
 export default {
   props: {
     collapse: Boolean,
@@ -26,10 +26,15 @@ export default {
   },
   data () {
     return {
-      menus,
+      menus:JSON.parse(sessionStorage.getItem('menus')),
       defaultActive: 'home',
       test: 'asdfasdf'
     }
+  },
+  created(){
+    var menus = sessionStorage.getItem('menus');
+    this.menus = JSON.parse(menus);
+    console.log(this.menus);
   },
   watch: {
     $route () {

@@ -136,7 +136,7 @@
 						<el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
             <el-button type="text" v-if="scope.row.status!='4'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
 						<el-button type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
-						<router-link :to="{name:'subject-edit',params:{rowInfo:scope.row}}">
+						<router-link :to="{name:'subject-edit',params:{id:scope.row.id,argu:{a:value,b:value6,c:inputs,d:per_page,e:currentPage}}}">
 							<el-button type="text"><i class="iconfont icon-edit"></i></el-button>
 						</router-link>
             <!-- <el-button v-else disabled type="text"><i class="iconfont icon-edit"></i></el-button> -->
@@ -167,6 +167,7 @@ export default {
         }
       };
     return{
+      argu:{},
       hasFmt:false,
 			bannerForm:{
 				type:'专题'
@@ -226,6 +227,15 @@ export default {
 			}
 		},
   created(){
+    // a:value,b:value6,c:inputs,d:per_page,e:currentPage
+    if(this.$route.params.argu){
+      this.argu = this.$route.params.argu;
+      this.value=this.argu.a;
+      this.value6=this.argu.b;
+      this.inputs=this.argu.c;
+      this.per_page=this.argu.d;
+      this.currentPage=this.argu.e;
+    }
     this.getSubjectList();
 		this.baceUrl = getBaceUrl();
   },

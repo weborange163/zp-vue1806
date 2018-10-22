@@ -35,6 +35,31 @@
 					<el-form-item label="发布到:" required>
 						<el-input :disabled="true" v-model="classifyTypes"></el-input>
 					</el-form-item>
+          <el-row>
+            <el-col :span="14">
+              <el-form-item label="来源:" prop="sourceType" required>
+                <el-radio-group v-model="form2.sourceType" :disabled="true">
+                  <el-radio label="1" >原创</el-radio>
+                  <el-radio label="2" >转载</el-radio>
+                </el-radio-group>
+              </el-form-item>
+            </el-col>
+            <el-col :span="10">
+              <el-form-item v-if="form2.sourceType == 2" prop="source" class="source_style">
+                <el-select filterable v-model="form2.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+                  <el-option
+                    v-for="item in cities"
+                    :key="item.id"
+                    :label="item.name"
+                    :value="item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+            </el-col>
+          </el-row>
+          <el-form-item label="作者:">
+						<el-input v-model="form2.author" :disabled="true"></el-input>
+					</el-form-item>
 					<el-form-item label="所属分类:" prop="userId" required>
 					<el-select v-model="value" name="classifyType" placeholder="请选择"  style='padding-left: 6px;' :disabled="true">
 						<el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
@@ -138,7 +163,7 @@
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form2.checkTime}}</div></td>
                 <td><div class="cell">{{form2.checkPerson}}</div></td>
-                <td><div class="cell"><p v-if="form2.status == '4'">{{form2.checkCause=='其他'?form2.checkMessage:form2.checkCause}}</p></div></td>
+                <td><div class="cell"><p v-if="form2.status == '4'">{{form2.checkCause=='其它'?form2.checkMessage:form2.checkCause}}</p></div></td>
               </tr>
             </tbody>
           </table>
@@ -179,7 +204,8 @@ import { getBaceUrl } from '@/utils/auth'
 					title: '',
 					content: '',
 					userId: '1',
-					imgType: '1',
+          imgType: '1',
+          sourceType: '1',
 					tagLabel: '',
 					resource: '',
 					source: '',
@@ -202,7 +228,8 @@ import { getBaceUrl } from '@/utils/auth'
 				uploadData: {},
 				value: '',
 				imgFullSrc: '',
-				imgSrc: '',
+        imgSrc: '',
+        cities:[]
 			};
 		},
 		created() {
@@ -212,7 +239,11 @@ import { getBaceUrl } from '@/utils/auth'
       this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
         console.log(res)
         this.accounts = res.data;
-      })
+      });
+      this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
+    		// console.log(res.data)
+    		this.cities = res.data
+      });
 			//  	修改查看
 			this.$get('/industry/get', {
 				tokenId: this.$store.state.user.tokenId,

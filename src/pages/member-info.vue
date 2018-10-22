@@ -13,7 +13,7 @@
             <el-row>
               <el-col :span="4">
                 <div class="avatar" style="height:217px;">
-                  <img :src="data1.fullUrl" style="width:100%;height:100%">
+                  <img :src="data1.headImgUrl" style="width:100%;height:100%">
                 </div>
               </el-col>
               <el-col :span="20">
@@ -30,13 +30,13 @@
                         <td><div class="cell">昵称</div></td>
                         <td><div class="cell">{{data1.nickName}}</div></td>
                         <td><div class="cell">性别</div></td>
-                        <td><div class="cell">{{data1.sex==1?'男':'女'}}</div></td>
+                        <td><div class="cell">{{data1.sex1}}</div></td>
                       </tr>
                       <tr class="el-table__row">
                         <td><div class="cell">用户ID</div></td>
                         <td><div class="cell">{{data1.userCode}}</div></td>
                         <td><div class="cell">城市</div></td>
-                        <td><div class="cell">{{data1.cityId}}</div></td>
+                        <td><div class="cell">{{data1.address}}</div></td>
                       </tr>
                       <tr class="el-table__row">
                         <td><div class="cell">手机号</div></td>
@@ -247,11 +247,18 @@ export default {
           tokenId:this.$store.state.user.tokenId,
           userId:this.idDetail
         }
-        this.$post('members/getBaseInfo',params).then(res => {
+        this.$post('/members/getBaseInfo',params).then(res => {
           // console.log(res.data);
           if(res.data){
             this.data1 = res.data[0];
-            this.data1.fullUrl = this.baceUrl + res.data[0].headImg
+            if(this.data1.sex==''){
+              this.data1.sex1='未设置'
+            }else if(this.data1.sex==1){
+              this.data1.sex1='男'
+            }else{
+              this.data1.sex1='女'
+            }
+            // this.data1.fullUrl = this.baceUrl + res.data[0].headImg
           }
           // console.log(this.data1)
         })

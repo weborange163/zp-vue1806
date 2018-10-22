@@ -9,7 +9,7 @@
     </div>
     <div class="box">
 			<div class="text-right">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<!-- <el-button size="small" class="light_btn">预览</el-button> -->
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','3')">仅保存</el-button>
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm','4')">保存并上线</el-button>
@@ -62,14 +62,14 @@
       </el-form>
       <el-dialog :visible.sync="searchAdd">
         <div style="margin-bottom:20px">
-          <el-input v-model="searchInput" style="width:80%"></el-input>
+          <el-input v-model="searchInput" style="width:80%" size="mini" placeholder="请输入搜索内容"></el-input>
           <el-button class="light_btn" @click="searchMore">搜索</el-button>
         </div>
         <el-table :data="searchLinkArt" border :row-class-name="miniTable" :header-row-class-name="miniTable">
-          <el-table-column prop="title" label="标题" width="150"></el-table-column>
-          <el-table-column prop="articleId" label="文章ID" width="200"></el-table-column>
-          <el-table-column  label="操作">
-            <template slot-scope="scope">
+          <el-table-column prop="title" label="标题" ></el-table-column>
+          <el-table-column prop="articleId" label="文章ID" width="120"></el-table-column>
+          <el-table-column  label="操作" width="100">
+            <template slot-scope="scope" >
               <el-button v-if="!scope.row.flag" @click="handleClick1(scope.row,artData,0)" type="text" size="small">取消关联</el-button>
               <el-button v-else @click="handleClick1(scope.row,artData,1)" type="text" size="small">关联</el-button>
             </template>
@@ -92,6 +92,7 @@ export default {
         }
       };
     return{
+      argu:{},
       hasFmt:false,
       searchInput:'',
       uploadData:{},
@@ -130,7 +131,7 @@ export default {
   },
   created(){
     this.baceUrl = getBaceUrl();
-    // console.log(this.baceUrl)http://localhost:8089/specialInfo/add
+    this.argu=this.$route.params.argu;
   },
   methods:{
     onSuccess(){
@@ -197,7 +198,7 @@ export default {
           articleIds:this.subjectForm.ariId
         }
         this.$post('news/batchGet',params).then(res => {
-            console.log(res)
+            // console.log(res)
             if(!res.data[0]){
               this.$message.error('请输入正确的文章ID!');
             }else{
@@ -229,10 +230,15 @@ export default {
               if(res.code == 0){
                 setTimeout(() => {
                   this.$message({
-                  type: 'success',
-                  message: '添加成功!'
-                });
-                  this.$router.push({name: 'subject'});
+                    type: 'success',
+                    message: '添加成功!'
+                  });
+                  this.$router.push({
+                    name: 'subject',
+                    params: {
+                      argu: this.argu
+                    }
+                  });
                 }, 500);
               }
             })          
@@ -298,6 +304,19 @@ export default {
         this.hasFmt = true;
       }
     },
+    fanhui(){
+      this.$confirm('返回已编辑内容将重置是否继续？')
+        .then(_ => {
+            this.$router.push({
+            name: 'subject',
+            params: {
+              argu: this.argu
+            }
+          });
+          done();
+        })
+        .catch(_ => {});
+    },
     handleRemove(file, fileList) {
       console.log(file, fileList);
     },
@@ -308,7 +327,11 @@ export default {
       this.dialogImageUrl = file.url;
       this.dialogVisible = true;
     }
-  }
+  },
+  beforeRouteLeave(to, from, next) {
+    to.meta.keepAlive = false;
+    next();
+  },
 }
 </script>
 <style>

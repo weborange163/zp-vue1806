@@ -4,7 +4,7 @@
       </div>
       <div class="box">
         <div class="text-right marBo4">
-          <el-button class="light_btn" @click="newDialog = true;classForm.title='';classForm.radio='1'">新建分类</el-button>
+          <el-button class="light_btn" @click="newDialog = true;classForm.title='';classForm.radio='1';isEdit=false;hasChangeFile=true;">新建分类</el-button>
         </div>
         <el-table :row-class-name="miniTable()" :header-row-class-name="miniTable()" v-loading="loading"
           :data="tableData"
@@ -40,7 +40,7 @@
         <div class="marT20">
           <el-pagination class="text-right" background @current-change="handleCurrentChange" 
           :current-page="currentPage" :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" 
-          layout="prev, pager, next" :total="this.total_pages">
+          layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages" @size-change="handleSizeChange">
           </el-pagination>
         </div>
       </div>
@@ -167,6 +167,7 @@ export default {
     editClass(row){
       console.log(row);
       this.newDialog = true;
+      this.hasChangeFile = false;
       this.classForm.title = row.name;
       this.classForm.radio = row.status;
       this.fileList.push({url:row.picture_url});
@@ -308,6 +309,10 @@ export default {
         this.hasFmt =false;
       }
     },
+    handleSizeChange(val){
+      this.per_page = val;
+      this.getList()
+    }
   }
 }
 </script>

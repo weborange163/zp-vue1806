@@ -9,11 +9,10 @@
 		<div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
-				<el-breadcrumb-item>行业信息</el-breadcrumb-item>
-				<el-breadcrumb-item>查看新闻资讯</el-breadcrumb-item>
+				<el-breadcrumb-item>新闻管理</el-breadcrumb-item>
+				<el-breadcrumb-item>查看{{type}}资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
-		
 		<div class="box" >
 			<div class="text-right marR100">
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
@@ -22,7 +21,7 @@
 				<el-button size="small" class="light_btn" v-if="form1.status == '5'" @click="onOff('4','上线')">上线</el-button>
 				<el-button size="small" class="light_btn" v-if="status == '4'" @click="onOff('5','下线')">下线</el-button>
 			</div>
-			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
+			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
 						<el-input type="textarea" autosize v-model="form1.title" :disabled="true"></el-input>
@@ -62,6 +61,12 @@
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author" :disabled="true"></el-input>
 					</el-form-item>
+          <el-form-item label="所属分类:" prop="userId">
+            <el-select v-model="value" name="classifyType" placeholder="暂无分类"  style='padding-left: 6px;' :disabled="true">
+              <el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+					</el-form-item>
 					<el-form-item label="发布账号:" v-if="form1.publishSource!='3'" prop="userId" label-width="82">
 						<el-select v-model="form1.userId" disabled>
 							<el-option 
@@ -81,8 +86,17 @@
 								<el-radio label="2" disabled>提取第一个图为缩略图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item label="封面图">
+					<el-form-item label="封面图:">
 						<img class="wh80" :src="imgFullSrc" alt="封面图展示">
+					</el-form-item>
+          <el-form-item label="视频地址:" v-if="form1.videoId">
+						<a :href="form1.videoUrl">{{form1.videoUrl}}</a>
+					</el-form-item>
+          <el-form-item label="视频名称:" v-if="form1.videoId">
+            <p v-text="form1.videoName"></p>
+					</el-form-item>
+					<el-form-item label="Tag标签:" prop="tagLabels">
+						<el-input placeholder="用'，'隔开，单个标签小于12字节"  v-model="form1.tagLabels" ></el-input>
 					</el-form-item>
 					<el-form-item label="Tag标签:">
 						<el-input  v-model="form1.tagLabels" :disabled="true"></el-input>
@@ -157,8 +171,8 @@
               <tr class="el-table__row">
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
-                <td><div class="cell">{{form1.checkPerson}}</div></td>
-                <td><div class="cell"><p v-if="form1.status=='3'">{{form1.checkReason=='其他'?form1.checkMessage:form1.checkReason}}</p></div></td>
+                <td><div class="cell">{{form1.checkReason=='涉及敏感词'?'机审':form1.checkPerson}}</div></td>
+                <td><div class="cell"><p v-if="form1.status=='3'">{{form1.checkReason=='其它'?form1.checkMessage:form1.checkReason}}</p></div></td>
               </tr>
             </tbody>
           </table>
@@ -178,7 +192,9 @@ import axios from 'axios'
 		},
 		data(){
 			return{
-        type:'新闻',
+        classifyType: '',
+        value:'',
+        type:'',
         accounts:[],
 				imgFullSrc:'',
 				imgSrc:'',
@@ -304,9 +320,29 @@ import axios from 'axios'
 				this.$get('news/show',params).then(res => {
 					this.form1 = res.data[0];
           // console.log(this.form1);
+          this.classifyType = this.form1.classifyType;
+          if(this.form1.articleType == '1'){
+            this.type='新闻'
+          }else{
+            this.type='行情'
+          }
 					this.imgSrc = this.form1.coverImgId;
 					this.status = this.form1.status;
-					this.imgFullSrc = this.form1.coverImgUrl;
+          this.imgFullSrc = this.form1.coverImgUrl;
+          	let selectid = this.classifyType;
+				//				alert(selectid)
+				//  	下拉菜单
+				this.$get('/industryCategory/findIndustryCategoryList', {
+					tokenId: this.$store.state.user.tokenId
+				}).then(res => {
+					console.log(res.data)
+					this.classifyType = res.data
+					for(var i = 0; i < this.classifyType.length; i++) {
+						if(selectid == this.classifyType[i].id) {
+							this.value = this.classifyType[i].name
+						}
+					}
+				})
 				});
 			},
 			getParams () {

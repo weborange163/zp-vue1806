@@ -30,7 +30,7 @@
 				<el-tab-pane label="全部" name="first">
 					<div class="tab1">
 						<div class="text-right marBo4">
-							<router-link :to="{name:'news-add'}">
+							<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
 								<el-button class="light_btn" size="mini">添加新闻</el-button>
 							</router-link>
 							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
@@ -84,8 +84,11 @@
 									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
-									<el-button class="marR10" type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
-									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.content_type != '3'" @click.native.prevent="recommend(scope.$index, scope.row)">
+                    <i class="iconfont icon-share"></i>
+                  </el-button>
+                  <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled> <i class="iconfont icon-share"></i></el-button>
+									<router-link :to="{name:'news-edit',params:{id:scope.row.id,argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
 										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
 									<el-button type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus==0" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
@@ -95,7 +98,7 @@
 						</el-table>
 					</div>
 					<div style="margin-top:20px;">
-						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1"
+						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="this.currentPage1"
              :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
               @size-change="handleSizeChange1" :total="this.total_pages1">
 						</el-pagination>
@@ -104,7 +107,7 @@
         <el-tab-pane label="已上线" name="second">
           <div class="tab2">
             <div class="text-right marBo4">
-							<router-link :to="{name:'news-add'}">
+							<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
 								<el-button class="light_btn" size="mini">添加新闻</el-button>
 							</router-link>
 							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
@@ -144,7 +147,10 @@
                   <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
-									<el-button class="marR10" type="text" v-if="scope.row.status =='4'" @click.native.prevent="recommend(scope.$index, scope.row)"><i class="iconfont icon-share"></i></el-button>
+                  <el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.content_type != '3'" @click.native.prevent="recommend(scope.$index, scope.row)">
+                    <i class="iconfont icon-share"></i>
+                  </el-button>
+                  <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled> <i class="iconfont icon-share"></i></el-button>
                   <el-button class="marR10" type="text" disabled><i class="iconfont icon-delete unclick"></i></el-button>
 								</template>
 							</el-table-column>
@@ -191,7 +197,7 @@
 									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
 									</router-link>
-									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
+									<router-link :to="{name:'news-edit',params:{id:scope.row.id,argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
 										<el-button class="marR10" type="text" v-if="(scope.row.status == '0'||scope.row.status == '5') && scope.row.publish_source != '3'"><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
 									<el-button type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
@@ -237,8 +243,11 @@
 							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
 							<el-table-column label="操作" width="200" fixed="right">
 								<template slot-scope="scope">
-									<el-button class="marR10" type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button>
-									<router-link :to="{name:'news-edit',params:{id:scope.row.id}}">
+									<!-- <el-button class="marR10" type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button> -->
+									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
+										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
+									</router-link>
+                  <router-link :to="{name:'news-edit',params:{id:scope.row.id,argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
                     <el-button class="marR10" type="text" ><i class="iconfont icon-edit"></i></el-button>
 									</router-link>
 									<el-button class="marR10" type="text" v-if="scope.row.top_flag!='1'&& scope.row.status !='4'&&scope.row.recommend=='0'&&scope.row.specialNewsStatus=='0'" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
@@ -412,20 +421,46 @@
 				value6: '',
 				inputs: '',
 				value: '',
-				value1: '',
-				value2: '',
+				value1:'',
+				value2:'',
 				dataList: [],
 				ids:[],
 				baceUrl:'',
 				dialogImageUrl:'',
         uploadData:{},
         hasFmt:false,
+        fromparams:{},
+        argu:{}
 			}
 		},
 		created(){
-			this.newsList();
-			this.baceUrl = getBaceUrl();
-		},
+      this.baceUrl = getBaceUrl();
+      // console.log(this.$route.params);
+      if(this.$route.params.argu){
+        this.argu = this.$route.params.argu;
+        this.value1=this.argu.a;
+        this.value2=this.argu.b;
+        this.value6=this.argu.c;
+        this.inputs=this.argu.d;
+        this.activeTab=this.argu.e;
+        this.per_page1=this.argu.f;
+        this.currentPage1=this.argu.g;
+        if(this.activeTab == 'fourth'){ 	
+					this.status='0';
+        }
+        if(this.activeTab == 'second'){ 	
+					this.status='4';
+        }
+        if(this.activeTab == 'third'){ 	
+					this.status='5'
+        }
+        if(this.activeTab=='first'){
+          this.status='';
+        }
+        // console.log(this.currentPage1);
+      }
+      this.newsList();
+    },
 		mounted() {
 			// this.db();
 		},
@@ -481,7 +516,7 @@
 			publishWaitTop(){
 				this.dialogVisible = true;
 				this.loading = true;
-				this.$get('news/publishWaitTop',{tokenId:this.$store.state.user.tokenId}).then(res =>{
+				this.$get('news/publishWaitTop',{tokenId:this.$store.state.user.tokenId,articleType:'1'}).then(res =>{
 					this.loading = false;
 					console.log(res)
 					this.upData = res.data;
@@ -553,6 +588,7 @@
 				// if(!params){
 					//console.log(params)
         var params={
+          articleType:'1',
           tokenId:this.$store.state.user.tokenId,
           limit:this.per_page1,
           offset:this.currentPage1,
@@ -576,9 +612,13 @@
         if(res.code == 0){
           this.loading=false;
           this.$message({
-          message: '成功获取新闻列表',
-          type: 'success'
-        });
+            message: '成功获取新闻列表',
+            type: 'success'
+          });
+          if(this.argu.g){
+            this.currentPage1=this.argu.g;
+            this.argu.g=0;
+          }
           this.tableData = res.data[0].rows;
           this.total_pages1 = res.data[0].total;
         }

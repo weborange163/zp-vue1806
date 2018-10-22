@@ -11,7 +11,7 @@
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
 				<el-breadcrumb-item>新闻信息</el-breadcrumb-item>
-				<el-breadcrumb-item>编辑新闻资讯</el-breadcrumb-item>
+				<el-breadcrumb-item>编辑{{fabudao}}资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		
@@ -42,7 +42,7 @@
         
 				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
 					<el-form-item label="发布到:">
-						<el-input v-model="form1.column" disabled></el-input>
+						<el-input v-model="fabudao"  disabled></el-input>
 					</el-form-item>
           <el-row>
           <el-col :span="14">
@@ -55,7 +55,7 @@
           </el-col>
           <el-col :span="10">
             <el-form-item v-if="form1.sourceType == 2" prop="source">
-              <el-select  v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+              <el-select filterable v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
                 <el-option
                   v-for="item in cities"
                   :key="item.id"
@@ -69,8 +69,14 @@
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author"></el-input>
 					</el-form-item>
+          <el-form-item label="所属分类:" prop="classifyType">
+            <el-select filterable v-model="form1.classifyType" name="classifyType" placeholder="请选择"  style='padding-left: 6px;'>
+              <el-option v-for="item in classifyTypeAll" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+					</el-form-item>
 					<el-form-item label="发布账号:" prop="userId">
-						<el-select v-model="form1.userId">
+						<el-select filterable v-model="form1.userId">
 							<el-option 
                 v-for="item in accounts"
                 :key="item.userId"
@@ -100,6 +106,22 @@
 						<el-dialog :visible.sync="dialogVisible">
 							<img width="100%" :src="dialogImageUrl" alt="">
 						</el-dialog>
+					</el-form-item>
+          <el-form-item label="上传视频:">
+						<el-upload
+              class="upload-demo" :limit='1'
+              ref="uploadVideo" name="newsVideo"
+              :action="videoUrl" accept='video/mp4'
+              :on-remove="handleRemove2"
+              :file-list="fileListVideo"
+              :on-success="handleSuccess"
+              :before-remove="beforeRemove"
+              :auto-upload="false">
+              <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+              <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
+              <!-- <div slot="tip" class="el-upload__tip">只能上传mp4文件</div> -->
+              <div class="el-upload__tip" v-html="showUrl"></div>
+            </el-upload>
 					</el-form-item>
 					<el-form-item label="Tag标签:" prop="tagLabels">
 						<el-input placeholder="用'，'隔开，单个标签小于12字节"  v-model="form1.tagLabels" ></el-input>
@@ -174,7 +196,7 @@
               <tr class="el-table__row">
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
-                <td><div class="cell">{{form1.checkPerson}}</div></td>
+                <td><div class="cell">{{form1.checkReason=='涉及敏感词'?'机审':form1.checkPerson}}</div></td>
                 <td><div class="cell">{{form1.checkReason}}</div></td>
               </tr>
             </tbody>
@@ -221,7 +243,12 @@ import axios from 'axios'
 				fileList:[],	// 预览图片
 				imgFullSrc:'',
         imgSrc:'',
+        videoUrl:'',
+        videoId:'',
+        showUrl:'',
+        fileListVideo:[],
         hasChangeFile:false,
+        fabudao:'',
 				form1: {
 					title: '',
 					content:'',
@@ -238,7 +265,7 @@ import axios from 'axios'
 					coverImgId:''
 				},
         // type:'新闻',
-        
+        classifyTypeAll:'',
 				pkg:'',
         quill: {
           width: 420,
@@ -270,7 +297,8 @@ import axios from 'axios'
 				editorOption:{},
 				dialogImageUrl: '',
         dialogVisible: false,
-				cities:[],
+        cities:[],
+        argu:{},
 				rules1: {
           icon:[
             {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
@@ -285,12 +313,18 @@ import axios from 'axios'
           sourceType: [
             { required: true, message: '请选择来源', trigger: 'change'}
           ],
+          classifyType:[
+            { required: true, message: '请选择来源', trigger: 'change'}
+          ],
           userId: [
             {required: true, message: '请选择发布账号', trigger: 'change' }
           ],
           imgType: [
             {required: true, message: '请选择图片', trigger: 'change' }
           ],
+         /*  classifyType:[
+            { required: true, message: '请选择所属分类', trigger: 'blur' },
+          ], */
           source: [
             { required: true, message: '请选择转载来源', trigger: 'change' }
           ],
@@ -302,22 +336,29 @@ import axios from 'axios'
 		},
 		created(){
 			this.baceUrl = getBaceUrl();
-			this.getParams();
+      this.getParams();
+      this.videoUrl = this.baceUrl + '/news/addVideo';
+      this.argu=this.$route.params.argu;
+      // console.log(this.argu)
 		},
 		mounted() {
 			this.$get('reprintSth/findAll',{tokenId:this.$store.state.user.tokenId}).then(res => {
-    		console.log(res.data)
+    		// console.log(res.data)
     		this.cities = res.data
       });
+      this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
+    		// console.log(res.data)
+    		this.classifyTypeAll = res.data
+    	});
       this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
-        console.log(res)
+        // console.log(res)
         this.accounts = res.data;
       });
       this.showNews();
 		},
 		methods:{
       radioChange(val){
-        console.log(val)
+        // console.log(val)
         if(val == '2'){
           this.hasFmt = true;
         }else{
@@ -360,12 +401,18 @@ import axios from 'axios'
             param.append('content',this.form1.content);
             param.append('sourceType',this.form1.sourceType);
             param.append('author',this.form1.author);
+            param.append('articleType',this.form1.articleType);
+            param.append('classifyType',this.form1.classifyType);
             param.append('userId',this.form1.userId);
             param.append('imgType',this.form1.imgType);
             param.append('tagLabels',this.form1.tagLabels.replace(/，/ig,','));
             // param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
             param.append('publishSource','1');
             param.append('status',status);
+            if(this.videoId){
+              param.append('videoId',this.videoId);
+              param.append('videoUrl',this.showUrl);
+            }
             if(this.form1.sourceType=='2'){
               param.append('source',this.form1.source)
             }
@@ -378,8 +425,19 @@ import axios from 'axios'
                 message: res.msg,
                 type: 'success'
               });
+               var backRoute='';
+              if(this.fabudao == '新闻'){
+                backRoute = 'news';
+              }else{
+                backRoute = 'market';
+              }
               setTimeout(() => {
-                this.$router.push({name: 'news'});
+                this.$router.push({
+                  name: backRoute,
+                  params: {
+                    argu: this.argu
+                  }
+                });
               }, 1000);
               }
             })
@@ -400,11 +458,22 @@ import axios from 'axios'
 				this.$get('news/show',params).then(res => {
           // console.log(res.data[0]);
 					this.form1 = res.data[0];
-					// console.log(this.form1)
+          // console.log(this.form1);
+          if(this.form1.articleType == '1'){
+            this.fabudao='新闻';
+          }else{
+            this.fabudao='行情';
+          }
+          this.showUrl = this.form1.videoUrl;
+          if(this.form1.videoId){
+            this.videoId=this.form1.videoId;
+            this.showUrl=this.form1.videoUrl;
+            this.fileListVideo.push({name:this.form1.videoName,url:this.form1.videoUrl});
+          }
 					this.imgSrc = this.form1.coverImgId;
 					this.status = this.form1.status;
 					this.imgFullSrc = this.form1.coverImgUrl;
-					console.log(this.imgFullSrc)
+					// console.log(this.imgFullSrc)
 					this.fileList.push({url:this.imgFullSrc})
 				});
 			},
@@ -441,9 +510,9 @@ import axios from 'axios'
 			}) {},
 			// 获取富文本的内容
 			onEditorBlur(quill) {
-        console.log( quill);
+        // console.log( quill);
         // this.form1.content = quill.container.innerHTML;
-				console.log(this.form1.content);
+				// console.log(this.form1.content);
 			},
       onEditorFocus(quill) {
         console.log('editor focus!', quill)
@@ -471,18 +540,45 @@ import axios from 'axios'
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
       },
+      submitUpload() {
+        this.$refs.uploadVideo.submit();
+      },
+      handleRemove2(file, fileList) {
+        this.showUrl ='';
+        this.videoId='';
+      },
+      handleSuccess(res,file){
+        console.log(res.data[1]);
+        this.showUrl = res.data[1];
+        this.videoId = res.data[0];
+        console.log(file);
+      },
+      beforeRemove(file, fileList) {
+        return this.$confirm(`确定移除 ${ file.name }？`);
+      },
       fanhui(){
         this.$confirm('返回已编辑内容将重置是否继续？')
           .then(_ => {
-            this.$router.back();
+             var backRoute='';
+              if(this.fabudao == '新闻'){
+                backRoute = 'news';
+              }else{
+                backRoute = 'market';
+              }
+             this.$router.push({
+              name: backRoute,
+              params: {
+                argu: this.argu
+              }
+            });
             done();
           })
           .catch(_ => {});
       }
     },
     beforeRouteLeave(to, from, next) {
-        to.meta.keepAlive = true;
-        next();
+      to.meta.keepAlive = false;
+      next();
     },
 		watch: {
     // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可

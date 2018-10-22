@@ -6,7 +6,6 @@
 				<p id="p2" v-html="subjectForm.description"></p>
 			</el-form>
 		</el-dialog>
-  	
     <div class="breadcrumb" style="padding:8px;">
       <el-breadcrumb separator-class="el-icon-arrow-right" >
 			<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
@@ -16,7 +15,7 @@
     </div>
     <div class="box">
 			<div class="text-right marBo4" style="margin-right:50px;">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<!-- <el-button size="small" class="light_btn" @click="bannerDialog = true;">预览</el-button> -->
 				<el-button size="small" class="light_btn" @click="addSubject('subjectForm',subjectForm.status)">保存</el-button>
 				<!-- <el-button size="small" class="light_btn" @click="addSubject('subjectForm','4')">保存并上线</el-button> -->
@@ -69,8 +68,8 @@
       </el-form>
       <el-dialog :visible.sync="searchAdd">
         <div style="margin-bottom:20px">
-          <el-input v-model="searchInput" style="width:80%" size="mini"></el-input>
-          <el-button class="light_btn" @click="searchMore">搜索</el-button>
+          <el-input v-model="searchInput" style="width:80%" size="mini" placeholder="请输入搜索内容"></el-input>
+          <el-button class="light_btn" @click="searchMore" size="mini">搜索</el-button>
         </div>
         <el-table :data="searchLinkArt" border :row-class-name="miniTable" :header-row-class-name="miniTable">
           <el-table-column prop="title" label="标题" width="150"></el-table-column>
@@ -99,6 +98,7 @@ export default {
         }
     };
     return{
+      argu:{},
       hasFmt:true,
       hasChangeFile:false,
       editStatus:'2',
@@ -141,10 +141,11 @@ export default {
   },
   created(){
     this.baceUrl = getBaceUrl();
-    console.log(this.$route.params.rowInfo)
+    this.argu=this.$route.params.argu;
+    // console.log(this.$route.params.id)
     this.$get('/specialInfo/show', {
 				tokenId: this.$store.state.user.tokenId,
-				id: this.$route.params.rowInfo.id
+				id: this.$route.params.id
 			}).then(res => {
         console.log(res)
 				this.subjectForm=res.data[0]
@@ -257,16 +258,21 @@ export default {
             if(this.hasChangeFile){
               param.append('file',this.subjectForm.file,this.subjectForm.filename);
             }
-            param.append('id',this.$route.params.rowInfo.id);
+            param.append('id',this.$route.params.id);
             param.append('editStatus',this.editStatus);
             this.$post('specialInfo/edit',param).then(res => {
               if(res.code == 0){
                 setTimeout(() => {
                   this.$message({
-                  type: 'success',
-                  message: res.msg
-                });
-                  this.$router.push({name: 'subject'});
+                    type: 'success',
+                    message: res.msg
+                  });
+                  this.$router.push({
+                    name: 'subject',
+                    params: {
+                      argu: this.argu
+                    }
+                  });
                 }, 500);
               }
             });
@@ -275,6 +281,19 @@ export default {
             return false;
           }
         });
+    },
+    fanhui(){
+      this.$confirm('返回已编辑内容将重置是否继续？')
+        .then(_ => {
+            this.$router.push({
+            name: 'subject',
+            params: {
+              argu: this.argu
+            }
+          });
+          done();
+        })
+        .catch(_ => {});
     },
     getFullUrl(){
       return (this.baceUrl+'/specialInfo/edit')
@@ -347,7 +366,11 @@ export default {
     handleExceed(files, fileList){
       this.$message.warning('当前限制选择 1 个文件');
     },
-  }
+  },
+  beforeRouteLeave(to, from, next) {
+    to.meta.keepAlive = false;
+    next();
+  },
 }
 </script>
 <style>

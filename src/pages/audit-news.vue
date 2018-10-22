@@ -8,12 +8,12 @@
 						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
 						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
 						<el-option label="您发布的内容不符合栏目属性" value="您发布的内容不符合栏目属性"></el-option>
-            <el-option label="其他" value="其他"></el-option>
+            <el-option label="其它" value="其它"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="审核信息">
 					<el-input size="mini" type="textarea" v-model="form.name" auto-complete="off" :disabled="qita"
-          placeholder="审核原因选择其他,可以填写审核信息"></el-input>
+          placeholder="审核原因选择其它,可以填写审核信息"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -42,7 +42,7 @@
             </el-option>
           </el-select>
         </el-col>
-       <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >创建时间</span></el-col>
+       <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >创建时间:</span></el-col>
         <el-col :span="7">
            <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
 					</el-date-picker>
@@ -89,7 +89,7 @@
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
               <el-table-column label="操作" width="80" fixed="right">
                 <template slot-scope="scope">
-                  <router-link :to="{name:'news-second',params:{id:scope.row.id}}" > 
+                  <router-link :to="{name:'news-second',params:{id:scope.row.id,argu:{a:value,b:value6,c:search_pra,d:activeName,e:per_page1,f:currentPage1,g:per_page2,h:currentPage2}}}" > 
                     <el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" >审核</el-button>
                   </router-link>
                   <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" >
@@ -99,7 +99,7 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-              <el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="currentPage1" 
+              <el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page.sync="currentPage1" 
               :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper" 
               :total="this.total_pages1" @size-change="handleSizeChange1">
               </el-pagination>
@@ -139,13 +139,13 @@
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
                 <template slot-scope="scope">
-                    <router-link :to="{name:'news-second',params:{id:scope.row.id}}" > <el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;">审核</el-button></router-link>
+                    <router-link :to="{name:'news-second',params:{id:scope.row.id,argu:{a:value,b:value6,c:search_pra,d:activeName,e:per_page1,f:currentPage1,g:per_page2,h:currentPage2}}}" > <el-button type="text" v-if="scope.row.status=='1'||scope.row.status=='3'" style="margin-right:8px;vertical-align:middle;">审核</el-button></router-link>
                     <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" ><el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button></router-link>
                 </template>
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-              <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+              <el-pagination class="text-right" background @current-change="handleCurrentChange2(currentPage2)" :current-page.sync="currentPage2" :page-sizes="[10, 20, 30, 40]" 
                   :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
               </el-pagination>
             </div>
@@ -189,7 +189,7 @@
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page.sync="currentPage2" :page-sizes="[10, 20, 30, 40]" 
                 :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
             </el-pagination>
             </div>
@@ -227,13 +227,13 @@
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
               <el-table-column label="操作" width="50" fixed="right">
                 <template slot-scope="scope">
-                   <router-link :to="{name:'news-second',params:{id:scope.row.id}}" > <el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;">审核</el-button></router-link>
-                    <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" ><el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button></router-link>
+                  <router-link :to="{name:'news-second',params:{id:scope.row.id,argu:{a:value,b:value6,c:search_pra,d:activeName,e:per_page1,f:currentPage1,g:per_page2,h:currentPage2}}}" > <el-button type="text" v-if="scope.row.status=='1'||scope.row.status=='3'" style="margin-right:8px;vertical-align:middle;">审核</el-button></router-link>
+                  <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" ><el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button></router-link>
                 </template>
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+            <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page.sync="currentPage2" :page-sizes="[10, 20, 30, 40]" 
                 :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
             </el-pagination>
             </div>
@@ -261,6 +261,7 @@
                     <p v-if="scope.row.status=='3'" >审核不通过</p>
                 </template>
               </el-table-column>
+              <el-table-column label="审核人" prop="checkPerson" width="120"></el-table-column>
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                   <p v-if="scope.row.publish_source=='1'" >PC后台</p>
@@ -269,16 +270,17 @@
                 </template>
               </el-table-column>
               <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
-              <el-table-column label="操作" width="50" fixed="right">
+              <el-table-column label="操作" width="120" fixed="right">
                 <template slot-scope="scope">
-                    <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" >
-                      <el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button>
-                    </router-link>
+                  <router-link :to="{name:'news-second',params:{id:scope.row.id,argu:{a:value,b:value6,c:search_pra,d:activeName,e:per_page1,f:currentPage1,g:per_page2,h:currentPage2}}}" > <el-button type="text" v-if="scope.row.status=='1'||scope.row.status=='3'" style="margin-right:8px;vertical-align:middle;">审核</el-button></router-link>
+                  <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}" >
+                    <el-button v-if="scope.row.status=='3' || scope.row.status=='4' "  type="text" style="margin-right:8px;vertical-align:middle;">查看</el-button>
+                  </router-link>
                 </template>
               </el-table-column>
             </el-table>
             <div style="margin-top:20px;">
-              <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page="currentPage2" :page-sizes="[10, 20, 30, 40]" 
+              <el-pagination class="text-right" background @current-change="handleCurrentChange2" :current-page.sync="currentPage2" :page-sizes="[10, 20, 30, 40]" 
                   :page-size="this.per_page2" layout="total, sizes, prev, pager, next, jumper" :total="this.total_pages2" @size-change="handleSizeChange2">
               </el-pagination>
             </div>
@@ -340,15 +342,48 @@ export default {
       activeName: 'first',
       search_pra:'',
       value6:'',
+      argu:{}
     }
   },
-  created(){
-    this.getAuditlist();
+  mounted(){
+    if(this.$route.params.argu){
+      // a:value,b:value6,c:search_pra,d:activeName,e:per_page1,
+      // f:currentPage1,g:per_page2,h:currentPage2
+        this.argu = this.$route.params.argu;
+        // console.log(this.argu);
+        this.value=this.argu.a;
+        this.value6=this.argu.b;
+        this.search_pra=this.argu.c;
+        this.activeName=this.argu.d;
+        this.per_page1=this.argu.e;
+        this.currentPage1=this.argu.f;
+        this.per_page2=this.argu.g;
+        this.currentPage2=this.argu.h;
+        // console.log(this.currentPage2);
+        if(this.activeName == 'second'){
+          this.status='1';
+          this.handleCurrentChange2(this.currentPage2);
+        }else if(this.activeName == 'third'){ 	
+          this.status='2';
+           this.handleCurrentChange2(this.currentPage2);
+        }else if(this.activeName == 'fourth'){ 	
+          this.status='4'
+          this.handleCurrentChange2(this.currentPage2);
+        }else if(this.activeName == 'fifth'){ 	
+          this.status='3';
+          this.handleCurrentChange2(this.currentPage2);
+        }else if(this.activeName == 'first'){
+          this.status=''
+          this.getAuditlist();
+        }
+      }else{
+        this.getAuditlist();
+      }
   },
   methods: {
     selectChange(val){
         console.log(val);
-        if(val == '其他'){
+        if(val == '其它'){
           this.qita = false;
         }else{
           this.qita = true;
@@ -365,7 +400,11 @@ export default {
 						status: '4',
 					}
 					this.$post('news/check',params).then(res => {
-						console.log(res,res.code);
+            console.log(res,res.code);
+            this.$message({
+              message: res.msg?res.msg:'操作成功',
+              type: 'success'
+            });
 						var params = {
               tokenId:this.$store.state.user.tokenId,
               status:'1',
@@ -376,10 +415,7 @@ export default {
               if(res.code == '0'){
                 this.audit_no = res.data[0].rows;
                 this.total_pages2 = res.data[0].total;
-                this.$message({
-                  message: res.msg,
-                  type: 'success'
-                });
+                
               }else{
                 this.$message({
                   message: '提交失败',
@@ -472,6 +508,7 @@ export default {
       this.loading = true;
       // if(!params){
         var params = {
+          articleType:'1',
           tokenId:this.$store.state.user.tokenId,
           queryType:'audit',
           limit:this.per_page1,
@@ -486,11 +523,10 @@ export default {
       this.$post('news/list',params).then(res =>{
         if(res.code == 0){
           this.loading = false;
-          /* this.$message({
-          message: '成功获取列表',
-          type: 'success'
-        }); */
-        // console.log(res.data[0].rows)
+          if(this.argu.f){
+            this.currentPage1=this.argu.f;
+            this.argu.f=0;
+          }
         this.audit_all = res.data[0].rows;
         this.total_pages1 = res.data[0].total;
         }
@@ -498,8 +534,9 @@ export default {
     },
     // tab切换获取相应的数据
     getTabList(params){
-      // if(!params){
+        // console.log('------',this.currentPage2);
         var params= {
+          articleType:'1',
           tokenId:this.$store.state.user.tokenId,
           limit:this.per_page2,
           offset:this.currentPage2,
@@ -510,11 +547,16 @@ export default {
           startTime:this.value6[0],
           endTime:this.value6[1],
         }
-      // }
       // console.log(params);
       this.$post('news/list',params).then(res =>{
         if(res.code==0){
+          // console.log(res.data[0].rows);
           this.loading = false;
+          if(this.argu.h){
+            this.currentPage2=this.argu.h;
+            this.argu.h=0;
+          }
+          // this.currentPage2=this.argu.h;
           this.$message({
             message: '成功获取列表',
             type: 'success'
@@ -527,17 +569,17 @@ export default {
     },
     // 切换tab 
     handleClick(tab, event) {
+      // console.log(1111)
       this.currentPage1=1;
       this.currentPage2=1;
       this.per_page2=10;
       this.search_pra='';
       this.value6='';
       this.value='';
-      console.log(tab.name, event);
+      // console.log(tab.name, event);
       if(tab.name == 'second'){
         this.status='1';
         this.getTabList();
-
       }else if(tab.name == 'third'){ 	
         this.status='2';
         this.getTabList();
@@ -555,13 +597,13 @@ export default {
 //  全部
     handleCurrentChange1(val) {
     	this.currentPage1=val;
-      console.log(`当前页: ${val}`);
+      // console.log(`当前页: ${val}`);
       this.getAuditlist();
     },
     //待审核
     handleCurrentChange2(val){
       this.currentPage2=val;
-      console.log(`当前页: ${val}`);
+      // console.log('+++++',this.currentPage2);
       this.getTabList();
     },
     

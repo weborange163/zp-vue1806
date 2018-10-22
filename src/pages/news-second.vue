@@ -4,7 +4,7 @@
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
 				<el-breadcrumb-item>新闻审核</el-breadcrumb-item>
-				<el-breadcrumb-item>审核新闻资讯</el-breadcrumb-item>
+				<el-breadcrumb-item>审核{{column}}资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		<el-dialog title="审核页面" :visible.sync="dialogFormVisible" width="30%">
@@ -15,12 +15,12 @@
 						<el-option label="您发布的内容涉嫌敏感内容" value="您发布的内容涉嫌敏感内容"></el-option>
 						<el-option label="您发布的内容无具体信息，或信息无意义" value="您发布的内容无具体信息，或信息无意义"></el-option>
 						<el-option label="您发布的内容不符合栏目属性" value="您发布的内容不符合栏目属性"></el-option>
-            <el-option label="其他" value="其他"></el-option>
+            <el-option label="其它" value="其它"></el-option>
 					</el-select>
 				</el-form-item>
 				<el-form-item label="审核信息">
 					<el-input size="mini" type="textarea" v-model="form.name" auto-complete="off" :disabled="qita"
-          placeholder="审核原因选择其他,可以填写审核信息"></el-input>
+          placeholder="审核原因选择其它,可以填写审核信息"></el-input>
 				</el-form-item>
 			</el-form>
 			<div slot="footer" class="dialog-footer">
@@ -31,11 +31,11 @@
 
 		<div class="box">
 			<div class="text-right">
-				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
+				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="dialogFormVisible = true">不通过</el-button>
 				<el-button size="small" class="light_btn" @click="toAudit('4')">通过</el-button>
 			</div>
-			<el-form ref="form1" :model="form1" label-width="80px" :rules="rules1" class="up_form clearfix">
+			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title">
 						<el-input :disabled="true" type="textarea" autosize v-model="form1.title" placeholder="请输入标题"></el-input>
@@ -61,6 +61,12 @@
 					<el-form-item label="作者:">
 						<el-input :disabled="true" v-model="form1.author"></el-input>
 					</el-form-item>
+          <el-form-item label="所属分类:" prop="userId" required>
+            <el-select v-model="value" name="classifyType" placeholder="暂无分类"  style='padding-left: 6px;' :disabled="true">
+              <el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
+					</el-form-item>
 					<el-form-item label="发布账号:" v-if="form1.publishSource!='3'" prop="userId" label-width="82">
 						<el-select :disabled="true" v-model="form1.userId" placeholder="请选择发布账号">
 							<el-option 
@@ -82,6 +88,12 @@
 					</el-form-item>
 					<el-form-item label="封面图" required v-if="form1.imgType == 1">
 						<img class="wh80" :src="imgSrc" alt="封面图展示">
+					</el-form-item>
+          <el-form-item label="视频地址:" v-if="form1.videoId">
+						<a target="_blank" :href="form1.videoUrl">{{form1.videoUrl}}</a>
+					</el-form-item>
+          <el-form-item label="视频名称:" v-if="form1.videoId">
+            <p v-text="form1.videoName"></p>
 					</el-form-item>
 					<el-form-item label="Tag标签:">
 						<el-input :disabled="true" placeholder="用逗号隔开，单个标签少于12字节" v-model="form1.tagLabels"></el-input>
@@ -156,8 +168,8 @@
               <tr class="el-table__row">
                 <td><div class="cell">审核时间</div></td>
                 <td><div class="cell">{{form1.checkTime}}</div></td>
-                <td><div class="cell">{{form1.checkPerson}}</div></td>
-                <td><div class="cell"><p v-if="form1.status=='3'">{{form1.checkReason=='其他'?form1.checkMessage:form1.checkReason}}</p></div></td>
+                <td><div class="cell">{{form1.checkReason=='涉及敏感词'?'机审':form1.checkPerson}}</div></td>
+                <td><div class="cell"><p v-if="form1.status=='3'">{{form1.checkReason=='其它'?form1.checkMessage:form1.checkReason}}</p></div></td>
               </tr>
             </tbody>
           </table>
@@ -177,6 +189,7 @@
 		},
 		data() {
 			return {
+        value:'',
         pkg: '',
         qita:true,
 				quill: {
@@ -225,7 +238,8 @@
 				cities: [],
 				idDetail:'',
 				imgSrc:'',
-				fileList:[],
+        fileList:[],
+        classifyType:'',
 				//弹框
 				dialogTableVisible: false,
         dialogFormVisible: false,
@@ -277,26 +291,27 @@
 						required: true,
 						message: '请填写活动形式',
 						trigger: 'blur'
-					}]
+          }],
+          argu:{}
 				}
 			}
 		},
 		created() {
 			this.baceUrl = getBaceUrl();
 			this.getParams();
-			this.showNews();
-			// console.log(this.baceUrl)
-			
+      this.showNews();
+      this.argu=this.$route.params.argu;
+			// console.log(this.argu);
 		},
 		mounted() {
 			this.$get('reprintSth/findAll', {
 				tokenId: this.$store.state.user.tokenId
 			}).then(res => {
-				console.log(res.data)
+				// console.log(res.data)
 				this.cities = res.data
       });
       this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
-        console.log(res)
+        // console.log(res)
         this.accounts = res.data;
       })
 			document.getElementById('content').innerHTML=this.form1.content;
@@ -310,14 +325,34 @@
 				}
 				this.$get('news/show',params).then(res => {
 					this.form1 = res.data[0];
-					console.log(this.form1)
+          // console.log(this.form1)
+          this.classifyType = this.form1.classifyType;
+          if(this.form1.articleType == '1'){
+            this.column='新闻'
+          }else{
+            this.column='行情'
+          }
 					this.imgSrc = this.form1.coverImgUrl;
-					this.status = this.form1.status;
+          this.status = this.form1.status;
+          let selectid = this.classifyType;
+				//				alert(selectid)
+				//  	下拉菜单
+				this.$get('/industryCategory/findIndustryCategoryList', {
+					tokenId: this.$store.state.user.tokenId
+				}).then(res => {
+					console.log(res.data)
+					this.classifyType = res.data
+					for(var i = 0; i < this.classifyType.length; i++) {
+						if(selectid == this.classifyType[i].id) {
+							this.value = this.classifyType[i].name
+						}
+					}
+				})
 				});
       },
       selectChange(val){
         console.log(val);
-        if(val == '其他'){
+        if(val == '其它'){
           this.qita = false;
         }else{
           this.qita = true;
@@ -366,15 +401,25 @@
             params.checkMessage= this.form.name;
           }
           this.$post('/news/check', params).then(res => {
-            console.log(res);
-            if(res.code == 0) {
+            // console.log(res);
+            if(res.code == 0){
+              var backRoute='';
+              if(this.column == '新闻'){
+                backRoute = 'audit-news';
+              }else{
+                backRoute = 'audit-market';
+              }
               this.$message({
                 type: 'success',
                 message: res.msg
               });
+              // console.log(backRoute);
               setTimeout(() => {
                 this.$router.push({
-                  name: 'audit-news'
+                  name: backRoute,
+                  params:{
+                    argu:this.argu
+                  }
                 });
               }, 1000);
             }else if(res.code == 2){
@@ -393,57 +438,6 @@
 				
 			},
 
-			// 新建新闻
-			creatNews(formName, status) {
-				this.$refs[formName].validate((valid) => {
-					if(valid) {
-						console.log(valid)
-						if(this.form1.sourceType == '2' && !this.form1.source) { // 选择转载时候,需要选择转载来源 (待)
-
-						}
-						this.uploadData = {
-							tokenId: this.$store.state.user.tokenId,
-							// newsFile:this.form1.newsFile,
-							status: status,
-							title: this.form1.title,
-							content: 'this.form1.content',
-							sourceType: this.form1.sourceType,
-							source: this.form1.source,
-							author: this.form1.author,
-							userId: this.form1.userId,
-							imgType: this.form1.imgType,
-							tagLabel: this.form1.tagLabel,
-							keyWords: this.form1.keyWords,
-							publishSource: "1"
-						}
-						// this.uploadData = params;
-						console.log(this.uploadData)
-						setTimeout(() => {
-							this.$refs.upload.submit();
-							this.$message({
-								type: 'success',
-								message: '添加成功!'
-							});
-							setTimeout(() => {
-								this.$router.push({
-									name: 'news'
-								});
-							}, 1000);
-						}, 0);
-
-						// console.log(params)
-						/* this.$post('news/add',params).then(res =>{
-							if(res.code == 0){
-								console.log(1111111,res)
-							}
-						}) */
-					} else {
-						console.log('error submit!!');
-						return false;
-					}
-				});
-
-			},
 			test() {
 				console.log(this.form1.source);
 			},
@@ -472,8 +466,26 @@
 			handlePictureCardPreview(file) {
 				this.dialogImageUrl = file.url;
 				this.dialogVisible = true;
-			}
-		},
+      },
+      fanhui(){
+        var backRoute='';
+        if(this.column == '新闻'){
+          backRoute = 'audit-news';
+        }else{
+          backRoute = 'audit-market';
+        }
+        this.$router.push({
+          name: backRoute,
+          params: {
+            argu: this.argu
+          }
+        });
+      }
+    },
+    beforeRouteLeave(to, from, next) {
+      to.meta.keepAlive = false;
+      next();
+    },
 		watch: {
     // 监测路由变化,只要变化了就调用获取路由参数方法将数据存储本组件即可
       '$route': 'getParams'
