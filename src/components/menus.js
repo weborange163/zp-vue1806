@@ -39,18 +39,28 @@ const menus = [
       {id: 'd1', name: 'rules1', label: '行业信息分类设置'},
       {id: 'd2', name: 'rules2', label: '转载来源设置'},
       {id: 'd3', name: 'rules3', label: '区域管理'},
-      {id: 'd4', name: 'version', label: '版本管理'},
-      {id: 'd5', name: 'permissions', label: '角色与权限'},
-      {id: 'd6', name: 'accounts', label: '后台用户管理'}
+      {id: 'd4', name: 'travel-coin', label: '交通币规则'},
+      {id: 'd5', name: 'version', label: '版本管理'},
+      {id: 'd6', name: 'permissions', label: '角色与权限'},
+      {id: 'd7', name: 'accounts', label: '后台用户管理'}
     ]
   },
   {
     id: 'e',
+    icon: 'iconfont icon-coins',
+    label: '交通币',
+    submenu: [
+      {id: 'e1', name: 'coin-account', label: '会员账户'},
+      {id: 'e2', name: 'coin-withdraw', label: '提现管理'}
+    ]
+  },
+  {
+    id: 'f',
     icon: 'iconfont icon-chart',
     label: '数据统计',
     submenu: [
-      {id: 'e1', name: 'content-data', label: '内容数据'},
-      {id: 'e2', name: 'third-party', label: '平台用户数据'}
+      {id: 'f1', name: 'content-data', label: '内容数据'},
+      {id: 'f2', name: 'third-party', label: '平台用户数据'}
     ]
   }
   /*{

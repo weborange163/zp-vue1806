@@ -349,19 +349,13 @@ export default {
 				this.$get('/specialInfo/publishWaitTop',{tokenId:this.$store.state.user.tokenId}).then(res =>{
 					this.loading = false;
 					if(res.code == '0'){
-            this.$message({
-							type: 'success',
-							message: res.msg
-            });
             this.upData = res.data;
           }else{
              this.$message({
 							type: 'errpr',
-							message: res.msg?res.msg:'排序失败'
+							message: res.msg?res.msg:'获取列表失败'
             });
           }
-					
-					
 				})
 			},
 			//提交置顶排序(弹框点击发布)
@@ -379,9 +373,21 @@ export default {
 				}
 				console.log(params);
 				this.$post('/specialInfo/publishTop',params).then(res => {
-					console.log(res)
+					if(res.code == '0'){
+            this.$message({
+							type: 'success',
+							message: res.msg?res.msg:'发布成功'
+            });
+            this.getSubjectList();
+            this.dialogVisible = false;
+          }else{
+            this.$message({
+							type: 'errpr',
+							message: res.msg?res.msg:'发布失败'
+            });
+          }
 				})
-				this.dialogVisible = false
+			
 			},
 		//推荐到banner
 		recommend(index,row) {

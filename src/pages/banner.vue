@@ -494,7 +494,8 @@
 							type: 'success',
 							message: res.msg
             });
-            this.dialogVisible = false
+            this.dialogVisible = false;
+            this.getBannerlist();
           }else{
             this.$message({
 							type: 'error',

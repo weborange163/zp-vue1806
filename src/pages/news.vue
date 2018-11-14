@@ -958,7 +958,7 @@
 		font-size: 12px;
 	}
 	
-	.el-table th {
+	.news .el-table th {
 		font-size: 14px;
 	}
 	
