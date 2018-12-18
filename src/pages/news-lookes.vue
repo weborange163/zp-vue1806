@@ -18,8 +18,9 @@
 				<el-button size="small" @click="$router.back()" class="light_btn">返回</el-button>
 				<el-button size="small" class="light_btn" @click="detailDialog = true;" >预览</el-button>
 				<el-button size="small" v-if="form1.status == '0'" class="light_btn" @click="toAudit()">提交审核</el-button>
-				<el-button size="small" class="light_btn" v-if="form1.status == '5'" @click="onOff('4','上线')">上线</el-button>
-				<el-button size="small" class="light_btn" v-if="status == '4'" @click="onOff('5','下线')">下线</el-button>
+				<el-button size="small" class="light_btn" v-if="form1.status == '5'" @click="onOff('4','上线',form1.articleType)">上线</el-button>
+				<el-button size="small" class="light_btn" v-if="status == '4'&& form1.topFlag!='1'&&form1.recommend !='1'&&form1.specialNewsStatus!=1" @click="onOff('5','下线',form1.articleType)">下线</el-button>
+				<!-- <el-button size="small" class="light_btn" v-else :disabled="true">下线</el-button> -->
 			</div>
 			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
@@ -94,9 +95,6 @@
 					</el-form-item>
           <el-form-item label="视频名称:" v-if="form1.videoId">
             <p v-text="form1.videoName"></p>
-					</el-form-item>
-					<el-form-item label="Tag标签:" prop="tagLabels">
-						<el-input placeholder="用'，'隔开，单个标签小于12字节"  v-model="form1.tagLabels" ></el-input>
 					</el-form-item>
 					<el-form-item label="Tag标签:">
 						<el-input  v-model="form1.tagLabels" :disabled="true"></el-input>
@@ -248,8 +246,17 @@ import axios from 'axios'
 		},
 		methods:{
 			//上下线操作
-			onOff(status,type){
-				this.$confirm(`确定要${type}该新闻吗?`, '提示', {
+			onOff(status,type,article_type){
+        var text='';
+        var router =''
+        if(article_type =='1'){
+          text = '新闻';
+          router = 'news';
+        }else{
+          text = '行情'
+          router = 'market'
+        }
+				this.$confirm(`确定要${type}该${text}吗?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -262,7 +269,7 @@ import axios from 'axios'
 					this.$post('news/isOnline',params).then(res => {
 						// console.log(res)
 						setTimeout(() => {
-								this.$router.push({name: 'news'});
+								this.$router.push({name: router});
 							}, 1000);
 						this.$message({
 							type: 'success',
@@ -272,7 +279,7 @@ import axios from 'axios'
         }).catch(() => {
           this.$message({
             type: 'info',
-            message: res.msg
+            message: '失败了'
           });          
         });
 			},
@@ -332,7 +339,7 @@ import axios from 'axios'
           	let selectid = this.classifyType;
 				//				alert(selectid)
 				//  	下拉菜单
-				this.$get('/industryCategory/findIndustryCategoryList', {
+				this.$get('/column/findColumnList', {
 					tokenId: this.$store.state.user.tokenId
 				}).then(res => {
 					console.log(res.data)

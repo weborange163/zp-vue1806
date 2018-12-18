@@ -42,21 +42,22 @@
         </el-col>
         <el-col :span='10' :offset="0">
           <el-row style="margin-bottom:8px;">
-            <el-select size="mini" placeholder="会员身份" v-model="identityValue" style="width:30%;margin-right:2%;">
+            <el-select size="mini" placeholder="会员身份" filterable default-first-option multiple allow-create
+            v-model="identityValue" style="width:50%;margin-right:2%;" @change="testVal">
               <el-option
                 v-for="item in identitySelect"
                 :key="item.value" :label="item.label"
                 :value="item.value">
               </el-option>
             </el-select>
-            <el-select size="mini" placeholder="选择省" v-model="provinceVal" style="width:30%;margin-right:2%;" @change="provinceChange">
+            <el-select size="mini" placeholder="选择省" v-model="provinceVal" style="width:20%;margin-right:2%;" @change="provinceChange">
               <el-option
                 v-for="item in provinceArr"
                 :key="item.areaNo" :label="item.areaName"
                 :value="item.areaNo">
               </el-option>
             </el-select>
-            <el-select size="mini" placeholder="选择市" v-model="cityVal" style="width:30%;">
+            <el-select size="mini" placeholder="选择市" v-model="cityVal" style="width:20%;">
                 <el-option
                 v-for="item in cityArr"
                 :key="item.areaNo" :label="item.areaName"
@@ -289,6 +290,9 @@ export default {
       });
     },
     methods: {
+      testVal(val){
+        console.log(val);
+      },
       showList(){
         this.loading = true;
         var params = {

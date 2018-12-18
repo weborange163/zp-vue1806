@@ -80,6 +80,7 @@
 					<template slot-scope="scope">
 						<el-input size="mini" v-if="bannerForm1.bannerType=='1'" value="新闻" disabled></el-input>
 						<el-input size="mini" v-if="bannerForm1.bannerType=='2'" value="专题" disabled></el-input>
+            <el-input size="mini" v-if="bannerForm1.bannerType=='3'" value="行情" disabled></el-input>
 					</template>
 				</el-form-item>
 				<el-form-item label="链接">
@@ -397,7 +398,7 @@
 						id: rows.id,
 				}
 				this.$get('bannerInfo/show', params).then(res => {
-					console.log(res.data[0])
+					// console.log(res.data[0])
           this.bannerForm1 = res.data[0];
           if(this.bannerForm1.status == '0'){
             this.bannerForm1.statusText ='待上线'
@@ -519,7 +520,7 @@
           this.banner_data = res.data[0].rows;
 					this.total_pages = res.data[0].total;
 				})
-				this.search_info = ''
+				// this.search_info = ''
 			},
 			//刷新
 			getBannerlist1(params) {

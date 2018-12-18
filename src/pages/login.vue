@@ -69,7 +69,8 @@ export default {
           this.$store.dispatch('saveUserInfo', res.data[0]).then(res => {
             this.$message.success('登录成功')
             this.isLoging = false
-           this.$router.push({name: 'home'})
+          //  this.$router.push({name: '首页'})
+          this.$router.push({name: 'home'});
           //  this.$router.replace('/')
           }, res => {
             this.$message.success(res.msg)

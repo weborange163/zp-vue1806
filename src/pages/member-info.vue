@@ -96,14 +96,20 @@
                   <tr class="el-table__row">
                     <td><div class="cell">发布广播</div></td>
                     <td><div class="cell">0</div></td>
-                    <td><div class="cell">点赞</div></td>
-                    <td><div class="cell">{{num6}}</div></td>
+                    <td><div class="cell">获赞</div></td>
+                    <td><div class="cell">{{num8}}</div></td>
                   </tr>
                   <tr class="el-table__row">
                     <td><div class="cell">发布评论</div></td>
                     <td><div class="cell">{{num3}}</div></td>
+                    <td><div class="cell">喜欢收藏</div></td>
+                    <td><div class="cell">{{num6}}</div></td>
+                  </tr>
+                  <tr class="el-table__row">
                     <td><div class="cell">跟踪</div></td>
                     <td><div class="cell">{{num7}}</div></td>
+                    <td><div class="cell"></div></td>
+                    <td><div class="cell"></div></td>
                   </tr>
                 </tbody>
               </table>
@@ -132,6 +138,32 @@
                 label="操作时间">
               </el-table-column>
               
+            </el-table>
+          </div>
+        </el-tab-pane>
+        <el-tab-pane label="关联账号" name="fifth">
+          <div>
+            <p class="info_title">关联账号</p>
+            <el-table :row-class-name="miniTable" :header-row-class-name="miniTable"
+              :data="thirdAccount" 
+              border
+              style="width: 800px;">
+              <el-table-column
+                prop="name"
+                label="第三方"
+                width="220">
+              </el-table-column>
+              <el-table-column
+                prop="openId"
+                label="openID/UnionId/关联账号"
+                >
+              </el-table-column>
+              <el-table-column label="状态" width="220">
+                <template slot-scope="scope">
+                  <p v-if="scope.row.isBinding==1" class="yshx">已绑定</p>
+                  <p v-else class="yxx">未绑定</p>
+                </template>
+              </el-table-column>
             </el-table>
           </div>
         </el-tab-pane>
@@ -221,10 +253,11 @@ export default {
         checkOp:[],
         checkList: [],
         idDetail:'',
-        num1:0,num2:0,num3:0,num4:0,num5:0,num6:0,num7:0,
+        num1:0,num2:0,num3:0,num4:0,num5:0,num6:0,num7:0,num8:0,
         flag1:true,
         flag2:true,
         flag3:true,
+        flag4:true,
         data1:{
           nickName:'',sex:'',userId:'',cityId:'',phone:'',birthday:'',idCard:'',
           userDesc:'',createTime:'',loginTime:'',mobileModel:'',fullUrl:''
@@ -232,6 +265,7 @@ export default {
         data3:{mobileOs:''},
         activeName: 'first',
         tableData: [],
+        thirdAccount:[],
         baceUrl:''
       };
     },
@@ -342,12 +376,15 @@ export default {
         })
       },
       handleClick(tab, event) {
-        if(tab.index == '1' && this.flag1){
+        console.log(tab);
+        if(tab.name == 'second' && this.flag1){
           this.userData();
-        }else if(tab.index == '2' && this.flag2){
+        }else if(tab.name == 'third' && this.flag2){
           this.UserProhibit();
-        }else if(tab.index == '3' && this.flag3){
+        }else if(tab.name == 'fourth' && this.flag3){
           this.otherInfo();
+        }else if(tab.name == 'fifth' && this.flag4){
+          this.getThird();
         }
       },
       // 用户数据
@@ -373,6 +410,8 @@ export default {
               this.num6= item.num
             }else if(item.title == 'follows'){
               this.num7= item.num
+            }else if(item.title == 'wonGoods'){
+               this.num8 = item.num
             }
           })
           this.flag1 = false;
@@ -385,10 +424,24 @@ export default {
           tokenId:this.$store.state.user.tokenId,
           userId:this.idDetail
         }
-        this.$post('members/getUserProhibit',params).then(res => {
+        this.$post('/members/getUserProhibit',params).then(res => {
           console.log(res.data);
           this.tableData = res.data;
           this.flag2 = false;
+        })
+      },
+      //getThird
+      getThird(){
+        console.log('关联账号')
+        var params = {
+          tokenId:this.$store.state.user.tokenId,
+          userId:this.idDetail
+        }
+        this.$post('/members/getUserThird',params).then(res => {
+          console.log(res.data);
+          this.thirdAccount=res.data;
+          // this.tableData = res.data;
+          this.flag4 = false;
         })
       },
       //其他信息
@@ -397,12 +450,17 @@ export default {
           tokenId:this.$store.state.user.tokenId,
           userId:this.idDetail
         }
-        this.$post('members/getUserOtherInfo',params).then(res => {
-          // console.log(res.data);
+        this.$post('/members/getUserOtherInfo',params).then(res => {
+          if(res.data[0]){
+             console.log(res.data);
           var d = res.data
           this.data3 = d[0];
           // console.log(11111,this.data3)
           this.flag3 = false;
+          }else{
+            
+          }
+         
         })
       },
       miniTable(row){

@@ -1,5 +1,5 @@
 <template>
-	<div class="page-body" style="min-width:980px;">
+	<div class="page-body news-add" style="min-width:980px;">
     <el-dialog center width="375px"  :visible.sync="showNews" append-to-body id='div1'>
 			<el-form :data="form1"  ref="form1" label-width="110px" class="form1">
 				<p id="p1" >{{form1.title }}</p>
@@ -21,7 +21,7 @@
 				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1','1')">保存并提交审核</el-button>
 			</div>
-			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
+			<el-form ref="form1" :model="form1" label-width="96px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
 						<el-input type="textarea" autosize v-model="form1.title" placeholder="请输入标题" style="width:420px;"></el-input>
@@ -39,9 +39,19 @@
 					</el-form-item>
 				</div>
 				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
-					<el-form-item label="发布到:">
+					<!-- <el-form-item label="发布到:">
 						<el-input :disabled="true" v-model="form1.column"></el-input>
-					</el-form-item>
+					</el-form-item> -->
+          <el-form-item label="发布到:" prop="columnId">
+            <el-select filterable v-model="form1.columnId" name="columnId" placeholder="请选择">
+              <el-option
+                v-for="item in columnIds"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id">
+              </el-option>
+            </el-select>
+          </el-form-item>
           <el-row>
             <el-col :span="14">
               <el-form-item label="来源:" prop="sourceType">
@@ -53,7 +63,7 @@
             </el-col>
             <el-col :span="10">
               <el-form-item v-if="form1.sourceType == 2" prop="source" class="source_style">
-                <el-select filterable v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+                <el-select filterable allow-create v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
                   <el-option
                     v-for="item in cities"
                     :key="item.id"
@@ -65,18 +75,9 @@
             </el-col>
           </el-row>
 					<el-form-item label="作者:">
-						<el-input v-model="form1.author"></el-input>
+						<el-input v-model="form1.author" style="width:194px;"></el-input>
 					</el-form-item>
-          <el-form-item label="所属分类:" prop="classifyType">
-            <el-select filterable v-model="form1.classifyType" name="classifyType" placeholder="请选择">
-              <el-option
-                v-for="item in classifyTypeAll"
-                :key="item.id"
-                :label="item.name"
-                :value="item.id">
-              </el-option>
-            </el-select>
-          </el-form-item>
+          
 					<el-form-item class="fabuStyle" label="发布账号:" prop="userId">
 						<el-select filterable v-model="form1.userId" placeholder="请选择发布账号">
 							<el-option 
@@ -87,16 +88,30 @@
               ></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="附加选项:" prop="imgType">
-							<el-radio-group v-model="form1.imgType" @change="radioChange">
-								<el-radio label="1">上传缩略图</el-radio>
-								<el-radio label="2">提取第一个图为缩略图</el-radio>
+					<el-form-item label="封面图样式:" prop="coverNum">
+							<el-radio-group v-model="form1.coverNum" @change="coverNumChange">
+                <el-radio label="0">无图</el-radio>
+								<el-radio label="1">单图</el-radio>
+								<el-radio label="3">三图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item label="封面图:" prop="icon" ref="icon" v-show="form1.imgType == '1'">
-						<el-upload
+					<el-form-item label="上传封面图:" prop="icon" ref="icon" v-show="form1.coverNum != '0'">
+            	<el-radio-group v-model="form1.imgType" @change="radioChange">
+                <el-radio label="1">上传封面图</el-radio>
+								<el-radio label="2">提取正文图为封面图</el-radio>
+							</el-radio-group>
+						<el-upload v-if="form1.coverNum == '1'"
 							action="" :multiple="false" :limit='1'
 							ref="upload" name="newsFile" :file-list="fileList"
+							list-type="picture-card" :auto-upload="false"
+							:on-change="fileChange" :on-exceed="handleExceed"
+							:on-preview="handlePictureCardPreview"
+							:on-remove="handleRemove">
+							<i class="el-icon-plus"></i>
+						</el-upload>
+            <el-upload v-if="form1.coverNum == '3'"
+							action="" :multiple="true" :limit='3'
+							ref="upload2" name="newsFile" :file-list="fileList2"
 							list-type="picture-card" :auto-upload="false"
 							:on-change="fileChange" :on-exceed="handleExceed"
 							:on-preview="handlePictureCardPreview"
@@ -114,11 +129,17 @@
               ref="uploadVideo" name="newsVideo"
               :action="videoUrl" accept='video/mp4'
               :on-remove="handleRemove2"
+              element-loading-text="拼命上传中"
+              element-loading-spinner="el-icon-loading"
+              element-loading-background="rgba(0, 0, 0, 0.4)"
+              v-loading.fullscreen.lock="loading2"
+              :on-progress="uploading"
               :file-list="fileListVideo"
               :on-success="handleSuccess"
+              :on-exceed="exceedFile"
               :before-remove="beforeRemove"
               :auto-upload="false">
-              <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+              <el-button slot="trigger" size="small" type="primary">选取视频</el-button>
               <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
               <!-- <div slot="tip" class="el-upload__tip">只能上传mp4文件</div> -->
               <div class="el-upload__tip" v-html="showUrl"></div>
@@ -169,8 +190,10 @@ import axios from 'axios'
         }
       };
 			return{
+        loading2:false,
         accounts:[],
         fileList:[],
+        fileList2:[],
         fileListVideo:[],
         showNews:false,
 				pkg:'',
@@ -211,9 +234,9 @@ import axios from 'axios'
 				form1: {
 					title: '',
 					content:'',
-					column:'新闻资讯',
+					coverNum:'1',
           sourceType:'1',
-          classifyType:'',
+          columnId:'',
 					source:'',
 					author:'',
 					userId:'',
@@ -223,17 +246,17 @@ import axios from 'axios'
 					keyWords:''
 				},
 				cities:[],
-        hasFmt:false,
+        hasFmt:true,
         showUrl:'',
         argu:{},
         videoUrl:'',
-        classifyTypeAll:'',
+        columnIds:'',
         videoId:"",
 				rules1: {
           icon:[
             {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
           ],
-         /*  classifyType:[
+         /* classifyType:[
             { required: true, message: '请选择所属分类', trigger: 'blur' },
           ], */
           title: [
@@ -246,10 +269,13 @@ import axios from 'axios'
           sourceType: [
             { required: true, message: '请选择来源', trigger: 'change'}
           ],
+          coverNum:[
+            {required: true, message: '请选择封面图样式', trigger: 'change' }
+          ],
           source:[
             {required: true, message: '请选择转载来源', trigger: 'change' }
           ],
-          classifyType:[
+          columnId:[
             { required: true, message: '请选择来源', trigger: 'change'}
           ],
           userId: [
@@ -274,9 +300,9 @@ import axios from 'axios'
       this.baceUrl = getBaceUrl();
       this.videoUrl = this.baceUrl + '/news/addVideo';
       // console.log(this.videoUrl);
-      this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
+      this.$get('/column/findColumnList',{tokenId:this.$store.state.user.tokenId,navigationBar:''}).then(res => {
     		// console.log(res.data)
-    		this.classifyTypeAll = res.data
+    		this.columnIds = res.data
     	});
       // console.log(this.$route.params);
 			this.argu=this.$route.params.argu;
@@ -294,13 +320,30 @@ import axios from 'axios'
 		methods:{
       radioChange(val){
         console.log(val)
-        if(val == '2'){
+        /* if(val == '2'){
           this.hasFmt = true;
         }else{
           if(!this.fileList){
             this.hasFmt=false;
           }
+        } */
+      },
+      coverNumChange(val){
+        if(val == '0'){
+          this.hasFmt = true;
+        }else{
+          this.hasFmt = false;
+          if(this.fileList){
+            this.hasFmt=true;
+          }
         }
+      },
+      exceedFile(){
+        this.$message.warning('只能上传一个文件!');
+      },
+      uploading(event, file, fileList){
+        // console.log(event, file, fileList)
+        
       },
 			// 富文本图片上传
 			uploadImg(file,insert){
@@ -332,6 +375,7 @@ import axios from 'axios'
         this.videoId='';
       },
       handleSuccess(res,file){
+        this.loading2 = false;
         console.log(res.data[1]);
         this.showUrl = res.data[1];
         this.videoId = res.data[0];
@@ -367,9 +411,10 @@ import axios from 'axios'
             param.append('sourceType',this.form1.sourceType);
             param.append('author',this.form1.author);
             param.append('userId',this.form1.userId);
+            param.append('coverNum',this.form1.coverNum);
             param.append('imgType',this.form1.imgType);
-            param.append('articleType','1');
-            param.append('classifyType',this.form1.classifyType);
+            // param.append('articleType','1');
+            param.append('columnId',this.form1.columnId);
             param.append('tagLabels',this.form1.tagLabels.replace(/，/ig,','));
             // param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
             param.append('publishSource','1');
@@ -507,5 +552,7 @@ import axios from 'axios'
   .source_style .el-form-item__error{
     left: -50px;
   }
-  
+  .news-add .el-progress--line{
+    display: none !important;
+  }
 </style>

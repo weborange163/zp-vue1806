@@ -10,8 +10,8 @@
         </el-col>
         <el-col :span="8" :offset="7">
           <el-input v-model="inputs" size="mini" style="width:60%" placeholder="会员ID、会员昵称、手机号" ></el-input>
-          <el-button class="light_btn" size="mini" @click.native.prevent="getComList()">搜索</el-button>
-          <el-button class="light_btn" size="mini" @click.native.prevent="getComList()">刷新</el-button>
+          <el-button class="light_btn" size="mini" @click.native.prevent="refreshList()">搜索</el-button>
+          <el-button class="light_btn" size="mini" @click.native.prevent="refreshList()">刷新</el-button>
         </el-col>
       </el-row>
     </div>
@@ -23,13 +23,13 @@
             <p class="text-center marBo10" style="color:#FFBC00;">交通币（JTB）</p>
             <el-form ref="form1" :model="form1" label-width="50%">
               <el-form-item label="发行总量:">
-                <p v-text="form1.a" class="show_info"></p>
+                <p v-text="form1.totalJtb" class="show_info"></p>
               </el-form-item>
               <el-form-item label="已使用(JTB):">
-                <p v-text="form1.b" class="show_info"></p>
+                <p v-text="form1.usedJtb" class="show_info"></p>
               </el-form-item>
               <el-form-item label="余额(JTB):">
-                <p v-text="form1.c" class="show_info"></p>
+                <p v-text="form1.currentJtb" class="show_info"></p>
               </el-form-item>
             </el-form>
           </div>
@@ -39,10 +39,10 @@
             <p class="text-center marBo10" style="color:#57E2D9;">JTB兑换RMB</p>
             <el-form ref="form2" :model="form2" label-width="50%">
               <el-form-item label="兑换总量:">
-                <p v-text="form2.a" class="show_info"></p>
+                <p v-text="form2.totalExchangeJtb" class="show_info"></p>
               </el-form-item>
               <el-form-item label="折合RMB（元）:">
-                <p v-text="form2.b" class="show_info"></p>
+                <p v-text="form2.totalExchangeMoney" class="show_info"></p>
               </el-form-item>
             </el-form>
           </div>
@@ -52,13 +52,13 @@
             <p class="text-center marBo10" style="color:#FF5D58;">现金（¥）</p>
             <el-form ref="form3" :model="form3" label-width="50%">
               <el-form-item label="提现次数（次）:">
-                <p v-text="form3.a" class="show_info"></p>
+                <p v-text="form3.withdrawNum" class="show_info"></p>
               </el-form-item>
               <el-form-item label="已提现（¥）:">
-                <p v-text="form3.b" class="show_info"></p>
+                <p v-text="form3.withdrawMoney" class="show_info"></p>
               </el-form-item>
               <el-form-item label="余额（¥）:">
-                <p v-text="form3.b" class="show_info"></p>
+                <p v-text="form3.currentMoney" class="show_info"></p>
               </el-form-item>
             </el-form>
           </div>
@@ -69,27 +69,27 @@
         style="width: 100%">
         <el-table-column label="会员信息">
           <el-table-column label="序号" type="index"width="50"></el-table-column>
-          <el-table-column prop="name" label="会员id" width="120"></el-table-column>
-          <el-table-column prop="name" label="昵称" width="120"></el-table-column>
-          <el-table-column prop="name" label="手机号" width="160"></el-table-column>
+          <el-table-column prop="userCode" label="会员id" width="120"></el-table-column>
+          <el-table-column prop="nickName" label="昵称" width="120"></el-table-column>
+          <el-table-column prop="phone" label="手机号" width="160"></el-table-column>
         </el-table-column>
         <el-table-column label="交通币(JTB)">
-          <el-table-column prop="name" label="已使用" width="120"></el-table-column>
-          <el-table-column prop="name" label="余额" width="120"></el-table-column>
+          <el-table-column prop="usedJtb" label="已使用" width="120"></el-table-column>
+          <el-table-column prop="jtb" label="余额" width="120"></el-table-column>
         </el-table-column>
         <el-table-column label="现金(元)">
-          <el-table-column prop="name" label="提现次数" width="120"></el-table-column>
-          <el-table-column prop="name" label="已提现" width="120"></el-table-column>
-          <el-table-column prop="name" label="余额" width="120"></el-table-column>
+          <el-table-column prop="withdrawNum" label="提现次数" width="120"></el-table-column>
+          <el-table-column prop="withdrawMoney" label="已提现" width="120"></el-table-column>
+          <el-table-column prop="money" label="余额" width="120"></el-table-column>
         </el-table-column>
         <el-table-column >
-          <el-table-column label="操作"  fixed="right">
+          <el-table-column label="操作"  width="200"  fixed="right">
             <template slot-scope="scope">
-              <router-link :to="{name:'coin-detail1',params:{id:scope.row.id}}">
+              <router-link :to="{name:'coin-detail1',params:{id:scope.row.userId}}">
                 <el-button type="text"  size="small"
                  class="marR10">收支明细</el-button>
               </router-link>
-              <router-link :to="{name:'coin-detail2',params:{id:scope.row.id}}">
+              <router-link :to="{name:'coin-detail2',params:{id:scope.row.userId}}">
                 <el-button type="text"  size="small" class="marR10">提现记录</el-button>
               </router-link>
             </template>
@@ -103,31 +103,88 @@
         </el-pagination>
       </div>
     </div>
-    </div>
+    
+  </div>
 </template>
 <script>
 import {miniTable} from '@/utils/table-style.js'
 export default {
     data(){
       return{
-        form1:{a:'5000JTB',b:'1000JTB',c:'4000JTB'},
-        form2:{a:'5000JTB',b:'1000元'},
-        form3:{a:'5000',b:'1000元',c:'4000元'},
+       
+        dialog:false,
+        form1:{},
+        form2:{},
+        form3:{},
         timeFilter:'',
-        inputs:'',
-        tableData:[{name:'18833445566',id:1}],
+        tableData:[],
         miniTable:miniTable,
         currentPage:1,
         per_page:10,
-        total_pages:1
+        total_pages:1,
+        inputs:'',
+
       }
     },
+    created() {
+      this.userList();
+      this.userAccount();
+    },
     methods:{
-      handleCurrentChange(){
-
+      refreshList(){
+        this.userAccount();
+        this.userList();
       },
-      handleSizeChange(){
-
+      // 获取会员账户
+      userAccount(){
+        let params = {
+          tokenId: this.$store.state.user.tokenId,
+          startTime:this.timeFilter?this.timeFilter[0]:'',
+          endTime:this.timeFilter?this.timeFilter[1]:'',
+          simpleParameter:this.inputs,
+        }
+        this.$post('/jtbUserAccount/getUserAccountDataStatistics',params).then(res=> {
+          if(res.code == 0){
+            // console.log(res)
+            this.form1 = res.data[0].jtbStatistics;
+            this.form2 = res.data[0].jtbExchangeStatistics;
+            this.form3 = res.data[0].jtbWithdrawStatisticsPlat;
+          }
+        });
+      },
+      userList(){
+        let params = {
+          tokenId: this.$store.state.user.tokenId,
+          startTime:this.timeFilter?this.timeFilter[0]:'',
+          endTime:this.timeFilter?this.timeFilter[1]:'',
+          simpleParameter:this.inputs,
+          limit:this.per_page,
+          offset:this.currentPage,
+          userId:'486247830634110976'
+        }
+        this.$post('/jtbUserAccount/findList',params).then(res=> {
+          if(res.code == 0){
+            this.total_pages = res.data[0].total;
+            this.tableData=res.data[0].rows;
+            this.$message({
+							type: 'success',
+							message: res.msg?res.msg:'查询成功'
+						});
+          }else{
+             this.$message({
+							type: 'error',
+							message: res.msg?res.msg:'查询失败'
+						});
+          }
+        });
+      },
+      handleCurrentChange(val){
+        this.currentPage = val;
+				this.userList();
+      },
+      handleSizeChange(val){
+        this.per_page = val;
+        this.userList();
       }
     }
 }

@@ -45,7 +45,7 @@
       <el-menu-item
         v-else
         :key="item.id"
-        :index="item.name"
+        :index="item.label"
         :route="toRoute(item)"
         >
         <i v-if="item.icon" :class="item.icon"></i>
@@ -92,6 +92,7 @@ export default {
       return Object.prototype.toString.call(v) === '[object Array]'
     },
     toRoute (item) {
+      // console.log(item);
       if (item.name) {
         return {name: item.name}
       } else if (item.path) {

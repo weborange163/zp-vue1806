@@ -1,9 +1,17 @@
 <template>
     <div class="page-body rules">
+      <div class="breadcrumb" style="padding:8px;">
+        <el-breadcrumb separator-class="el-icon-arrow-right">
+          <el-breadcrumb-item :to="{ path: '/' }">系统设置</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/rules-list' }">规则管理</el-breadcrumb-item>
+          <el-breadcrumb-item>转载来源设置</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
       <div class="page-header">
       </div>
       <div class="box">
         <div class="text-right marBo4">
+				  <el-button size="mini"  @click="$router.back()" class="light_btn">返回</el-button>
           <el-button class="light_btn" @click="newDialog = true;sourceForm.name='';">新建</el-button>
         </div>
         <el-table :row-class-name="btnTable()" :header-row-class-name="btnTable()" v-loading="loading"

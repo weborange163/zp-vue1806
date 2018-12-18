@@ -211,7 +211,7 @@ import axios from 'axios'
 				form1: {
 					title: '',
 					content:'',
-					column:'新闻资讯',
+					column:'行情资讯',
 					sourceType:'1',
 					source:'',
 					author:'',

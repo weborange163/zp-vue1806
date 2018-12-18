@@ -42,6 +42,7 @@
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+                  <i class="iconfont icon-lanmu" style="color:#A30001;" v-if="scope.row.column_top_flag == '1'"></i>
 									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
 									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
 									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
@@ -55,6 +56,7 @@
 									<span>{{ scope.row.title }}</span>
 								</template>
 							</el-table-column>
+							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
 							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="发布状态" width="80">
 								<template slot-scope="scope">
@@ -78,7 +80,7 @@
 								<template slot-scope="scope">
 									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
 									<el-button class="marR10" type="text" v-if="scope.row.status == '0'" @click="toAudit(scope.row)">提交审核</el-button>
-									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.top_flag != '1'&&scope.row.recommend !='1'&&scope.row.specialNewsStatus!=1" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.top_flag != '1'&&scope.row.recommend !='1'&&scope.row.specialNewsStatus!=1 &&scope.row.column_top_flag !=1" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
 						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
 									<el-button class="marR10" type="text" v-if="scope.row.status =='5'" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
 									<router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
@@ -118,6 +120,7 @@
 							<el-table-column label="标题" prop="title">
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
+                  <i class="iconfont icon-lanmu" style="color:#A30001;" v-if="scope.row.column_top_flag == '1'"></i>
 									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
 									<i class="iconfont icon-banner" style="color:#333;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '2'"></i>
 									<i class="iconfont icon-zhuanti" style="color:#FEB210;vertical-align: middle;font-size:18px;" v-if="scope.row.specialNewsStatus == '1'"></i>
@@ -125,6 +128,7 @@
 								  <span>{{ scope.row.title }}</span>
                 </template>
 							</el-table-column>
+							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
 							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
@@ -142,7 +146,7 @@
 							<el-table-column label="操作" width="240" fixed="right">
 								<template slot-scope="scope">
 									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
-									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.top_flag != '1'&&scope.row.recommend !='1'&&scope.row.specialNewsStatus!=1" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
+									<el-button class="marR10" type="text" v-if="scope.row.status =='4'&& scope.row.top_flag != '1'&&scope.row.recommend !='1'&&scope.row.specialNewsStatus!=1 &&scope.row.column_top_flag !=1" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'5','下线')">下线</el-button>
 						      <el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
                   <router-link :to="{name:'news-lookes',params:{id:scope.row.id}}">
 										<el-button class="marR10" type="text"><i class="iconfont icon-see"></i></el-button>
@@ -177,6 +181,7 @@
 									<span>{{ scope.row.title }}</span>
 								</template>
 							</el-table-column>
+							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
 							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
@@ -226,6 +231,7 @@
 							</el-table-column>
 							<el-table-column prop="title" label="标题">
 							</el-table-column>
+							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
 							<el-table-column prop="createUser" label="创建人" width="100">
 							</el-table-column>
 							<el-table-column label="状态" width="50">
@@ -292,8 +298,9 @@
         </span>
 			</el-dialog>
 			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" style="padding-left:20px;">
-				<el-radio v-model="recommendRadio" label="1" class="marBo4">置顶-新闻推荐列表区</el-radio><br/>
-				<el-radio v-model="recommendRadio" label="2">推荐到banner</el-radio>
+				<el-radio v-model="recommendRadio" label="1" class="marBo4">首页置顶</el-radio><br/>
+        <el-radio v-model="recommendRadio" label="2">栏目页置顶</el-radio> <br/>
+				<el-radio v-model="recommendRadio" label="3">首页banner</el-radio>
 				<span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible1 = false;recommendRadio=''" class="light_btn">取 消</el-button>
           <el-button type="primary" @click="sureReco" class="light_btn">确 定</el-button>
@@ -516,7 +523,7 @@
 			publishWaitTop(){
 				this.dialogVisible = true;
 				this.loading = true;
-				this.$get('news/publishWaitTop',{tokenId:this.$store.state.user.tokenId,articleType:'1'}).then(res =>{
+				this.$get('news/publishWaitTop',{tokenId:this.$store.state.user.tokenId,/* articleType:'1' */}).then(res =>{
 					this.loading = false;
 					console.log(res)
 					this.upData = res.data;
@@ -538,9 +545,9 @@
 				console.log(params);
 				this.$post('news/publishTop',params).then(res => {
 					this.$message({
-          message: res.msg,
-          type: 'success'
-        });
+            message: res.msg,
+            type: 'success'
+          });
 				})
 				this.dialogVisible = false
 			},
@@ -588,7 +595,7 @@
 				// if(!params){
 					//console.log(params)
         var params={
-          articleType:'1',
+          // articleType:'1',
           tokenId:this.$store.state.user.tokenId,
           limit:this.per_page1,
           offset:this.currentPage1,
@@ -645,7 +652,7 @@
             param.append('articleId',this.bannerForm.articleId);
             console.log(param)
             this.$post('bannerInfo/save',param).then(res =>{
-              console.log(res);
+              // console.log(res);
               if(res.code == 0){
                 this.$message({
                   type: 'success',
@@ -751,12 +758,13 @@
 					type:'新闻',
 					link:''
 				};
-				if(this.recommendRadio == '1'){	// 推荐到置顶
-					console.log(this.recoIndex)
+				if(this.recommendRadio == '1'||this.recommendRadio == '2'){	// 新闻置顶
+					// console.log(this.recoIndex)
 					var params = {
 						tokenId:this.$store.state.user.tokenId,
 						id: this.tableData[this.recoIndex].id,
-						topFlag:'1'
+            topData:'1',
+            topType:this.recommendRadio
 					}
 					this.$post('news/top',params).then(res => {
 						console.log(res,res.code);
@@ -776,7 +784,7 @@
             }
 					})
 					this.dialogVisible1 = false;
-				}else if(this.recommendRadio == '2'){	// 推荐到banner
+				}else if(this.recommendRadio == '3'){	// 推荐到banner
           // console.log('推荐到banner');
           if(this.tableData[this.recoIndex].recommend !='0'){   // 判断是否是已经推荐到了banner列表,
             this.$message({
@@ -792,8 +800,8 @@
 					this.bannerForm.articleId = this.tableData[this.recoIndex].article_id;
 					this.dialogVisible1 = false;
 					this.bannerDialog =true;
-				}else{
-					 this.$message('请选择置顶或者banner');
+        }else{
+					 this.$message('请选择一项再操作');
 				}
 				// this.dialogVisible1 = false;
 			},
@@ -825,16 +833,24 @@
 					var params = {
 						tokenId:this.$store.state.user.tokenId,
 						id: row.id,
-						topFlag:'0'
+            topData:'0',
+            topType:'1'
 					}
 					console.log(params.id)
 					this.$post('news/top',params).then(res => {
-						console.log(res);
-						this.$message({
-							type: 'success',
-							message: '操作成功!'
-						});
-						this.newsList();
+            if(res.code==0){
+                console.log(res);
+              this.$message({
+                type: 'success',
+                message: '操作成功!'
+              });
+              this.newsList();
+            }else{
+               this.$message({
+                type: 'error',
+                message: res.msg?res.msg:'操作失败'
+              });
+            }
 					})
 				}).catch(() => {
 					this.$message({

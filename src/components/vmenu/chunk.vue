@@ -57,10 +57,10 @@ export default {
       return Object.prototype.toString.call(v) === '[object Array]'
     },
     toRoute (item) {
-      if (item.name) {
-        return {name: item.name}
-      } else if (item.path) {
+      if (item.path) {
         return {path: item.path}
+      }else if (item.name) {
+        return {name: item.name}
       }
       return {}
     },

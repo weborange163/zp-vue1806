@@ -23,10 +23,34 @@
     <el-main class="app-body">
       <el-container style="min-height: 700px;background:#fff;" id="appBody">
         <el-main class="app-page-body" style="width:100%;">
+          <el-tabs v-model="activeIndex" type="card" @tab-click="tabClick" v-if="options.length" @tab-remove="tabRemove">
+            <el-tab-pane               
+              :key="item.path"
+              v-for="(item) in options"
+              v-if="item.name!='首页'"
+              :p_id="item.num"
+              :label="item.name"                
+              :name="item.route"
+              closable>
+            </el-tab-pane>
+            <el-tab-pane       
+              v-else
+              :key="item.name"
+              :label="item.name"
+              :name="item.route"
+              :closable="false"
+            >
+            </el-tab-pane>
+          </el-tabs>
           <keep-alive>
-            <router-view v-if="$route.meta.keepAlive"></router-view>
+            <router-view v-if="$route.meta.keepAlive">
+              
+            </router-view>
           </keep-alive>
-          <router-view v-if="!$route.meta.keepAlive"></router-view>
+          <router-view v-if="!$route.meta.keepAlive">
+            
+            
+          </router-view>
           <!-- <router-view></router-view> -->
         </el-main>
         <!-- <el-footer class="app-footer" :height="footerHeight + 'px'">
@@ -53,7 +77,16 @@ export default {
       sideWidth: 200,
       footerHeight: 50,
       headerHeight: 98,
-      theme: {theme: {}}
+      theme: {theme: {}},
+      editableTabs: [{
+        title: 'Tab 1',
+        name: '1',
+        content: 'Tab 1 content'
+      }, {
+        title: 'Tab 2',
+        name: '2',
+        content: 'Tab 2 content'
+      }],
     }
   },
   components: {
@@ -62,6 +95,32 @@ export default {
     AppSide
   },
   methods: {
+    tabClick(tab) {
+        let path = this.activeIndex;
+        // 用户详情页的时候，对应了二级路由，需要拼接添加第二级路由
+        if (this.activeIndex === '/userInfo') {
+          //  path = this.activeIndex + '/' + this.$store.state.userInfo.name;
+        }
+        this.$router.push({ path: path });//路由跳转
+    },
+    tabRemove(targetName) {
+        // 首页不可删除
+        if (targetName == '/') {
+            return;
+        }
+        //将改tab从options里移除
+        this.$store.commit('delete_tabs', targetName);
+        //还同时需要处理一种情况当需要移除的页面为当前激活的页面时，将上一个tab页作为激活tab
+        if (this.activeIndex === targetName) {
+            // 设置当前激活的路由
+            if (this.options && this.options.length >= 1) {
+                this.$store.commit('set_active_index', this.options[this.options.length - 1].route);
+                this.$router.push({ path: this.activeIndex });
+            } else {
+                this.$router.push({ path: '/' });
+            }
+        }
+    },
     handleSideSwitch (val) {
       this.isCollapse = val
       this.sideWidth = val ? 60 : 200
@@ -72,7 +131,41 @@ export default {
     handleSetTheme (theme) {
       this.theme = theme
     }
-  }
+  },
+  computed: {
+    options () {
+      return this.$store.state.user.options;
+    },
+    activeIndex: {
+      get () {
+        return this.$store.state.user.activeIndex;
+      },
+      set (val) {
+        this.$store.commit('set_active_index', val);
+      }
+    }
+  },
+  /* watch: {
+    '$route'(to) {
+      let flag = false;
+      // console.log(this.options);
+      console.log(to.path);
+      for (let option of this.options ) {
+        console.log(option.path)
+        if (option.path === to.path) {
+          flag = true;
+          // this.$store.commit('set_active_index', '/' + to.path.split('/')[1]);
+          this.$store.commit('set_active_index', '/' + to.path.substr(1));
+          break
+        }
+      }
+      if (!flag) {
+        //  console.log(to);
+        this.$store.commit('add_tabs', {route: '/' + to.path.substr(1), name: to.name,num: to.query.num,path:to.path});
+        this.$store.commit('set_active_index', '/' + to.path.substr(1));
+      }
+    }
+  } */
 }
 </script>
 <style type="text/css">
@@ -121,7 +214,6 @@ export default {
     font-weight: bold;
     opacity: 1;
   }
-
   /*mini-side*/
   .app-container.mini-side .app-side{
     overflow: visible;

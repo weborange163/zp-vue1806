@@ -1,11 +1,12 @@
 <template>
     <div class="page-body travel_coin">
       <div class="page-header">
-        <el-input size="mini" v-model="role_nik" placeholder="项目/规则" style="width:200px;"></el-input>
-        <el-button class="light_btn">搜索</el-button>
+        <el-input size="mini" v-model="role_nik" placeholder="规则名称" style="width:200px;"></el-input>
+        <el-button class="light_btn" @click="getList">搜索</el-button>
       </div>
       <div class="box">
          <div class="text-right marBo4">
+           <el-button class="light_btn" @click="sortRules">排序</el-button>
           <el-button class="light_btn" @click="getList">刷新</el-button>
         </div>
         <el-table :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading"
@@ -16,7 +17,12 @@
           <el-table-column prop="dict_type_name"  label="规则类别" width='120'></el-table-column>
           <el-table-column prop="dict_name"  label="规则名称" width='160'></el-table-column>
           <el-table-column prop="description"  label="参数详情"></el-table-column>
-          <el-table-column prop="id"  label="id"></el-table-column>
+          <el-table-column label="状态" width='80'>
+            <template slot-scope="scope">
+              <p v-if="scope.row.is_enable=='0'" class="yxx">未启用</p>
+              <p v-if="scope.row.is_enable=='1'" class="yshx">已启用</p>
+            </template>
+          </el-table-column>
           <el-table-column prop="update_time"  label="修改时间" width='150'></el-table-column>
           <el-table-column prop="update_user_name"  label="操作账号" width='120'></el-table-column>
           <el-table-column label="操作" width="100" fixed="right">
@@ -40,7 +46,7 @@
             </el-input>
           </el-form-item>
           <el-form-item label="人民币" prop="money">
-            <el-input size="mini" type="text" v-model="form1.money">
+            <el-input size="mini" type="text" v-model="form1.money" :disabled="true">
               <template slot="append">元</template>
             </el-input>
           </el-form-item>
@@ -177,7 +183,7 @@
         </div>
       </el-dialog>
       <el-dialog title="分享文章奖励设置" :visible.sync="dialog6" width="350px">
-        <el-form :model="form6" ref="form6" label-width="80px" :rules="rules6">
+        <el-form :model="form6" ref="form6" label-width="98px" :rules="rules6">
           <el-form-item label="分享文章" prop="shareArticle">
             <el-input size="mini" type="text" v-model="form6.shareArticle" autoComplete="off">
               <template slot="append">JTB/篇</template>
@@ -186,6 +192,16 @@
           <el-form-item label="奖励次数" prop="awardNum">
             <el-input size="mini" type="text" v-model="form6.awardNum">
               <template slot="append">次/日</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="每篇满足" prop="readPepole">
+            <el-input size="mini" type="text" v-model="form6.readPepole">
+              <template slot="append">人阅读,给予奖励</template>
+            </el-input>
+          </el-form-item>
+          <el-form-item label="文章有效时间" prop="effectTime">
+            <el-input size="mini" type="text" v-model="form6.effectTime">
+              <template slot="append">小时/篇</template>
             </el-input>
           </el-form-item>
           <el-form-item label="任务分类" prop="c">
@@ -242,7 +258,7 @@
         <el-form :model="form8" ref="form8" label-width="80px" :rules="rules8">
           <el-form-item label="每日签到" prop="signInDay">
             <el-input size="mini" type="text" v-model="form8.signInDay" autoComplete="off">
-              <template slot="append">JTB/篇</template>
+              <template slot="append">JTB/日</template>
             </el-input>
           </el-form-item>
           <el-form-item label="启用" style="margin-bottom:0;">
@@ -282,7 +298,6 @@
                     :label="item.label"
                     :value="item.value"
                     :disabled="item.disabled"></el-option>
-                  
                 </el-select>
               </el-form-item>
             </el-col>
@@ -294,13 +309,12 @@
             </el-form-item>
             </el-col>
           </el-row>
-          
-          <el-form-item label="任务分类" prop="c">
+          <!-- <el-form-item label="任务分类" prop="c">
             <el-select size="mini" v-model="form8.category" placeholder="请选择">
               <el-option label="日常任务" value="1"></el-option>
               <el-option label="专属任务" value="2"></el-option>
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="启用" style="margin-bottom:0;">
             <el-switch
               v-model="form8.isEnable"
@@ -352,12 +366,12 @@
               <template slot="append">JTB</template>
             </el-input>
           </el-form-item>
-          <el-form-item label="任务分类" prop="c">
+          <!-- <el-form-item label="任务分类" prop="c">
             <el-select size="mini" v-model="form10.category" placeholder="请选择">
               <el-option label="日常任务" value="1"></el-option>
               <el-option label="专属任务" value="2"></el-option>
             </el-select>
-          </el-form-item>
+          </el-form-item> -->
           <el-form-item label="启用" style="margin-bottom:0;">
             <el-switch
               v-model="form10.isEnable"
@@ -377,7 +391,7 @@
             <el-radio-group v-model="form11.cycle">
               <el-radio label="1">日</el-radio>
               <el-radio label="7">周</el-radio>
-              <el-radio label="7">月</el-radio>
+              <el-radio label="30">月</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="兑换次数" prop="exchangeNum">
@@ -404,7 +418,7 @@
             <el-radio-group v-model="form12.cycle">
               <el-radio label="1">日</el-radio>
               <el-radio label="7">周</el-radio>
-              <el-radio label="7">月</el-radio>
+              <el-radio label="30">月</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="提现次数" prop="withdrawNum">
@@ -451,6 +465,37 @@
           <el-button size="mini" type="primary" @click="setRule('form13')">确 认</el-button>
         </div>
       </el-dialog>
+      <!-- 规则排序 -->
+      <el-dialog center title="规则排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+        任务分类
+        <el-select size="mini" v-model="sortCategory" placeholder="请选择任务类型" class="marBo4" @change="sortTypeChange">
+          <el-option label="日常任务" value="1"></el-option>
+          <el-option label="专属任务" value="2"></el-option>
+        </el-select>
+				<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading1">
+					<el-table-column prop="dictName" label="规则名称"></el-table-column>
+					<el-table-column label="操作" width="80" class="text-center">
+						<template slot-scope="scope">
+							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
+								<i class="iconfont icon-up"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-up unclick"></i>
+							</el-button>
+							<el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'isDown')">
+								<i class="iconfont icon-down"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-down" style="cursor:not-allowed"></i>
+							</el-button>
+						</template>
+					</el-table-column>
+				</el-table>
+				<span slot="footer" class="dialog-footer">
+          <el-button size="small" @click="dialogVisible = false">取 消</el-button>
+          <el-button size="small" type="primary" @click="sureSort()">发 布</el-button>
+        </span>
+			</el-dialog>
     </div>
 </template>
 <script>
@@ -472,6 +517,7 @@ export default {
       }
     };
     return{
+      dialogVisible:false,upData:[],sortCategory:'1',loading1:false,
       options:[{label:'无',value:''},{label:'星期一',value:'1'},{label:'星期二',value:'2'},{label:'星期三',value:'3'},{label:'星期四',value:'4'},{label:'星期五',value:'5'},{label:'星期六',value:'6'},{label:'星期日',value:'7'}],
       // options1:[{label:'无',value:''},{label:'星期一',value:'1'},{label:'星期二',value:'2'},{label:'星期三',value:'3'},{label:'星期四',value:'4'},{label:'星期五',value:'5'},{label:'星期六',value:'6'},{label:'星期日',value:'7'}],
       // options2:[{label:'无',value:''},{label:'星期一',value:'1'},{label:'星期二',value:'2'},{label:'星期三',value:'3'},{label:'星期四',value:'4'},{label:'星期五',value:'5'},{label:'星期六',value:'6'},{label:'星期日',value:'7'}],
@@ -481,7 +527,7 @@ export default {
       dialog1:false,dialog2:false, dialog3:false,dialog4:false,
       dialog5:false,dialog6:false, dialog7:false,dialog8:false,
       dialog9:false,dialog10:false, dialog11:false,dialog12:false,dialog13:false,
-      form1:{jtb:'',money:'',isEnable:false},
+      form1:{jtb:'',money:'1',isEnable:false},
       rules1:{
         jtb:[{ required: true, message: '"交通币"输入值未填写', trigger: 'blur' },
             {pattern:/^\d+$/,message:'只能输入数字',trigger:'blur' }],
@@ -519,6 +565,10 @@ export default {
         shareArticle:[{ required: true, message: '"分享文章"输入值未填写', trigger: 'blur' },
             {pattern:/^\d+$/,message:'只能输入数字',trigger:'blur' }],
         awardNum:[{ required: true, message: '"奖励次"数输入值未填写', trigger: 'blur' },
+        {pattern:/^\d+$/,message:'只能输入数字',trigger:'blur' }],
+        readPepole:[{ required: true, message: '"阅读人数"数输入值未填写', trigger: 'blur' },
+        {pattern:/^\d+$/,message:'只能输入数字',trigger:'blur' }],
+        effectTime:[{ required: true, message: '"有效时长"数输入值未填写', trigger: 'blur' },
         {pattern:/^\d+$/,message:'只能输入数字',trigger:'blur' }]
       },
       form7:{shareIncome:'',readPepole:'',isEnable:false},
@@ -641,7 +691,7 @@ export default {
               this.setRuleAjax(param);
               this.dialog5=false;
             }else if(formName =='form6'){
-              let jsonExt={shareArticle:this.form6.shareArticle,awardNum:this.form6.awardNum}
+              let jsonExt={shareArticle:this.form6.shareArticle,awardNum:this.form6.awardNum,effectTime:this.form6.effectTime,readPepole:this.form6.readPepole}
               let param = {
                 tokenId: this.$store.state.user.tokenId,
                 isEnable:this.form6.isEnable==false?'0':'1',
@@ -653,7 +703,7 @@ export default {
               this.setRuleAjax(param);
               this.dialog6=false;
             }else if(formName =='form7'){
-              let jsonExt={shareIncome:this.form7.shareArticle,readPepole:this.form7.readPepole}
+              let jsonExt={shareIncome:this.form7.shareIncome,readPepole:this.form7.readPepole}
               let param = {
                 tokenId: this.$store.state.user.tokenId,
                 isEnable:this.form7.isEnable==false?'0':'1',
@@ -703,7 +753,7 @@ export default {
                 tokenId: this.$store.state.user.tokenId,
                 isEnable:this.form8.isEnable==false?'0':'1',
                 rule:8,
-                category:this.form8.category,
+                // category:this.form8.category,
                 id:this.currentId,
                 ext:JSON.stringify(jsonExt)
               }
@@ -727,7 +777,7 @@ export default {
                 tokenId: this.$store.state.user.tokenId,
                 isEnable:this.form10.isEnable==false?'0':'1',
                 rule:10,
-                category:this.form10.category,
+                // category:this.form10.category,
                 id:this.currentId,
                 ext:JSON.stringify(jsonExt)
               }
@@ -774,6 +824,74 @@ export default {
           }
         });
     },
+    sortTypeChange(val){
+      // console.log(val);
+      let params={
+        tokenId: this.$store.state.user.tokenId,
+        category:val
+      }
+      this.$post('/jtbRule/getListByCategory',params).then(res => {
+        this.loading1 =false;
+        this.upData = res.data[0];
+      });
+    },
+    handleClose(done) {
+      this.$confirm('确认关闭？')
+        .then(_ => {
+
+          done();
+        })
+        .catch(_ => {});
+    },
+    // 确认排序
+    sureSort(){
+      let ids=[];
+      this.upData.map((item, index) => {
+      //	newsInfos.push({id:item.id,orderNum:index+1})
+        ids.push(item.id);
+      });
+      let params = {
+        tokenId: this.$store.state.user.tokenId,
+        ids:ids.join(',')
+      }
+      this.$post('/jtbRule/updateSortByIds',params).then(res => {
+        if(res.code == 0){
+          this.$message({
+            message: res.msg,
+            type: 'success'
+          });
+          this.dialogVisible = false;
+          this.getList();
+        }
+      })
+    },
+    sortRules(){
+      this.loading1 = true;
+      if(!this.dialogVisible){
+        this.dialogVisible = true;
+      }
+      let params={
+        tokenId: this.$store.state.user.tokenId,
+        category:this.sortCategory
+      }
+      this.$post('/jtbRule/getListByCategory',params).then(res => {
+        this.loading1 =false;
+        this.upData = res.data[0];
+      });
+    },
+    changeIndex(index, rows, dir) {
+				if(dir == 'isUp') {
+					var a = rows[index]
+					var b = rows[index - 1]
+					rows.splice(index - 1, 1, a)
+					rows.splice(index, 1, b)
+				} else {
+					var a = rows[index]
+					var b = rows[index + 1]
+					rows.splice(index + 1, 1, a)
+					rows.splice(index, 1, b)
+				}
+			},
     dateChange0(val){
       var op=this.options;
       op.map((item,index) =>{
@@ -929,7 +1047,7 @@ export default {
         tokenId: this.$store.state.user.tokenId,
         offset: this.currentPage,
         limit: this.per_page,
-        queryField:''
+        queryField:this.role_nik
       }
       this.$post('/jtbRule/list',param).then(res => {
         console.log(res.data)
@@ -942,14 +1060,19 @@ export default {
       })
     },
     handleSizeChange(val){
-        this.per_page = val;
-        this.getList();
-      },
-      handleCurrentChange(val) {
-				this.currentPage = val;
-				this.getList();
-			},
-  }
+      this.per_page = val;
+      this.getList();
+    },
+    handleCurrentChange(val) {
+      this.currentPage = val;
+      this.getList();
+    },
+  },
+  computed: {
+    upDataLength: function() {
+      return this.upData.length - 1;
+    }
+  },
 }
 </script>
 <style>

@@ -108,7 +108,7 @@
           <div class="tab2">
             <div class="text-right marBo4">
 							<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
-								<el-button class="light_btn" size="mini">添加新闻</el-button>
+								<el-button class="light_btn" size="mini">添加行情</el-button>
 							</router-link>
 							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
 							<el-button class="light_btn" size="mini" @click="newsList()">刷新</el-button>
@@ -472,7 +472,7 @@
 		methods: {
 			//上下线操作
 			onOff(row,status,type){
-				this.$confirm(`确定要${type}该新闻吗?`, '提示', {
+				this.$confirm(`确定要${type}该行情吗?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -612,7 +612,7 @@
         if(res.code == 0){
           this.loading=false;
           this.$message({
-            message: '成功获取新闻列表',
+            message: '成功获取行情列表',
             type: 'success'
           });
           if(this.argu.g){
@@ -877,7 +877,7 @@
 			//删除新闻
 			deleteRow(index, rows) {
 				// rows.splice(index, 1);
-				this.$confirm('此操作将永久删除该新闻, 是否继续?', '提示', {
+				this.$confirm('此操作将永久删除该行情, 是否继续?', '提示', {
 					confirmButtonText: '确定',
 					cancelButtonText: '取消',
 					type: 'warning'

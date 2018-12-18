@@ -8,9 +8,12 @@
 			</el-breadcrumb>
 		</div>
     <div class="box">
+      <div class="text-right marT20">
+				<el-button size="mini"  @click="$router.back()" class="light_btn">返回</el-button>
+			</div>
       <div class="el-table__body-wrapper is-scrolling-none info_table marT20">
         <div class="statistics_header">
-          <span class="mr40">会员ID：use100000q</span class="mr40"><span>手机号：13123456543</span>
+          <span class="mr40">会员ID：{{form.userCode}}</span class="mr40"><span>手机号：{{form.phone}}</span>
         </div>
         <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border marT20">
           <colgroup>
@@ -29,11 +32,11 @@
               <td><div class="cell">提现时间</div></td>
             </tr>
             <tr class="el-table__row myTr">
-              <td><div class="cell">id12333</div></td>
-              <td><div class="cell">100</div></td>
-              <td><div class="cell">支付宝</div></td>
-              <td><div class="cell">小可爱</div></td>
-              <td><div class="cell">2019-10-01</div></td>
+              <td><div class="cell">{{form.orderNo}}</div></td>
+              <td><div class="cell">{{form.money}}</div></td>
+              <td><div class="cell" v-if="form.withdrawType==1">微信</div><div class="cell" v-if="form.withdrawType==2">支付宝</div></td>
+              <td><div class="cell">{{form.withdrawAccount}}</div></td>
+              <td><div class="cell">{{form.orderTime}}</div></td>
             </tr>
           </tbody>
         </table>
@@ -42,23 +45,20 @@
             <col name="el-table_1_column_1" width="20%">
             <col name="el-table_1_column_1" width="20%">
             <col name="el-table_1_column_1" width="20%">
-            <col name="el-table_1_column_1" width="20%">
-            <col name="el-table_1_column_2" width="20%">
+            <col name="el-table_1_column_1" width="40%">
           </colgroup>
           <tbody>
             <tr class="el-table__row myTh">
-              <td><div class="cell">订单ID</div></td>
-              <td><div class="cell">提现金额（元）</div></td>
-              <td><div class="cell">提现方式</div></td>
-              <td><div class="cell">提现账户</div></td>
-              <td><div class="cell">提现时间</div></td>
+              <td><div class="cell">审核状态</div></td>
+              <td><div class="cell">审核人</div></td>
+              <td><div class="cell">审核时间</div></td>
+              <td><div class="cell">备注</div></td>
             </tr>
             <tr class="el-table__row myTr">
-              <td><div class="cell">id12333</div></td>
-              <td><div class="cell">100</div></td>
-              <td><div class="cell">支付宝</div></td>
-              <td><div class="cell">小可爱</div></td>
-              <td><div class="cell">2019-10-01</div></td>
+              <td><div class="cell" v-if='form.auditStatus ==0'>待审核</div><div class="cell" v-if='form.auditStatus ==1'>通过</div><div class="cell" v-if='form.auditStatus ==2'>不通过</div></td>
+              <td><div class="cell">{{form.auditPerson}}</div></td>
+              <td><div class="cell">{{form.auditTime}}</div></td>
+              <td><div class="cell">{{form.auditReason}}</div></td>
             </tr>
           </tbody>
         </table>
@@ -67,23 +67,20 @@
             <col name="el-table_1_column_1" width="20%">
             <col name="el-table_1_column_1" width="20%">
             <col name="el-table_1_column_1" width="20%">
-            <col name="el-table_1_column_1" width="20%">
-            <col name="el-table_1_column_2" width="20%">
+            <col name="el-table_1_column_2" width="40%">
           </colgroup>
           <tbody>
             <tr class="el-table__row myTh">
-              <td><div class="cell">订单ID</div></td>
-              <td><div class="cell">提现金额（元）</div></td>
-              <td><div class="cell">提现方式</div></td>
-              <td><div class="cell">提现账户</div></td>
-              <td><div class="cell">提现时间</div></td>
+              <td><div class="cell">第三方订单ID</div></td>
+              <td><div class="cell">提现结果</div></td>
+              <td><div class="cell">时间</div></td>
+              <td><div class="cell">备注</div></td>
             </tr>
             <tr class="el-table__row myTr">
-              <td><div class="cell">id12333</div></td>
-              <td><div class="cell">100</div></td>
-              <td><div class="cell">支付宝</div></td>
-              <td><div class="cell">小可爱</div></td>
-              <td><div class="cell">2019-10-01</div></td>
+              <td><div class="cell">{{form.thirdNo}}</div></td>
+              <td><div class="cell" v-if="form.status ==0">默认</div><div class="cell" v-if="form.status ==1">成功</div><div class="cell" v-if="form.status ==2">失败</div></td>
+              <td><div class="cell">{{form.thirdTime}}</div></td>
+              <td><div class="cell">{{form.thirdResult}}</div></td>
             </tr>
           </tbody>
         </table>
@@ -93,95 +90,31 @@
   </div>
 </template>
 <script>
-import {btnTable} from '@/utils/table-style.js'
 export default {
    data(){
      return{
-        btnTable:btnTable,
-        tableData:[],
         idDetail:'',
-        comDetail:{
-          commentObj:'',  //评论对象
-          id:'',        // 评论id
-          articleId:'',  // 评论对象id
-          content:'',   // 评论内容
-          nickName:'',  // 评论人
-          userUniqueCode:'',  // 会员id
-          createTime:'',      // 评论时间
-          status: '',     // 评论状态
-          statusText:'',
-          checkPerson:'',   // 审核人
-          auditTime:'',     // 审核时间
-          type:''           // 评论类型
-        }
+        form:''
      }
    },
    created(){
      this.getParams();
-     this.showDetail();
+     this.getDetail()
    },
    methods:{
-     // 获取评论详情
-    showDetail(){
-      var params = {
-        tokenId:this.$store.state.user.tokenId,
+    getDetail(){
+      //   /jtbWithdraw/show
+      let param = {
+        tokenId: this.$store.state.user.tokenId,
         id:this.idDetail
       }
-      this.$post('comment/show',params).then(res => {
-        if(res.code == 0){
-          console.log(res.data[0]);
-          this.comDetail = res.data[0];
-          if(this.comDetail.status == 0){
-            this.comDetail.statusText = '正常'
-          }else{
-            this.comDetail.statusText = '已屏蔽'
-          }
-          console.log(this.comDetail)
+      this.$get('/jtbWithdraw/show',param).then(res => {
+        if(res.code ==0){
+          console.log(res);
+          this.form = res.data[0];
+
         }
       });
-    },
-    // 屏蔽
-    isBlock(id,type,num){
-      var text;
-      if(num == 1){
-        text = '屏蔽';
-      }else{
-        text = '取消屏蔽';
-      }
-      this.$confirm(`此操作将${text}当前评论, 是否继续?`, '提示', {
-          confirmButtonText: '确定',
-          cancelButtonText: '取消',
-          type: 'info'
-        }).then(() => {
-          var params = {
-            tokenId: this.$store.state.user.tokenId,
-            id:id,
-            status:num,
-            type:type
-          }
-          this.$post('comment/isBlock', params).then(res => {
-            console.log(res);
-            // this.getComList();
-            if(num==1){
-              this.comDetail.status ='1';
-              this.comDetail.statusText='已屏蔽';
-            }else{
-              this.comDetail.status ='0';
-              this.comDetail.statusText='正常';
-            }
-            console.log(this.comDetail)
-            this.$message({
-              type: 'success',
-              message: '操作成功!'
-            });
-            this.showDetail();
-          })
-        }).catch(() => {
-          this.$message({
-            type: 'info',
-            message: '已取消操作'
-          });          
-        });
     },
     getParams () {
       // 取到路由带过来的参数 

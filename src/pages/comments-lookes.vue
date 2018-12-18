@@ -2,7 +2,7 @@
   <div class="page-body comments_lookes">
     <div class="breadcrumb" style="padding:8px;">
 			<el-breadcrumb separator-class="el-icon-arrow-right">
-				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
+				<el-breadcrumb-item :to="{ path: '/' }">运营管理</el-breadcrumb-item>
 				<el-breadcrumb-item>评论管理</el-breadcrumb-item>
 				<el-breadcrumb-item>评论详情</el-breadcrumb-item>
 			</el-breadcrumb>

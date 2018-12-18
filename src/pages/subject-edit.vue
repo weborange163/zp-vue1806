@@ -10,7 +10,7 @@
       <el-breadcrumb separator-class="el-icon-arrow-right" >
 			<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
 			<el-breadcrumb-item>专题管理</el-breadcrumb-item>
-			<el-breadcrumb-item>新建专题</el-breadcrumb-item>
+			<el-breadcrumb-item>编辑专题</el-breadcrumb-item>
 		</el-breadcrumb>
     </div>
     <div class="box">

@@ -33,7 +33,7 @@ export default new Router({
         {path:'/market/lookes/id=:id',name:'market-lookes',component: page('market-lookes')},
         {path:'/market/lookes2',name:'market-lookes2',component: page('market-lookes2')},
         
-        {path:'/audit-news',name:'audit-news',component: page('audit-news'),meta:{keepAlive:true}},
+        {path:'/audit-news',name:'新闻审核',name:'audit-news',component: page('audit-news'),meta:{keepAlive:true}},
         {path:'/audit-market',name:'audit-market',component: page('audit-market'),meta:{keepAlive:true}},
         {path:'/market/second/id=:id',name:'market-second',component: page('market-second')},
         {path:'/banner',name:'banner',component: page('banner'),meta:{keepAlive:true}},
@@ -45,6 +45,7 @@ export default new Router({
         {path:'/comments/lookes/id=:id',name:'comments-lookes',component: page('comments-lookes')},
         {path:'/broadcast',name:'broadcast',component: page('broadcast')},
         {path:'/feedback',name:'feedback',component: page('feedback')},
+        {path:'/rules-list',name:'rules-list',component: page('rules-list')},
         {path:'/rules1',name:'rules1',component: page('rules1')},
         {path:'/rules2',name:'rules2',component: page('rules2')},
         {path:'/rules3',name:'rules3',component: page('rules3')},
@@ -58,9 +59,9 @@ export default new Router({
         {path:'/third-party',name:'third-party',component: page('third-party')},
         {path:'/coin-withdraw',name:'coin-withdraw',component: page('coin-withdraw')},
         {path:'/coin-account',name:'coin-account',component: page('coin-account')},
-        {path:'/coin-detail1',name:'coin-detail1',component: page('coin-detail1')},
-        {path:'/coin-detail2',name:'coin-detail2',component: page('coin-detail2')},
-        {path:'/coin-detail3',name:'coin-detail3',component: page('coin-detail3')},
+        {path:'/coin-detail1/id=:id',name:'coin-detail1',component: page('coin-detail1')},
+        {path:'/coin-detail2/id=:id',name:'coin-detail2',component: page('coin-detail2')},
+        {path:'/coin-detail3/id=:id',name:'coin-detail3',component: page('coin-detail3')},
         // {path:'/editor',name:'editor',component: page('ueditor_demo')},
 
 

@@ -82,9 +82,11 @@ code{
 .f-right{
   float: right;
 }
-.clearfix:before,
+.clearfix::before,
 .clearfix:after{
   content: "";
+  height: 0;
+  visibility: hidden;
   display: table;
   clear: both;
 }

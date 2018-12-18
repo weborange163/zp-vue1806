@@ -1,8 +1,18 @@
 <template>
     <div class="page-body rules">
+      <div class="breadcrumb" style="padding:8px;">
+        <el-breadcrumb separator-class="el-icon-arrow-right">
+          <el-breadcrumb-item :to="{ path: '/' }">系统设置</el-breadcrumb-item>
+          <el-breadcrumb-item :to="{ path: '/rules-list' }">规则管理</el-breadcrumb-item>
+          <el-breadcrumb-item>区域管理设置</el-breadcrumb-item>
+        </el-breadcrumb>
+      </div>
       <div class="page-header">
       </div>
       <div class="box">
+        <div class="text-right" style="max-width:600px;margin:0 auto 4px;">
+				  <el-button size="mini"  @click="$router.back()" class="light_btn">返回</el-button>
+        </div>
         <el-table :row-class-name="miniTable()" :header-row-class-name="miniTable()" v-loading="loading"
           :data="tableData"
           stripe border

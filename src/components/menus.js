@@ -1,14 +1,14 @@
 const menus = [
-  {id: '0', label: '首页', name:'home', icon: 'iconfont icon-index'},
+  {id: '0', label: '首页', name:'首页', icon: 'iconfont icon-index'},
   {
     id: 'a',
     icon: 'iconfont icon-menu',
     label: '内容管理',
     submenu: [
-      {id: 'a1', name: 'news', label: '新闻资讯管理'},
-      {id: 'a2', name: 'market', label: '行业信息管理'},
-      {id: 'a3', name: 'audit-news', label: '新闻审核'},
-      {id: 'a4', name: 'audit-market', label: '行情审核'}
+      {id: 'a1', name: '新闻资讯管理', label: '新闻资讯管理'},
+      {id: 'a2', name: '行业信息管理', label: '行业信息管理'},
+      {id: 'a3', name: '新闻审核', label: '新闻审核'},
+      {id: 'a4', name: '行情审核', label: '行情审核'}
     ]
   },
   {
@@ -16,10 +16,10 @@ const menus = [
     icon: 'iconfont icon-yunying',
     label: '运营管理',
     submenu: [
-      {id: 'b1', name: 'banner', label: 'banner管理'},
-      {id: 'b2', name: 'subject', label: '专题管理'},
-      {id: 'b3', name: 'comments', label: '评论管理'},
-      {id: 'b4', name: 'broadcast', label: '广播管理'}
+      {id: 'b1', name: 'banner管理', label: 'banner管理'},
+      {id: 'b2', name: '专题管理', label: '专题管理'},
+      {id: 'b3', name: '评论管理', label: '评论管理'},
+      {id: 'b4', name: '广播管理', label: '广播管理'}
     ]
   },
   {
@@ -27,8 +27,8 @@ const menus = [
     icon: 'iconfont icon-diamond',
     label: '会员中心',
     submenu: [
-      {id: 'c1', name: 'member', label: '会员管理'},
-      {id: 'c2', name: 'feedback', label: '用户反馈'}
+      {id: 'c1', name: '会员管理', label: '会员管理'},
+      {id: 'c2', name: '用户反馈', label: '用户反馈'}
     ]
   },
   {
@@ -36,13 +36,11 @@ const menus = [
     icon: 'iconfont icon-setting',
     label: '系统管理',
     submenu: [
-      {id: 'd1', name: 'rules1', label: '行业信息分类设置'},
-      {id: 'd2', name: 'rules2', label: '转载来源设置'},
-      {id: 'd3', name: 'rules3', label: '区域管理'},
-      {id: 'd4', name: 'travel-coin', label: '交通币规则'},
-      {id: 'd5', name: 'version', label: '版本管理'},
-      {id: 'd6', name: 'permissions', label: '角色与权限'},
-      {id: 'd7', name: 'accounts', label: '后台用户管理'}
+      {id: 'd0', name: '规则管理', label: '规则管理'},
+      {id: 'd4', name: '交通币规则', label: '交通币规则'},
+      {id: 'd5', name: '版本管理', label: '版本管理'},
+      {id: 'd6', name: '角色与权限', label: '角色与权限'},
+      {id: 'd7', name: '后台用户管理', label: '后台用户管理'}
     ]
   },
   {
@@ -50,8 +48,8 @@ const menus = [
     icon: 'iconfont icon-coins',
     label: '交通币',
     submenu: [
-      {id: 'e1', name: 'coin-account', label: '会员账户'},
-      {id: 'e2', name: 'coin-withdraw', label: '提现管理'}
+      {id: 'e1', name: '会员账户', label: '会员账户'},
+      {id: 'e2', name: '提现管理', label: '提现管理'}
     ]
   },
   {
@@ -59,8 +57,8 @@ const menus = [
     icon: 'iconfont icon-chart',
     label: '数据统计',
     submenu: [
-      {id: 'f1', name: 'content-data', label: '内容数据'},
-      {id: 'f2', name: 'third-party', label: '平台用户数据'}
+      {id: 'f1', name: '内容数据', label: '内容数据'},
+      {id: 'f2', name: '平台用户数据', label: '平台用户数据'}
     ]
   }
   /*{
