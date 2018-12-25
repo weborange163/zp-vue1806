@@ -10,7 +10,7 @@
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
 				<el-breadcrumb-item>新闻管理</el-breadcrumb-item>
-				<el-breadcrumb-item>查看{{type}}资讯</el-breadcrumb-item>
+				<el-breadcrumb-item>查看新闻资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		<div class="box" >
@@ -19,10 +19,10 @@
 				<el-button size="small" class="light_btn" @click="detailDialog = true;" >预览</el-button>
 				<el-button size="small" v-if="form1.status == '0'" class="light_btn" @click="toAudit()">提交审核</el-button>
 				<el-button size="small" class="light_btn" v-if="form1.status == '5'" @click="onOff('4','上线',form1.articleType)">上线</el-button>
-				<el-button size="small" class="light_btn" v-if="status == '4'&& form1.topFlag!='1'&&form1.recommend !='1'&&form1.specialNewsStatus!=1" @click="onOff('5','下线',form1.articleType)">下线</el-button>
+				<el-button size="small" class="light_btn" v-if="form1.status == '4'&& form1.topFlag!='1'&&form1.recommend !='1'&&form1.specialNewsStatus!=1" @click="onOff('5','下线',form1.articleType)">下线</el-button>
 				<!-- <el-button size="small" class="light_btn" v-else :disabled="true">下线</el-button> -->
 			</div>
-			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
+			<el-form ref="form1" :model="form1" label-width="96px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
 						<el-input type="textarea" autosize v-model="form1.title" :disabled="true"></el-input>
@@ -42,8 +42,14 @@
 					<!-- <div id="test" class="ql-editor"></div> -->
 				</div>
 				<div style="width: 35%;float:left;padding:15px;">
-					<el-form-item label="发布到:">
+					<!-- <el-form-item label="发布到:">
 						<el-input :disabled="true" v-model="type"></el-input>
+					</el-form-item> -->
+          <el-form-item label="发布到:" prop="columnId">
+            <el-select v-model="form1.columnId" placeholder="暂无分类"  style='padding-left: 6px;' disabled>
+              <el-option v-for="item in columnIds" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
 					</el-form-item>
 					<el-form-item label="来源:" prop="sourceType">
 						<el-radio-group v-model="form1.sourceType" >
@@ -62,13 +68,7 @@
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author" :disabled="true"></el-input>
 					</el-form-item>
-          <el-form-item label="所属分类:" prop="userId">
-            <el-select v-model="value" name="classifyType" placeholder="暂无分类"  style='padding-left: 6px;' :disabled="true">
-              <el-option v-for="item in classifyType" :key="item.id" :label="item.name" :value="item.id">
-              </el-option>
-            </el-select>
-					</el-form-item>
-					<el-form-item label="发布账号:" v-if="form1.publishSource!='3'" prop="userId" label-width="82">
+					<el-form-item label="发布账号:" v-if="form1.publishSource!='3'" prop="userId">
 						<el-select v-model="form1.userId" disabled>
 							<el-option 
                 v-for="item in accounts"
@@ -81,14 +81,22 @@
           <el-form-item v-else label="发布账号:" required>
             <el-input size="mini" disabled v-model="form1.createUser"></el-input>
           </el-form-item>
-					<el-form-item label="附加选项:" prop="sourceType" label-width="82">
-							<el-radio-group v-model="form1.sourceType">
-								<el-radio label="1" disabled>上传缩略图</el-radio>
-								<el-radio label="2" disabled>提取第一个图为缩略图</el-radio>
+					<el-form-item label="封面图样式:" prop="coverNum">
+							<el-radio-group v-model="form1.coverNum" disabled>
+								<el-radio :label="0">无图</el-radio>
+								<el-radio :label="1">单图</el-radio>
+								<el-radio :label="3">三图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item label="封面图:">
-						<img class="wh80" :src="imgFullSrc" alt="封面图展示">
+					<el-form-item label="封面图类型:" v-show="form1.coverNum != '0'">
+            <el-radio-group v-model="form1.imgType" disabled>
+                <el-radio label="1">上传封面图</el-radio>
+								<el-radio label="2">提取正文图为封面图</el-radio>
+							</el-radio-group>
+						<!-- <img class="wh80" :src="imgFullSrc" alt="封面图展示"> -->
+            <li v-for="item in form1.newsImgList" class="showImgs el-upload-list">
+              <img :src="item.coverImgUrl" />
+            </li>
 					</el-form-item>
           <el-form-item label="视频地址:" v-if="form1.videoId">
 						<a :href="form1.videoUrl">{{form1.videoUrl}}</a>
@@ -190,7 +198,7 @@ import axios from 'axios'
 		},
 		data(){
 			return{
-        classifyType: '',
+        columnIds:'',
         value:'',
         type:'',
         accounts:[],
@@ -229,7 +237,11 @@ import axios from 'axios'
 			this.baceUrl = getBaceUrl();
 			this.getParams();
 			// console.log(this.idDetail);
-			this.showNews();
+      this.showNews();
+      this.$get('/column/findColumnList',{tokenId:this.$store.state.user.tokenId,navigationBar:''}).then(res => {
+    		// console.log(res.data)
+    		this.columnIds = res.data
+    	});
 			// this.getImgUrl();
 		},
 		mounted() {
@@ -256,7 +268,7 @@ import axios from 'axios'
           text = '行情'
           router = 'market'
         }
-				this.$confirm(`确定要${type}该${text}吗?`, '提示', {
+				this.$confirm(`确定要${type}该新闻吗?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
           type: 'warning'
@@ -325,31 +337,17 @@ import axios from 'axios'
 					id:this.idDetail
 				}
 				this.$get('news/show',params).then(res => {
-					this.form1 = res.data[0];
-          // console.log(this.form1);
-          this.classifyType = this.form1.classifyType;
-          if(this.form1.articleType == '1'){
+          this.form1 = res.data[0];
+          
+          // console.log(111, this.form1.coverImgUrl);
+          /* if(this.form1.articleType == '1'){
             this.type='新闻'
           }else{
             this.type='行情'
-          }
-					this.imgSrc = this.form1.coverImgId;
-					this.status = this.form1.status;
-          this.imgFullSrc = this.form1.coverImgUrl;
-          	let selectid = this.classifyType;
-				//				alert(selectid)
-				//  	下拉菜单
-				this.$get('/column/findColumnList', {
-					tokenId: this.$store.state.user.tokenId
-				}).then(res => {
-					console.log(res.data)
-					this.classifyType = res.data
-					for(var i = 0; i < this.classifyType.length; i++) {
-						if(selectid == this.classifyType[i].id) {
-							this.value = this.classifyType[i].name
-						}
-					}
-				})
+          } */
+					// this.imgSrc = this.form1.coverImgId;
+					// this.status = this.form1.status;
+          // this.imgFullSrc = this.form1.coverImgUrl;
 				});
 			},
 			getParams () {
@@ -378,10 +376,6 @@ import axios from 'axios'
 			getFullUrl(){
 				return (this.baceUrl+'/news/add')
 			},
-			test(){
-				console.log(this.form1.source);
-			},
-			
 			handleRemove(file, fileList) {
         console.log(file, fileList);
       },
@@ -425,6 +419,24 @@ import axios from 'axios'
   .news_lookes .el-table td, 
   .news_lookes .el-table th{
     padding: 4px 0;
+  }
+  .news_lookes .showImgs{
+    width: 80px;
+    height: 80px;
+    line-height: 88px;
+    overflow: hidden;
+    background-color: #fff;
+    border: 1px solid #c0ccda;
+    border-radius: 6px;
+    -webkit-box-sizing: border-box;
+    box-sizing: border-box;
+    margin: 0 8px 8px 0;
+    display: inline-block;
+  }
+  .showImgs img{
+    width: 100%;
+    height: 100%;
+    line-height: 88px;
   }
   /* .news_lookes .el-table .cell{
     overflow: auto;

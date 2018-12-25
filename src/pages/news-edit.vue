@@ -11,7 +11,7 @@
 			<el-breadcrumb separator-class="el-icon-arrow-right">
 				<el-breadcrumb-item :to="{ path: '/' }">内容中心</el-breadcrumb-item>
 				<el-breadcrumb-item>新闻信息</el-breadcrumb-item>
-				<el-breadcrumb-item>编辑{{fabudao}}资讯</el-breadcrumb-item>
+				<el-breadcrumb-item>编辑新闻资讯</el-breadcrumb-item>
 			</el-breadcrumb>
 		</div>
 		
@@ -22,7 +22,7 @@
 				<el-button size="small" class="light_btn" @click="editNews('form1','0')">保存</el-button>
 				<el-button size="small" class="light_btn"  @click="editNews('form1','1')">保存并提交审核</el-button>
 			</div>
-			<el-form ref="form1" :model="form1" label-width="84px" :rules="rules1" class="up_form clearfix">
+			<el-form ref="form1" :model="form1" label-width="96px" :rules="rules1" class="up_form clearfix">
 				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
 					<el-form-item label="文章标题" prop="title" >
 						<el-input v-model="form1.title" type="textarea" autosize style="width:420px;"  placeholder="请输入标题"></el-input>
@@ -39,10 +39,16 @@
 						></m-quill-editor>
 					</el-form-item>
 				</div>
-        
 				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
-					<el-form-item label="发布到:">
+					<!-- <el-form-item label="发布到:">
 						<el-input v-model="fabudao"  disabled></el-input>
+					</el-form-item> -->
+          <el-form-item label="发布到:" prop="columnId">
+            <el-select v-model="form1.columnId" name="columnId" placeholder="暂无分类"  style='padding-left: 6px;'>
+              <el-option 
+              v-for="item in columnIds" :key="item.id" :label="item.name" :value="item.id">
+              </el-option>
+            </el-select>
 					</el-form-item>
           <el-row>
           <el-col :span="14">
@@ -69,12 +75,6 @@
 					<el-form-item label="作者:">
 						<el-input v-model="form1.author"></el-input>
 					</el-form-item>
-          <el-form-item label="所属分类:" prop="classifyType">
-            <el-select filterable v-model="form1.classifyType" name="classifyType" placeholder="请选择"  style='padding-left: 6px;'>
-              <el-option v-for="item in classifyTypeAll" :key="item.id" :label="item.name" :value="item.id">
-              </el-option>
-            </el-select>
-					</el-form-item>
 					<el-form-item label="发布账号:" prop="userId">
 						<el-select filterable v-model="form1.userId">
 							<el-option 
@@ -85,25 +85,29 @@
               ></el-option>
 						</el-select>
 					</el-form-item>
-					<el-form-item label="附加选项:" prop="imgType">
-							<el-radio-group v-model="form1.imgType" @change="radioChange">
-								<el-radio label="1">上传缩略图</el-radio>
-								<el-radio label="2">提取第一个图为缩略图</el-radio>
+          <el-form-item label="封面图样式:" prop="coverNum">
+							<el-radio-group v-model="form1.coverNum" @change="coverNumChange">
+								<el-radio :label="0">无图</el-radio>
+								<el-radio :label="1">单图</el-radio>
+								<el-radio :label="3">三图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item prop="icon" ref="icon" label="封面图" v-if="form1.imgType=='1'">
-						<el-upload
-							action="" :multiple="false" :limit='1'
-							ref="upload" name="newsFile"
-              :file-list="fileList"
-							list-type="picture-card"
-							:auto-upload="false"
+          <el-form-item label="封面图类型:" prop="icon" ref="icon" v-show="form1.coverNum != '0'">
+            	<el-radio-group v-model="form1.imgType" @change="radioChange">
+                <el-radio label="1">上传封面图</el-radio>
+								<el-radio label="2">提取正文图为封面图</el-radio>
+							</el-radio-group>
+						<el-upload v-if="form1.coverNum != 0 && form1.imgType == '1'"
+							action="" :multiple="false" :limit=form1.coverNum
+							ref="upload" name="newsFile" :file-list="fileList"
+							list-type="picture-card" :auto-upload="false"
+              :http-request="uploadFile"
 							:on-change="fileChange" :on-exceed="handleExceed"
 							:on-preview="handlePictureCardPreview"
 							:on-remove="handleRemove">
 							<i class="el-icon-plus"></i>
 						</el-upload>
-						<el-dialog :visible.sync="dialogVisible">
+						<el-dialog :visible.sync="dialogVisible" width="30%">
 							<img width="100%" :src="dialogImageUrl" alt="">
 						</el-dialog>
 					</el-form-item>
@@ -240,6 +244,9 @@ import axios from 'axios'
         }
       };
 			return{
+        editStatus:'2',
+        formDatas:'',
+        columnIds:'',
 				fileList:[],	// 预览图片
 				imgFullSrc:'',
         imgSrc:'',
@@ -252,7 +259,7 @@ import axios from 'axios'
 				form1: {
 					title: '',
 					content:'',
-					column:'新闻资讯',
+					columnId:'',
 					sourceType:'1',
 					source:'',
 					status:'',
@@ -265,7 +272,6 @@ import axios from 'axios'
 					coverImgId:''
 				},
         // type:'新闻',
-        classifyTypeAll:'',
 				pkg:'',
         quill: {
           width: 420,
@@ -313,8 +319,8 @@ import axios from 'axios'
           sourceType: [
             { required: true, message: '请选择来源', trigger: 'change'}
           ],
-          classifyType:[
-            { required: true, message: '请选择来源', trigger: 'change'}
+          coverNum:[
+            {required: true, message: '请选择封面图样式', trigger: 'change' }
           ],
           userId: [
             {required: true, message: '请选择发布账号', trigger: 'change' }
@@ -328,6 +334,9 @@ import axios from 'axios'
           source: [
             { required: true, message: '请选择转载来源', trigger: 'change' }
           ],
+          columnId:[
+            { required: true, message: '请选择来源', trigger: 'change'}
+          ],
           tagLabels:[
             { validator: valiTag, trigger: 'blur' }
           ]
@@ -339,6 +348,10 @@ import axios from 'axios'
       this.getParams();
       this.videoUrl = this.baceUrl + '/news/addVideo';
       this.argu=this.$route.params.argu;
+      this.$get('/column/findColumnList',{tokenId:this.$store.state.user.tokenId,navigationBar:''}).then(res => {
+    		// console.log(res.data)
+    		this.columnIds = res.data
+    	});
       // console.log(this.argu)
 		},
 		mounted() {
@@ -346,11 +359,8 @@ import axios from 'axios'
     		// console.log(res.data)
     		this.cities = res.data
       });
-      this.$get('/industryCategory/findIndustryCategoryList',{tokenId:this.$store.state.user.tokenId}).then(res => {
-    		// console.log(res.data)
-    		this.classifyTypeAll = res.data
-    	});
-      this.$post('members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
+      
+      this.$post('/members/findByLevel',{tokenId:this.$store.state.user.tokenId,levelCode:100002}).then(res => {
         // console.log(res)
         this.accounts = res.data;
       });
@@ -370,14 +380,40 @@ import axios from 'axios'
       },
 			//图片的验证
 			fileChange(file,fileList){
+        this.editStatus = '1';
+        this.hasChangeFile = true;
         this.$refs['icon'].clearValidate(); // 图片验证
         this.form1.filename = file.name;
         this.form1.newsFile = file.raw;
-				// console.log(file)
+        this.fileList = fileList;
+				console.log(fileList);
 				if(fileList.length>0){
 					this.hasFmt = true;
 				}
-			},
+      },
+      coverNumChange(val){
+        if(val == 0){
+          this.hasFmt = true;
+        }else{
+          this.hasFmt = false;
+          if(this.fileList){
+            this.hasFmt=true;
+          }
+        }
+      },
+      uploadFile(file){
+        this.formDatas.append('newsFile', file.file);
+      },
+      handleRemove(file, fileList) {
+        this.editStatus = '1';
+        // console.log(this.fileList);
+        this.hasChangeFile = true;
+        // console.log(file, fileList);
+        this.fileList = fileList;
+				if(fileList.length == 0){
+					this.hasFmt =false;
+				}
+      },
 			// 编辑新闻
 			editNews(formName,status){
 				this.$refs[formName].validate((valid) => {
@@ -394,53 +430,76 @@ import axios from 'axios'
                  return;
 							}
 						}
-						let param = new FormData();
-            param.append('tokenId',this.$store.state.user.tokenId);
-            param.append('id',this.form1.id);
-            param.append('title',this.form1.title);  
-            param.append('content',this.form1.content);
-            param.append('sourceType',this.form1.sourceType);
-            param.append('author',this.form1.author);
-            param.append('articleType',this.form1.articleType);
-            param.append('classifyType',this.form1.classifyType);
-            param.append('userId',this.form1.userId);
-            param.append('imgType',this.form1.imgType);
-            param.append('tagLabels',this.form1.tagLabels.replace(/，/ig,','));
+            this.formDatas = new FormData();
+            this.formDatas.append('tokenId',this.$store.state.user.tokenId);
+            this.formDatas.append('editStatus',this.editStatus);
+            this.formDatas.append('id',this.form1.id);
+            this.formDatas.append('title',this.form1.title);  
+            this.formDatas.append('content',this.form1.content);
+            this.formDatas.append('sourceType',this.form1.sourceType);
+            this.formDatas.append('author',this.form1.author);
+            this.formDatas.append('articleType',this.form1.articleType);
+            this.formDatas.append('classifyType',this.form1.classifyType);
+            this.formDatas.append('userId',this.form1.userId);
+            this.formDatas.append('coverNum',this.form1.coverNum);
+            this.formDatas.append('imgType',this.form1.imgType);
+            this.formDatas.append('columnId',this.form1.columnId);
+            this.formDatas.append('tagLabels',this.form1.tagLabels.replace(/，/ig,','));
             // param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
-            param.append('publishSource','1');
-            param.append('status',status);
+            this.formDatas.append('publishSource','1');
+            this.formDatas.append('status',status);
+            if(this.editStatus == 1){
+              let imgIds = [];
+              console.log(this.fileList);
+              this.fileList.map(item => {
+                if(item.coverImgId){imgIds.push(item.coverImgId);}
+              });
+              if(this.form1.imgType == '1'&& this.hasChangeFile){
+                this.$refs.upload.submit();
+              }
+              console.log(imgIds);
+              this.formDatas.append('imgIds',imgIds);
+
+              // return;
+              
+            }
             if(this.videoId){
-              param.append('videoId',this.videoId);
-              param.append('videoUrl',this.showUrl);
+              this.formDatas.append('videoId',this.videoId);
+              this.formDatas.append('videoUrl',this.showUrl);
             }
             if(this.form1.sourceType=='2'){
-              param.append('source',this.form1.source)
+              this.formDatas.append('source',this.form1.source)
             }
-            if(this.form1.imgType == '1'&&this.hasChangeFile){
-              param.append('newsFile',this.form1.newsFile,this.form1.filename);
-            }
-            this.$post('news/edit',param).then(res =>{
+            const loading = this.$loading({
+              lock: true,
+              text: '上传中...',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.5)'
+            });
+            this.$post('news/edit',this.formDatas).then(res =>{
               if(res.code == 0){
+                loading.close();
                 this.$message({
-                message: res.msg,
-                type: 'success'
-              });
-               var backRoute='';
-              if(this.fabudao == '新闻'){
-                backRoute = 'news';
-              }else{
-                backRoute = 'market';
-              }
-              setTimeout(() => {
-                this.$router.push({
-                  name: backRoute,
-                  params: {
-                    argu: this.argu
-                  }
+                  message: res.msg,
+                  type: 'success'
                 });
-              }, 1000);
+              
+                setTimeout(() => {
+                  this.$router.push({
+                    name: 'news',
+                    params: {
+                      argu: this.argu
+                    }
+                  });
+                }, 1000);
+              }else{
+                loading.close();
+                this.$message({
+                  message: res.msg?res.msg:'操作失败',
+                  type: 'error'
+                });
               }
-            })
+            });
 						
           } else {
             console.log('error submit!!');
@@ -459,11 +518,7 @@ import axios from 'axios'
           // console.log(res.data[0]);
 					this.form1 = res.data[0];
           // console.log(this.form1);
-          if(this.form1.articleType == '1'){
-            this.fabudao='新闻';
-          }else{
-            this.fabudao='行情';
-          }
+          
           this.showUrl = this.form1.videoUrl;
           if(this.form1.videoId){
             this.videoId=this.form1.videoId;
@@ -474,7 +529,11 @@ import axios from 'axios'
 					this.status = this.form1.status;
 					this.imgFullSrc = this.form1.coverImgUrl;
 					// console.log(this.imgFullSrc)
-					this.fileList.push({url:this.imgFullSrc})
+          // this.fileList.push({url:this.imgFullSrc});
+          this.form1.newsImgList.map(item => {
+            this.fileList.push({url:item.coverImgUrl,coverImgId:item.coverImgId});
+          })
+
 				});
 			},
 			getParams () {
@@ -529,13 +588,7 @@ import axios from 'axios'
       handleExceed(files, fileList){
         this.$message.warning('当前限制选择 1 个文件');
       },
-			handleRemove(file, fileList) {
-        this.hasChangeFile = true;
-				console.log(file, fileList);
-				if(fileList.length == 0){
-					this.hasFmt =false;
-				}
-      },
+			
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;
         this.dialogVisible = true;
@@ -559,14 +612,9 @@ import axios from 'axios'
       fanhui(){
         this.$confirm('返回已编辑内容将重置是否继续？')
           .then(_ => {
-             var backRoute='';
-              if(this.fabudao == '新闻'){
-                backRoute = 'news';
-              }else{
-                backRoute = 'market';
-              }
+             
              this.$router.push({
-              name: backRoute,
+              name: 'news',
               params: {
                 argu: this.argu
               }

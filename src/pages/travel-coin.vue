@@ -1042,7 +1042,8 @@ export default {
       // console.log(name)
       
     },
-    getList(){
+    getList(val){
+      this.currentPage=val?val:1;
       let param={
         tokenId: this.$store.state.user.tokenId,
         offset: this.currentPage,
@@ -1064,8 +1065,8 @@ export default {
       this.getList();
     },
     handleCurrentChange(val) {
-      this.currentPage = val;
-      this.getList();
+      // this.currentPage = val;
+      this.getList(val);
     },
   },
   computed: {

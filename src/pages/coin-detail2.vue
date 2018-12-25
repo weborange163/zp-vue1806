@@ -155,7 +155,8 @@ export default {
       this.idDetail = routerParams
       // console.log(this.idDetail)
     },
-    getDetail(){
+    getDetail(val){
+      this.currentPage=val?val:1;
       let params = {
         tokenId: this.$store.state.user.tokenId,
         userId:this.idDetail,
@@ -178,8 +179,8 @@ export default {
       this.getDetail();
     },
     handleCurrentChange(val) {
-      this.currentPage = val;
-      this.getDetail();
+      // this.currentPage = val;
+      this.getDetail(val);
     },
   },
   watch: {

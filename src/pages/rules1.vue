@@ -15,7 +15,7 @@
         <div class="text-right marBo4">
 				  <el-button size="mini"  @click="$router.back()" class="light_btn">返回</el-button>
           <el-button size="mini"  @click="publishWaitTop" class="light_btn">栏目排序</el-button>
-          <el-button size="mini" class="light_btn" @click="newDialog = true;classForm.title='';classForm.radio='1';isEdit=false;hasChangeFile=true;">新建分类</el-button>
+          <el-button size="mini" class="light_btn" @click="newDialog = true;classForm.title='';classForm.radio='1';isEdit=false;hasChangeFile=true;"><i class="el-icon-plus" style="font-weight:600;"></i> 栏目</el-button>
           <el-button size="mini"  @click="getList" class="light_btn">刷新</el-button>
         </div>
         <el-table :row-class-name="miniTable()" :header-row-class-name="miniTable()" v-loading="loading"
@@ -26,7 +26,8 @@
           <el-table-column prop="name"  label="分类名称"></el-table-column>
           <el-table-column  label="icon" width='100'>
             <template slot-scope="scope">
-							<img :src="scope.row.picture_url" alt="">
+							<img v-if="scope.row.picture_url" :src="scope.row.picture_url" alt="">
+              <p v-else>暂无图片</p>
 						</template>
           </el-table-column>
           <el-table-column label="是否推荐到导航栏" width="140">
@@ -65,7 +66,7 @@
         width="30%" :close-on-click-modal="false"
         :visible.sync="newDialog" append-to-body>
         <el-form :model="classForm" :rules="classRules" ref="classForm" label-width="110px" class="classForm">
-          <el-form-item label="分类标题" prop="title" size="mini">
+          <el-form-item label="栏目标题" prop="title" size="mini">
             <el-input v-model="classForm.title" style="width:70%;"></el-input>
           </el-form-item>
           <el-form-item label="上传icon" label-width="110px" ref="icon" prop="icon">
@@ -85,8 +86,8 @@
             </el-dialog>
           </el-form-item>
           <el-form-item label="推荐到导航栏" required>
-             <el-radio v-model="classForm.navigationBar" label="1">是</el-radio>
-            <el-radio v-model="classForm.navigationBar" label="0">否</el-radio>
+             <el-radio v-model="classForm.navigation_bar" label="1">是</el-radio>
+            <el-radio v-model="classForm.navigation_bar" label="0">否</el-radio>
           </el-form-item>
           <el-form-item label="使用状态" required>
              <el-radio v-model="classForm.enabled" label="1">启用</el-radio>
@@ -132,7 +133,7 @@ export default {
   data(){
     var valiIcon = (rule, value, callback) => { // 图片验证
         if (!this.hasFmt) {
-          callback(new Error('请上传图片'));
+         // callback(new Error('请上传图片'));
         } else {
           callback();
         }
@@ -161,7 +162,7 @@ export default {
       classForm:{
         title:'',
         enabled:'1',
-        navigationBar:'0'
+        navigation_bar:'0'
       },
       classRules:{
         title: [
@@ -169,7 +170,7 @@ export default {
             { min: 2, max: 4, message: '长度在 2 到 4 个字', trigger: 'blur' }
           ],
         icon:[
-            {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
+         //   {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
         ]
         },
         hasFmt:false
@@ -260,8 +261,11 @@ export default {
       this.newDialog = true;
       this.hasChangeFile = false;
       this.classForm.title = row.name;
-      this.classForm.radio = row.status;
-      this.fileList.push({url:row.picture_url});
+      this.classForm.enabled = row.enabled;
+      this.classForm.navigation_bar = row.navigation_bar;
+      if(row.picture_url){
+        this.fileList.push({url:row.picture_url});
+      }
       this.hasFmt = true;
       this.editId = row.id;
       this.isEdit=true;
@@ -275,19 +279,21 @@ export default {
           param.append('tokenId',this.$store.state.user.tokenId);
           param.append('name',this.classForm.title);
           param.append('enabled',this.classForm.enabled);
-          param.append('navigationBar',this.classForm.navigationBar);
+          param.append('navigationBar',this.classForm.navigation_bar);
           if(this.isEdit){
             param.append('id',this.editId);
           }
-          if(this.hasChangeFile){
+          if(this.hasChangeFile){         // 如果编辑时更换了图片或者是新建时候上传了图片
             param.append('newsFile',this.classForm.file,this.classForm.filename);
+          }else{
+             param.append('newsFile','');
           }
           this.$post('column/save',param).then(res =>{
             console.log(res)
             this.newDialog = false;
             this.$refs['upload'].clearFiles();  // 清空图片
             this.$refs['classForm'].resetFields();  // 清空表单
-            this.classForm.navigationBar = '0';
+            this.classForm.navigation_bar = '0';
             this.classForm.enabled = '1';
             this.fileList=[];   // 清空图片列表
             if(res.code == 0){
@@ -348,8 +354,9 @@ export default {
         });          
       });
     },
-    getList(){
+    getList(val){
       this.loading=true;
+      this.currentPage=val?val:1;
       var params = {
         tokenId: this.$store.state.user.tokenId,
         limit: this.per_page,
@@ -375,8 +382,8 @@ export default {
       }
     },
     handleCurrentChange(val) {
-      this.currentPage = val;
-      this.getList();
+      // this.currentPage = val;
+      this.getList(val);
     },
     handlePictureCardPreview(file) {
       console.log(file)
@@ -386,6 +393,7 @@ export default {
     fileChange(file,fileList){
       this.$refs['icon'].clearValidate(); // 图片验证
       this.classForm.filename = file.name;
+      this.hasChangeFile=true;
       this.classForm.file = file.raw;
       console.log(file.raw)
       if(fileList.length>0){
@@ -400,6 +408,8 @@ export default {
       // console.log(file, fileList);
       if(fileList.length == 0){
         this.hasFmt =false;
+        this.classForm.file='';
+        this.classForm.filename='';
       }
     },
     handleSizeChange(val){
@@ -410,7 +420,10 @@ export default {
   computed: {
 			tableLength: function() {
 				return this.tableData.length - 1;
-			}
+      },
+      upDataLength:function(){
+        return this.upData.length - 1;
+      }
 		},
 }
 </script>

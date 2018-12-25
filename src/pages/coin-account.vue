@@ -132,6 +132,7 @@ export default {
     },
     methods:{
       refreshList(){
+        // this.currentPage=1;
         this.userAccount();
         this.userList();
       },
@@ -152,7 +153,8 @@ export default {
           }
         });
       },
-      userList(){
+      userList(val){
+        this.currentPage=val?val:1;
         let params = {
           tokenId: this.$store.state.user.tokenId,
           startTime:this.timeFilter?this.timeFilter[0]:'',
@@ -179,8 +181,8 @@ export default {
         });
       },
       handleCurrentChange(val){
-        this.currentPage = val;
-				this.userList();
+        // this.currentPage = val;
+				this.userList(val);
       },
       handleSizeChange(val){
         this.per_page = val;

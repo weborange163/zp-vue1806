@@ -245,7 +245,6 @@
           </div>
         	<div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
-              <el-table-column type="selection" width="55" align="center"></el-table-column>
               <el-table-column label="序号" type="index" width='50'></el-table-column>
               <el-table-column label="标题" prop="title"></el-table-column>
               <el-table-column label="发布到" prop="type" width="80">
@@ -504,8 +503,9 @@ export default {
 				})
     },
     //获取所有审核相关的新闻
-    getAuditlist(params){
+    getAuditlist(val){
       this.loading = true;
+      this.currentPage1=val?val:1;
       // if(!params){
         var params = {
           articleType:'1',
@@ -533,8 +533,9 @@ export default {
       })
     },
     // tab切换获取相应的数据
-    getTabList(params){
+    getTabList(val){
         // console.log('------',this.currentPage2);
+        this.currentPage2=val?val:1;
         var params= {
           articleType:'1',
           tokenId:this.$store.state.user.tokenId,
@@ -598,13 +599,13 @@ export default {
     handleCurrentChange1(val) {
     	this.currentPage1=val;
       // console.log(`当前页: ${val}`);
-      this.getAuditlist();
+      this.getAuditlist(val);
     },
     //待审核
     handleCurrentChange2(val){
-      this.currentPage2=val;
+      // this.currentPage2=val;
       // console.log('+++++',this.currentPage2);
-      this.getTabList();
+      this.getTabList(val);
     },
     
     handleSizeChange1(val){

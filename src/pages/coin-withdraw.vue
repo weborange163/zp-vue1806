@@ -198,7 +198,8 @@ export default {
     this.getList();
   },
   methods:{
-    getList(){
+    getList(val){
+      this.currentPage=val?val:1;
       let params = {
           tokenId: this.$store.state.user.tokenId,
           beginTime:this.timeFilter?this.timeFilter[0]:'',
@@ -252,8 +253,8 @@ export default {
       })
     },
     handleCurrentChange(val){
-      this.currentPage = val;
-      this.getList();
+      // this.currentPage = val;
+      this.getList(val);
     },
     handleSizeChange(val){
       this.per_page = val;

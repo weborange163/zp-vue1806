@@ -49,7 +49,8 @@ export default {
 		this.baceUrl = getBaceUrl();
   },
   methods:{
-    getFeedList(){
+    getFeedList(val){
+      this.currentPage=val?val:1;
       var params = {
         tokenId: this.$store.state.user.tokenId,
         limit: this.per_page,
@@ -67,8 +68,8 @@ export default {
       });
     },
     handleCurrentChange(val) {
-      this.currentPage = val;
-      this.getFeedList();
+      // this.currentPage = val;
+      this.getFeedList(val);
     },
     handleSizeChange(val){
       this.per_page = val;

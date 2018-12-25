@@ -14,8 +14,8 @@
 </template>
 <script type="text/javascript">
 import VMenu from './vmenu'
-//import MyMenu from './mymenu'  
-// import menus from './menus'
+//import MyMenu from './mymenu'  // 木有用
+import menus from './menus'
 export default {
   props: {
     collapse: Boolean,
@@ -26,8 +26,8 @@ export default {
   },
   data () {
     return {
-      // menus:menus,
-      menus:JSON.parse(sessionStorage.getItem('menus')),  // 隐藏import menus from './menus'  和上一行,打开此行
+      menus:menus,
+      // menus:JSON.parse(sessionStorage.getItem('menus')),  // 隐藏import menus from './menus'  和上一行,打开此行
       defaultActive: 'home',
       test: 'asdfasdf'
     }

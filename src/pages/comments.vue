@@ -169,8 +169,9 @@ export default {
     },
     
     // 获取评论list
-    getComList(){
+    getComList(val){
       this.loading = true;
+      this.currentPage=val?val:1;
       // console.log(this.value2);
       // NProgress.start();
       var params = {
@@ -203,8 +204,8 @@ export default {
       })
     },
     handleCurrentChange(val) {
-      this.currentPage = val;
-      this.getComList();
+      // this.currentPage = val;
+      this.getComList(val);
     },
     handleClick(row) {
       console.log(row);

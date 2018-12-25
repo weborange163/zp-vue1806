@@ -55,7 +55,7 @@
           <el-row>
             <el-col :span="14">
               <el-form-item label="来源:" prop="sourceType">
-                <el-radio-group v-model="form1.sourceType" @change="test()">
+                <el-radio-group v-model="form1.sourceType">
                   <el-radio label="1" >原创</el-radio>
                   <el-radio label="2" >转载</el-radio>
                 </el-radio-group>
@@ -90,29 +90,23 @@
 					</el-form-item>
 					<el-form-item label="封面图样式:" prop="coverNum">
 							<el-radio-group v-model="form1.coverNum" @change="coverNumChange">
-                <el-radio label="0">无图</el-radio>
-								<el-radio label="1">单图</el-radio>
-								<el-radio label="3">三图</el-radio>
+                <el-radio :label="0">无图</el-radio>
+								<el-radio :label="1">单图</el-radio>
+								<el-radio :label="3">三图</el-radio>
 							</el-radio-group>
 					</el-form-item>
-					<el-form-item label="上传封面图:" prop="icon" ref="icon" v-show="form1.coverNum != '0'">
+          <el-form-item label="封面图类型:"  v-show="form1.coverNum != '0'">
             	<el-radio-group v-model="form1.imgType" @change="radioChange">
                 <el-radio label="1">上传封面图</el-radio>
 								<el-radio label="2">提取正文图为封面图</el-radio>
 							</el-radio-group>
-						<el-upload v-if="form1.coverNum == '1'"
-							action="" :multiple="false" :limit='1'
+          </el-form-item>
+					<el-form-item label="封面图:" prop="icon" ref="icon" v-show="form1.coverNum != '0'&&form1.imgType == '1'">
+						<el-upload 
+							action="" :multiple="false" :limit=form1.coverNum
 							ref="upload" name="newsFile" :file-list="fileList"
 							list-type="picture-card" :auto-upload="false"
-							:on-change="fileChange" :on-exceed="handleExceed"
-							:on-preview="handlePictureCardPreview"
-							:on-remove="handleRemove">
-							<i class="el-icon-plus"></i>
-						</el-upload>
-            <el-upload v-if="form1.coverNum == '3'"
-							action="" :multiple="true" :limit='3'
-							ref="upload2" name="newsFile" :file-list="fileList2"
-							list-type="picture-card" :auto-upload="false"
+              :http-request="uploadFile"
 							:on-change="fileChange" :on-exceed="handleExceed"
 							:on-preview="handlePictureCardPreview"
 							:on-remove="handleRemove">
@@ -190,10 +184,10 @@ import axios from 'axios'
         }
       };
 			return{
+        formDatas:'',
         loading2:false,
         accounts:[],
         fileList:[],
-        fileList2:[],
         fileListVideo:[],
         showNews:false,
 				pkg:'',
@@ -234,13 +228,13 @@ import axios from 'axios'
 				form1: {
 					title: '',
 					content:'',
-					coverNum:'1',
+					coverNum:0,
           sourceType:'1',
           columnId:'',
 					source:'',
 					author:'',
 					userId:'',
-					imgType:'1',
+					imgType:'0',
 					newsFile:'',
 					tagLabels:'',
 					keyWords:''
@@ -284,12 +278,6 @@ import axios from 'axios'
           imgType: [
             {required: true, message: '请选择封面图类型', trigger: 'change' }
 					],
-					coverImg:[
-						{required: true, message: '请上传图片', trigger: 'change' }
-					],
-          desc: [
-            { required: true, message: '请填写活动形式', trigger: 'blur' }
-          ],
           tagLabels:[
             { validator: valiTag, trigger: 'blur' }
           ]
@@ -329,17 +317,22 @@ import axios from 'axios'
         } */
       },
       coverNumChange(val){
-        if(val == '0'){
+        if(val == 0){
           this.hasFmt = true;
+          this.form1.imgType ='0';
         }else{
           this.hasFmt = false;
-          if(this.fileList){
+          if(this.form1.imgType !=2){
+            this.form1.imgType ='1';
+          }
+          
+          if(this.fileList.length>0){
             this.hasFmt=true;
           }
         }
       },
       exceedFile(){
-        this.$message.warning('只能上传一个文件!');
+        this.$message.warning('只能上传一个视频!');
       },
       uploading(event, file, fileList){
         // console.log(event, file, fileList)
@@ -386,9 +379,83 @@ import axios from 'axios'
       },
 			getFullUrl(){
 				return (this.baceUrl+'/news/add')
-			},
+      },
+      uploadFile(file){
+        this.formDatas.append('newsFile', file.file);
+      },
+      creatNews(formName,status){
+        console.log(this.hasFmt);
+        this.$refs[formName].validate((valid) => {
+          console.log(valid);
+          if(valid){
+            this.formDatas = new FormData();
+            if(this.form1.imgType == '1'){
+              this.$refs.upload.submit();
+            }
+            if(this.form1.coverNum == 3){
+              if(this.fileList.length !=3){
+                this.$message({
+                  message: '必须满足上传三张图片!',
+                  type: 'error'
+                });
+                return;
+              }
+            }
+            this.formDatas.append('tokenId',this.$store.state.user.tokenId);
+            this.formDatas.append('title',this.form1.title);  
+            this.formDatas.append('content',this.form1.content);
+            this.formDatas.append('sourceType',this.form1.sourceType);
+            this.formDatas.append('author',this.form1.author);
+            this.formDatas.append('userId',this.form1.userId);
+            this.formDatas.append('coverNum',this.form1.coverNum);
+            this.formDatas.append('imgType',this.form1.imgType);
+            // param.append('articleType','1');
+            this.formDatas.append('columnId',this.form1.columnId);
+            this.formDatas.append('tagLabels',this.form1.tagLabels.replace(/，/ig,','));
+            // param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
+            this.formDatas.append('publishSource','1');
+            this.formDatas.append('status',status);
+            if(this.form1.sourceType=='2'){
+              this.formDatas.append('source',this.form1.source)
+            }
+            if(this.videoId){
+              this.formDatas.append('videoId',this.videoId);
+              this.formDatas.append('videoUrl',this.showUrl);
+            }
+            const loading = this.$loading({
+              lock: true,
+              text: '上传中...',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.5)'
+            });
+            this.$post('news/add',this.formDatas).then(res =>{
+                console.log(res);
+                if(res.code == 0){
+                  loading.close();
+                  this.$message({
+                    message: res.msg,
+                    type: 'success'
+                  });
+                  setTimeout(() => {
+                    this.$router.push({
+                      name: 'news',
+                      params: {
+                        argu: this.argu
+                      }
+                    });
+                  }, 1000);
+                }else{
+                  this.$message({
+                    message: res.msg?res.msg:'发布失败',
+                    type: 'error'
+                  });
+                }
+              })
+          }
+        })
+      },
 			// 新建新闻
-			creatNews(formName,status){
+			creatNewsOld(formName,status){
 				this.$refs[formName].validate((valid) => {
           console.log(valid)
           if (valid) {
@@ -404,7 +471,7 @@ import axios from 'axios'
                  return;
               }
 						}
-            let param = new FormData();
+            this.param = new FormData();
             param.append('tokenId',this.$store.state.user.tokenId);
             param.append('title',this.form1.title);  
             param.append('content',this.form1.content);
@@ -421,6 +488,8 @@ import axios from 'axios'
             param.append('status',status);
             if(this.form1.imgType == '1'){
               param.append('newsFile',this.form1.newsFile,this.form1.filename);
+              //  param.append('newsFile',JSON.stringify(this.fileList) );
+               console.log(this.fileList);
             }
             if(this.form1.sourceType=='2'){
               param.append('source',this.form1.source)
@@ -454,15 +523,14 @@ import axios from 'axios'
         });
 				
 			},
-			test(){
-				console.log(this.form1.source);
-      },
 			//图片的验证
 			fileChange(file,fileList){
         this.$refs['icon'].clearValidate(); // 图片验证
         this.form1.filename = file.name;
         this.form1.newsFile = file.raw;
-				// console.log(file)
+				// console.log(file);
+        // console.log(fileList);
+        this.fileList=fileList;
 				if(fileList.length>0){
 					this.hasFmt = true;
 				}
@@ -489,7 +557,7 @@ import axios from 'axios'
 				}
       },
       handleExceed(files, fileList){
-        this.$message.warning('当前限制选择 1 个文件');
+        this.$message.warning(`当前限制上传 ${this.form1.coverNum}个文件`);
       },
       handlePictureCardPreview(file) {
         this.dialogImageUrl = file.url;

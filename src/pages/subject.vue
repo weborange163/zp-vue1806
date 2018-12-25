@@ -409,8 +409,9 @@ export default {
 				}
 		},
     //专题列表
-    getSubjectList(){
+    getSubjectList(val){
       this.loading2=true;
+      this.currentPage=val?val:1;
       var params = {
         tokenId:this.$store.state.user.tokenId,
         limit:this.per_page,
@@ -436,8 +437,8 @@ export default {
     },
     handleCurrentChange(val) {
       // console.log(`当前页: ${val}`);
-      this.currentPage = val;
-      this.getSubjectList();
+      // this.currentPage = val;
+      this.getSubjectList(val);
     },
     // 删除专题
     deleteRow(index, rows) {

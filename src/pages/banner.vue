@@ -26,7 +26,7 @@
         </span>
 		</el-dialog>
 		<!--修改-->
-		<el-dialog center width="30%" :visible.sync="bannerDialog" append-to-body>
+		<el-dialog center width="30%" :visible.sync="bannerDialog" :before-close="handleClose2">
 			<el-form :model="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
 				<el-form-item label="原文标题">
 					<el-input size="mini" v-model="bannerForm.titleOriginal" :disabled="true"></el-input>
@@ -42,8 +42,8 @@
           :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
 						<i class="el-icon-plus"></i>
 					</el-upload>
-					<el-dialog :visible.sync="dialogVisible2">
-						<img width="100%" :src="dialogImageUrl" alt="">
+					<el-dialog :visible.sync="dialogVisible2" style="z-index:3000;" :modal-append-to-body="false">
+						<img width="100%" :src="dialogImageUrl" alt="" style="z-index:3000;">
 					</el-dialog>
 				</el-form-item>
 				<el-form-item label="类型">
@@ -58,7 +58,7 @@
 				</el-form-item>
 			</el-form>
 			<span slot="footer" class="dialog-footer">
-        <el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
+        <el-button @click="bannerDialog = false;recommendRadio='';$refs['bannerForm'].resetFields();" class="light_btn">取 消</el-button>
         <el-button type="primary" @click.native.prevent="toBanner()" class="light_btn">保 存</el-button>
       </span>
 		</el-dialog>
@@ -166,15 +166,16 @@
 							<img :src="scope.row.coverImgUrl" alt="">
 						</template>
 					</el-table-column>
-					<el-table-column label="上线时间" prop="online_time" width='100'></el-table-column>
-					<el-table-column label="创建时间" prop="create_time" width='100'></el-table-column>
+					<el-table-column label="上线时间" prop="online_time" width='140'></el-table-column>
+					<el-table-column label="创建时间" prop="create_time" width='140'></el-table-column>
 					<el-table-column label="操作" width="200" fixed="right">
 						<template slot-scope="scope">
 							<!-- <el-button type="text" v-if="scope.row.status=='1' && scope.row.top_flag=='1' " style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button> -->
 							<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
 							<el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
-              <el-button type="text" v-if="scope.row.status=='2' || scope.row.status=='0'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
-							<el-button type="text" @click="bannerShow(scope.$index, scope.row)"><i class="iconfont icon-see"></i></el-button>
+              <el-button type="text" v-if="(scope.row.status=='2' || scope.row.status=='0') && scope.row.topFlag=='0' " style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
+							<el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>上线</el-button>
+              <el-button type="text" @click="bannerShow(scope.$index, scope.row)"><i class="iconfont icon-see"></i></el-button>
 							<el-button type="text" v-if="scope.row.status=='1'" :disabled="true"><i class="iconfont icon-edit"></i></el-button>
 							<el-button type="text" v-if="scope.row.status=='2' || scope.row.status=='0' " @click.native.prevent="bannerEdit(scope.$index, scope.row)"><i class="iconfont icon-edit"></i></el-button>
 							<el-button type="text" v-if="scope.row.status=='1'" :disabled="true" @click.native.prevent="deleteRow(scope.$index, scope.row)"><i class="iconfont icon-delete"></i></el-button>
@@ -232,7 +233,7 @@
 				bannerRules: {
 					titleShort: [
             {required: true,message: '请输入短标题',trigger: 'blur'},
-            { min: 1, max: 10, message: '长度在 1 到 10 个字', trigger: 'blur' }
+            { min: 1, max: 30, message: '长度在 1 到 30 个字', trigger: 'blur' }
           ],
           icon:[
             {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
@@ -424,7 +425,7 @@
 			handlePictureCardPreview(file) {
 				console.log(file)
 				this.dialogImageUrl = file.url;
-				//      this.dialogVisible2 = true;
+				this.dialogVisible2 = true;
 			},
 			getFullUrl() {
 				return(this.baceUrl + '/bannerInfo/save')
@@ -506,41 +507,23 @@
 				})
 			},
       // banner列表
-			getBannerlist(params) {
-				if(!params) {
+			getBannerlist(val) {
+				// if(!params) {
+          this.currentPage=val?val:1;
 					var params = {
 						tokenId: this.$store.state.user.tokenId,
 						limit: this.per_page,
 						offset: this.currentPage,
 						simpleParameter: this.search_info
 					}
-				}
-				console.log(params)
+				// }
+				// console.log(params)
 				this.$post('bannerInfo/list', params).then(res => {
           this.banner_data = res.data[0].rows;
 					this.total_pages = res.data[0].total;
 				})
 				// this.search_info = ''
 			},
-			//刷新
-			getBannerlist1(params) {
-				if(!params) {
-					var params = {
-						tokenId: this.$store.state.user.tokenId,
-						limit: this.per_page,
-						offset: this.currentPage,
-						//        simpleParameter:this.search_info
-
-					}
-				}
-				this.$post('bannerInfo/list', params).then(res => {
-					console.log(res.data[0].rows);
-					this.banner_data = res.data[0].rows;
-					this.total_pages = res.data[0].total;
-				})
-				this.banner1 = false
-			},
-			// 
 			initParams() {
 				this.params = {
 					tokenId: this.$store.state.user.tokenId,
@@ -556,7 +539,7 @@
 				this.currentPage = val;
 				this.initParams()
 				console.log(this.params)
-				this.getBannerlist(this.params);
+				this.getBannerlist(val);
 			},
 			deleteRow(index, rows) {
 				// rows.splice(index, 1);
@@ -614,11 +597,21 @@
 			handleClose(done) {
 				this.$confirm('确认关闭？')
 					.then(_ => {
+
 						done();
 					})
 					.catch(_ => {});
 			},
-
+      handleClose2(done) {
+				this.$confirm('确认关闭？')
+					.then(_ => {
+            this.bannerDialog = false;
+            this.recommendRadio='';
+            this.$refs['bannerForm'].resetFields();
+						done();
+					})
+					.catch(_ => {});
+			},
 			sort() {
 				let arr = [{
 						id: 1

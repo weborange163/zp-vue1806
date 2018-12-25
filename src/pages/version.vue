@@ -407,8 +407,9 @@ export default {
         });          
       });
     },
-    getList(){
+    getList(val){
       this.loading=true;
+      this.currentPage =val?val:1;
       var params = {
         tokenId: this.$store.state.user.tokenId,
         limit: this.per_page,
@@ -435,8 +436,8 @@ export default {
     	return 'btnTable'
     },
     handleCurrentChange(val) {
-      this.currentPage = val;
-      this.getList();
+      // this.currentPage = val;
+      this.getList(val);
     },
     handleSizeChange(val) {
       // console.log(`每页 ${val} 条`);

@@ -43,21 +43,21 @@
         <el-col :span='10' :offset="0">
           <el-row style="margin-bottom:8px;">
             <el-select size="mini" placeholder="会员身份" filterable default-first-option multiple allow-create
-            v-model="identityValue" style="width:50%;margin-right:2%;" @change="testVal">
+            v-model="identityValue" style="width:220px;margin-right:2%;" @change="testVal">
               <el-option
                 v-for="item in identitySelect"
                 :key="item.value" :label="item.label"
                 :value="item.value">
               </el-option>
             </el-select>
-            <el-select size="mini" placeholder="选择省" v-model="provinceVal" style="width:20%;margin-right:2%;" @change="provinceChange">
+            <el-select size="mini" placeholder="选择省" v-model="provinceVal" style="width:150px;margin-right:2%;" @change="provinceChange">
               <el-option
                 v-for="item in provinceArr"
                 :key="item.areaNo" :label="item.areaName"
                 :value="item.areaNo">
               </el-option>
             </el-select>
-            <el-select size="mini" placeholder="选择市" v-model="cityVal" style="width:20%;">
+            <el-select size="mini" placeholder="选择市" v-model="cityVal" style="width:130px;">
                 <el-option
                 v-for="item in cityArr"
                 :key="item.areaNo" :label="item.areaName"
@@ -79,7 +79,18 @@
     </div>
     <div class="member_table">
       <div class="text-right marBo4">
-        <el-button class="light_btn" @click="innerMemDia = true" size="mini">创建小号</el-button>
+        <el-upload style="display:inline;"
+          class="upload-demo" name="usersFile"
+          action=""
+          :on-preview="handlePreview"
+          :on-change="handleChange"
+          :on-remove="handleRemove"
+          :auto-upload="false"
+          :on-exceed="handleExceed"
+          :file-list="fileList">
+          <el-button size="mini" type="primary">批量上传内部号</el-button>
+        </el-upload>
+        <el-button class="light_btn" @click="innerMemDia = true" size="mini">创建内部号</el-button>
         <el-button class="light_btn" size="mini" @click="showList()">刷新</el-button>
       </div>
       <el-table :row-class-name="miniTable" :header-row-class-name="miniTable"
@@ -154,22 +165,76 @@
 				</el-pagination>
       </div>
     </div>
+    <el-dialog
+      title="提示"
+      :visible.sync="dialogVisible"
+      width="30%"
+      >
+      <span>确定要导入吗?</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button @click="dialogVisible = false" size="mini">取 消</el-button>
+        <el-button type="primary" @click="sureUpload" size="mini">确 定</el-button>
+      </span>
+    </el-dialog>
     <!-- 创建小号的弹窗 -->
-    <el-dialog title="创建内部小号" :visible.sync="innerMemDia" width="30%" center>
-      <el-form :model="form" ref="form" :rules="rules">
-        <el-form-item label="手机号:" label-width="80px" prop="tel">
-          <el-input v-model="form.tel" auto-complete="off" size="mini" placeholder="请输入4-12位数字"></el-input>
-        </el-form-item>
-        <el-form-item label="用户名:" label-width="80px" prop="name">
-          <el-input v-model="form.name" size="mini" placeholder="请输入4-15个字"></el-input>
-        </el-form-item>
-        <el-form-item label="简介:" label-width="80px" prop="shortDes">
-          <el-input v-model="form.shortDes" type="textarea" size="mini" placeholder="请输入简介"></el-input>
-        </el-form-item>
+    <el-dialog title="创建内部账号" :visible.sync="innerMemDia" width="600px" center>
+      <el-form :model="form" ref="form" :rules="rules" label-width="84px">
+        <el-row :gutter="20">
+          <el-col :span="12">
+            <el-form-item label="账号类型:" prop="identityCode">
+              <el-select size="mini" placeholder="选择账号类型" v-model="form.identityCode">
+                <el-option value="100002" label="内部小号"></el-option>
+                <el-option value="100003" label="内部大号"></el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="手机号:" prop="tel">
+              <el-input v-model="form.tel" auto-complete="off" size="mini" placeholder="请输入4-12位数字"></el-input>
+            </el-form-item>
+            <el-form-item label="用户名:" prop="name">
+              <el-input v-model="form.name" size="mini" placeholder="请输入4-15个字"></el-input>
+            </el-form-item>
+            <el-form-item label="简介:" prop="shortDes">
+              <el-input v-model="form.shortDes" type="textarea" size="mini" placeholder="请输入简介"></el-input>
+            </el-form-item>
+          </el-col>
+          <el-col :span="12">
+            <el-form-item label="加V:" prop="rankCode">
+              <el-radio v-model="form.rankCode" label="1002">是</el-radio>
+              <el-radio v-model="form.rankCode" label="1001">否</el-radio>
+            </el-form-item>
+            <el-form-item label="性别:" prop="sex">
+              <el-radio v-model="form.sex" label="2">女</el-radio>
+              <el-radio v-model="form.sex" label="1">男</el-radio>
+            </el-form-item>
+            <el-form-item label="生日:" prop="birthday">
+              <el-date-picker size="mini" style="width:100%"
+                v-model="form.birthday" value-format="yyyy-MM-dd"
+                type="date"
+                placeholder="选择生日">
+              </el-date-picker>
+            </el-form-item>
+            <el-form-item label="城市:" prop="add">
+             <el-select size="mini" placeholder="选择省" v-model="form.province" style="width:45%;margin-right:2%;" @change="provinceChange2">
+              <el-option
+                v-for="item in provinceArr"
+                :key="item.areaNo" :label="item.areaName"
+                :value="item.areaNo">
+              </el-option>
+            </el-select>
+            <el-select size="mini" placeholder="选择市" v-model="form.city" style="width:45%">
+                <el-option
+                v-for="item in cityArr"
+                :key="item.areaNo" :label="item.areaName"
+                :value="item.areaNo">
+              </el-option>
+            </el-select></el-form-item>
+          </el-col>
+        </el-row>
+        
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="innerMemDia = false" size="mini">取 消</el-button>
-        <el-button type="primary" @click="createInner" size="mini">确 定</el-button>
+        <el-button type="primary" @click="createInner" size="mini">添 加</el-button>
       </div>
     </el-dialog>
     <!-- 身份弹窗 -->
@@ -201,32 +266,43 @@
 export default {
   data() {
       return {
+        dialogVisible:false,
+        newsFile:'',
+        formDatas:'',
+        fileList:[],
         radio:'100001',
         checkOp:[],
         checkList: [],
         form:{
           tel:'',
           name:'',
-          shortDes:''
+          shortDes:'',
+          identityCode:'',
+          rankCode:'1001',
+          sex:'1',
+          birthday:'',
+          province:'',
+          city:''
         },
         provinceArr:[],
         cityArr:[],
         provinceVal:'',
         cityVal:'',
-        identityValue:'',
-        identitySelect:[{
-          value: '0',
-          label: '全部'
-          }, {
-            value: '100001',
+        identityValue:[],
+        identitySelect:[ {
+            value: '100000',
             label: '普通会员'
           }, {
-            value: '100003',
+            value: '100001',
             label: '认证会员'
           },
           {
             value:'100002',
             label:'内部小号'
+          },
+          {
+            value:'100003',
+            label:'内部大号'
           }
         ],
         rules:{
@@ -239,10 +315,19 @@ export default {
             { required: true, message: '请输入用户名', trigger: 'blur' },
             { min: 2, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' },
           ],
+          identityCode:[
+             { required: true, message: '请选择账号类型', trigger: 'blur' },
+          ],
           shortDes:[
             // { required: true, message: '请输入简介', trigger: 'blur' },
             { min: 1, max: 25, message: '长度在 1 到 25 个字符', trigger: 'blur' }
-          ]
+          ],
+          rankCode:[
+            { required: true, message: '请选择是否加V', trigger: 'blur' },
+          ],
+          sex:[
+            { required: true, message: '请选择性别', trigger: 'blur' },
+          ],
         },
         innerMemDia:false,
         identityDia:false,
@@ -290,11 +375,54 @@ export default {
       });
     },
     methods: {
+      sureUpload(){
+        const loading = this.$loading({
+              lock: true,
+              text: '上传中...',
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.5)'
+            });
+        this.formDatas = new FormData();
+        this.formDatas.append('usersFile', this.newsFile);
+        this.formDatas.append('tokenId',this.$store.state.user.tokenId);
+        this.$post('/members/toExportInt',this.formDatas).then(res =>{
+          this.dialogVisible=false;
+          if(res.code == 0){
+            loading.close();
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+          }else{
+            loading.close();
+            this.$message({
+              message: res.msg?res.msg:'操作失败',
+              type: 'error'
+            });
+          }
+        })
+      },
+      handleChange(file, fileList){
+        // console.log(file, fileList);
+        this.newsFile = file.raw;
+        this.fileList = fileList;
+        this.dialogVisible=true;
+      },
+      handleRemove(file, fileList) {
+        console.log(file, fileList);
+      },
+      handlePreview(file) {
+        console.log(file);
+      },
+      handleExceed(files, fileList) {
+        this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
+      },
       testVal(val){
         console.log(val);
       },
-      showList(){
+      showList(val){
         this.loading = true;
+        this.currentPage=val?val:1;
         var params = {
           tokenId: this.$store.state.user.tokenId,
           limit: this.per_page,
@@ -305,7 +433,7 @@ export default {
           ageStart:this.value4,
           ageEnd:this.value5,
           simpleParameter:this.value6,
-          levelCode:this.identityValue=='0'?'':this.identityValue,
+          identityCode:this.identityValue.join(','),
           provinceId:this.provinceVal=='000000'?'':this.provinceVal,
           cityId:this.cityVal
         };
@@ -331,7 +459,7 @@ export default {
                 item.addr = item.province + item.city + item.area;
               }
             })
-            console.log(data);
+            // console.log(data);
             this.tableData = data;
 
             this.total_pages = res.data[0].total;
@@ -343,9 +471,19 @@ export default {
         // console.log(val);
         this.cityVal='';
         if(val){
-          this.$post('/area/findCityByProvinceNo',{tokenId:this.$store.state.user.tokenId,areaNo:this.provinceVal}).then(res => {
+          this.$post('/area/findCityByProvinceNo',{tokenId:this.$store.state.user.tokenId,areaNo:val}).then(res => {
             this.cityArr = res.data;
-            console.log(this.cityArr)
+            // console.log(this.cityArr)
+          })
+        }
+      },
+      provinceChange2(val){
+        console.log(val);
+        this.form.city='';
+        if(val){
+          this.$post('/area/findCityByProvinceNo',{tokenId:this.$store.state.user.tokenId,areaNo:val}).then(res => {
+            this.cityArr = res.data;
+            // console.log(this.cityArr)
           })
         }
       },
@@ -427,13 +565,20 @@ export default {
       },
       // 创建小号
       createInner(){
+        console.log(this.form.birthday);
         this.$refs['form'].validate((valid) => {
           if (valid) {
             var params = {
               tokenId:this.$store.state.user.tokenId,
               phone:this.form.tel,
               nickName:this.form.name,
-              userDesc:this.form.shortDes
+              userDesc:this.form.shortDes,
+              identityCode:this.form.identityCode,
+              rankCode:this.form.rankCode,
+              sex:this.form.sex,
+              birthday:this.form.birthday,
+              provinceId:this.form.province,
+              cityId:this.form.cityId
             };
             this.$post('members/addInnerMember',params).then(res=>{
               if(res.code == 0){
@@ -455,8 +600,8 @@ export default {
         
       },
       handleCurrentChange(val){
-        this.currentPage = val;
-        this.showList();
+        // this.currentPage = val;
+        this.showList(val);
       },
       handleSizeChange(val){
         this.per_page = val;
@@ -489,5 +634,8 @@ export default {
   }
   .member .el-checkbox+.el-checkbox{
     margin-left:0; 
+  }
+  .el-upload-list.el-upload-list--text{
+    display: none;
   }
 </style>

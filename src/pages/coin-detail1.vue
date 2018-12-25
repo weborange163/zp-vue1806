@@ -209,6 +209,7 @@ export default {
   },
   methods:{
     refresh(){
+      this.currentPage=1;
       this.getList();
       this.getPersonData();
     },
@@ -240,7 +241,8 @@ export default {
       this.nickName = routerParams.nickName;
       // console.log(this.idDetail)
     },
-    getList(){
+    getList(val){
+      this.currentPage=val?val:1;
       let params = {
         tokenId: this.$store.state.user.tokenId,
         userId:this.idDetail,
@@ -262,8 +264,8 @@ export default {
       this.getList();
     },
     handleCurrentChange(val) {
-      this.currentPage = val;
-      this.getList();
+      // this.currentPage = val;
+      this.getList(val);
     },
   },
   watch: {
