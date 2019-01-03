@@ -53,7 +53,7 @@
             </el-select>
           </el-form-item>
           <el-row>
-            <el-col :span="14">
+            <el-col :span="16">
               <el-form-item label="来源:" prop="sourceType">
                 <el-radio-group v-model="form1.sourceType">
                   <el-radio label="1" >原创</el-radio>
@@ -61,7 +61,7 @@
                 </el-radio-group>
               </el-form-item>
             </el-col>
-            <el-col :span="10">
+            <el-col :span="8">
               <el-form-item v-if="form1.sourceType == 2" prop="source" class="source_style">
                 <el-select filterable allow-create v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
                   <el-option
@@ -120,13 +120,10 @@
           <el-form-item label="上传视频:">
 						<el-upload
               class="upload-demo" :limit='1'
-              ref="uploadVideo" name="newsVideo"
-              :action="videoUrl" accept='video/mp4'
-              :on-remove="handleRemove2"
-              element-loading-text="拼命上传中"
-              element-loading-spinner="el-icon-loading"
-              element-loading-background="rgba(0, 0, 0, 0.4)"
-              v-loading.fullscreen.lock="loading2"
+              ref="uploadVideo1" name="newsVideo"
+              action="" accept='video/mp4'
+              :on-remove="handleRemove2" :before-upload='beforeUpload'
+              :http-request="uploadVideo"
               :on-progress="uploading"
               :file-list="fileListVideo"
               :on-success="handleSuccess"
@@ -134,10 +131,15 @@
               :before-remove="beforeRemove"
               :auto-upload="false">
               <el-button slot="trigger" size="small" type="primary">选取视频</el-button>
-              <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-              <!-- <div slot="tip" class="el-upload__tip">只能上传mp4文件</div> -->
-              <div class="el-upload__tip" v-html="showUrl"></div>
+              <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload" :loading="uploadVideoing1" :disabled="uploadVideoing2">点击上传视频</el-button>
+              <div slot="tip" class="el-upload__tip">请选择mp4文件进行上传</div>
+              <!-- <div class="el-upload__tip" v-html="showUrl"></div> -->
             </el-upload>
+					</el-form-item>
+          <el-form-item label="视频预览:" v-if="videoId">
+						<video width="320" height="240" controls style="background:rgba(0,0,0,0.7)">
+               <source :src="showUrl" type="video/mp4">
+            </video>
 					</el-form-item>
 					<el-form-item label="Tag标签:" prop="tagLabels">
 						<el-input placeholder="用'，'隔开，单个标签小于12字节" v-model="form1.tagLabels"></el-input>
@@ -184,8 +186,9 @@ import axios from 'axios'
         }
       };
 			return{
+        uploadVideoing1:false,
+        uploadVideoing2:false,
         formDatas:'',
-        loading2:false,
         accounts:[],
         fileList:[],
         fileListVideo:[],
@@ -306,15 +309,46 @@ import axios from 'axios'
       })
 		},
 		methods:{
+      beforeUpload(file){
+        console.log(file);
+      },
+      uploadVideo(file){
+        let formDatas = new FormData();
+        formDatas.append('newsVideo', file.file);
+        this.uploadVideoing1=true;
+        this.uploadVideoing2=true;
+        // formDatas.append('tokenId',this.$store.state.user.tokenId);
+        this.$post('/news/addVideo',formDatas).then(res =>{
+          if(res.code == 0){
+            this.uploadVideoing1=false;
+            this.showUrl = res.data[1];
+            this.videoId = res.data[0];
+            // console.log(this.showUrl,this.videoId);
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+
+          }else{
+            this.$message({
+              message: res.msg?res.msg:'操作失败',
+              type: 'error'
+            });
+            this.uploadVideoing1=false;
+            this.uploadVideoing2=false;
+          }
+        })
+      },
       radioChange(val){
-        console.log(val)
-        /* if(val == '2'){
+        this.$refs['icon'].clearValidate()
+        // console.log(val)
+        if(val == '2'){
           this.hasFmt = true;
         }else{
           if(!this.fileList){
             this.hasFmt=false;
           }
-        } */
+        }
       },
       coverNumChange(val){
         if(val == 0){
@@ -360,18 +394,23 @@ import axios from 'axios'
 					console.log(res);
 				})
       },
-      submitUpload() {
-        this.$refs.uploadVideo.submit();
+      submitUpload() {  // 执行的方法是uploadVideo
+        console.log(this.fileListVideo);
+        this.$refs.uploadVideo1.submit();
       },
       handleRemove2(file, fileList) {
         this.showUrl ='';
         this.videoId='';
+        this.uploadVideoing2=false;
+        this.$message({
+          message: '如果需要,请重新选择视频',
+          type: 'info'
+        });
       },
       handleSuccess(res,file){
-        this.loading2 = false;
-        console.log(res.data[1]);
-        this.showUrl = res.data[1];
-        this.videoId = res.data[0];
+        // console.log(res.data[1]);
+        // this.showUrl = res.data[1];
+        // this.videoId = res.data[0];
         console.log(file);
       },
       beforeRemove(file, fileList) {
@@ -443,6 +482,7 @@ import axios from 'axios'
                         argu: this.argu
                       }
                     });
+                    
                   }, 1000);
                 }else{
                   this.$message({
@@ -620,7 +660,7 @@ import axios from 'axios'
   .source_style .el-form-item__error{
     left: -50px;
   }
-  .news-add .el-progress--line{
+  /* .news-add .el-progress--line{
     display: none !important;
-  }
+  } */
 </style>

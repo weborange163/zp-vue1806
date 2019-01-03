@@ -483,12 +483,23 @@ export default {
 						topFlag:'0'
 					}
 					this.$post('/specialInfo/top', params).then(res => {
-						// console.log(res)
-						this.$message({
-							type: 'success',
-							message: '取消成功!'
-						});
-						this.getSubjectList();
+						if(res.code==0){
+              this.$message({
+                type: 'success',
+                message: res.msg
+              });
+              this.getSubjectList();
+            }else if(res.code==3){
+              this.$message({
+                type: 'warning',
+                message: res.msg
+              });
+            }else{
+              this.$message({
+                type: 'error',
+                message: res.msg?res.msg:'操作失败'
+              });
+            }
 					})
 				}).catch(() => {
 					this.$message({

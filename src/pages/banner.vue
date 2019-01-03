@@ -140,7 +140,7 @@
 			<div class="banner_show">
 				<el-table :data="banner_data" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
 					<el-table-column label="序号" type="index" width='50'></el-table-column>
-					<el-table-column label="原文标题">
+					<el-table-column label="原文标题" min-width='264'>
 						<template slot-scope="scope">
 							<p v-if="scope.row.banner_type=='1'||scope.row.banner_type=='3'" >{{scope.row.title_original}}</p>
 							<p v-if="scope.row.banner_type=='2'" >{{scope.row.title_original1}}</p>
@@ -173,7 +173,7 @@
 							<!-- <el-button type="text" v-if="scope.row.status=='1' && scope.row.top_flag=='1' " style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button> -->
 							<el-button type="text" v-if="scope.row.status=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag1(scope.$index, scope.row)">下线</el-button>
 							<el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>下线</el-button>
-              <el-button type="text" v-if="(scope.row.status=='2' || scope.row.status=='0') && scope.row.topFlag=='0' " style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
+              <el-button type="text" v-if="(scope.row.status=='2' || scope.row.status=='0') && scope.row.topFlag!='1' && scope.row.columnTopFlag!=1" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="top_flag2(scope.$index, scope.row)">上线</el-button>
 							<el-button type="text" v-else style="margin-right:8px;vertical-align:middle;" disabled>上线</el-button>
               <el-button type="text" @click="bannerShow(scope.$index, scope.row)"><i class="iconfont icon-see"></i></el-button>
 							<el-button type="text" v-if="scope.row.status=='1'" :disabled="true"><i class="iconfont icon-edit"></i></el-button>
@@ -283,7 +283,9 @@
                   message: res.msg,
                   type: 'success'
                 });
-                this.getBannerlist();
+                setTimeout(() => {
+                  this.getBannerlist(this.currentPage);
+                  }, 1000);
               }else{
                 this.$message({
                   message: '对不起,修改失败',
@@ -326,13 +328,25 @@
 					}
 					this.$post('bannerInfo/isOnline', params).then(res => {
 						// console.log(res)
-						this.$message({
-							type: 'success',
-							message: '下线成功!'
-						});
-						setTimeout(() => {
+						if(res.code==0){
+              this.$message({
+                type: 'success',
+                message: res.msg
+              });
+						  setTimeout(() => {
 								this.getBannerlist();
 							}, 1000);
+            }else if(res.code==3){
+              this.$message({
+                type: 'warning',
+                message: res.msg
+              });
+            }else{
+              this.$message({
+                type: 'error',
+                message: res.msg?res.msg:'操作失败!'
+              });
+            }
 							
 					})
 				}).catch(() => {
@@ -519,8 +533,14 @@
 				// }
 				// console.log(params)
 				this.$post('bannerInfo/list', params).then(res => {
-          this.banner_data = res.data[0].rows;
-					this.total_pages = res.data[0].total;
+          if(res.code == 0){
+            this.$message({
+							type: 'success',
+							message: res.msg?res.msg:'成功获取列表'
+						});
+            this.banner_data = res.data[0].rows;
+					  this.total_pages = res.data[0].total;
+          }
 				})
 				// this.search_info = ''
 			},

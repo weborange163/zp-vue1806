@@ -39,7 +39,7 @@
 						<el-table key="tableData1" :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 							<!--<el-table-column label="#" type="index"></el-table-column>-->
 							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
-							<el-table-column label="标题" prop="title">
+							<el-table-column label="标题" prop="title" min-width='264'>
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
                   <i class="iconfont icon-lanmu" style="color:#A30001;" v-if="scope.row.column_top_flag == '1'"></i>
@@ -118,7 +118,7 @@
 						</div>
             <el-table key="tableData2" :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
-							<el-table-column label="标题" prop="title">
+							<el-table-column label="标题" prop="title"  min-width='264'>
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
                   <i class="iconfont icon-lanmu" style="color:#A30001;" v-if="scope.row.column_top_flag == '1'"></i>
@@ -171,9 +171,15 @@
         </el-tab-pane>
         <el-tab-pane label="已下线" name="third">
           <div class="tab3">
+            <div class="text-right marBo4">
+							<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
+								<el-button class="light_btn" size="mini">添加新闻</el-button>
+							</router-link>
+							<el-button class="light_btn" size="mini" @click="newsList()">刷新</el-button>
+						</div>
             <el-table key="tableData3" :data="tableData" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable">
 							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
-							<el-table-column label="标题" prop="title">
+							<el-table-column label="标题" prop="title"  min-width='264'>
 								<template slot-scope="scope">
 									<i class="iconfont icon-zhiding" style="color:#A30001;" v-if="scope.row.top_flag == '1'"></i>
 									<i class="iconfont icon-banner" style="color:#00C621;vertical-align: middle;font-size:22px;" v-if="scope.row.recommend == '1'"></i>
@@ -229,14 +235,14 @@
 								<el-button class="light_btn" size="mini">添加新闻</el-button>
 							</router-link>
 							<el-button class="light_btn" size="mini" @click="publishWaitTop">置顶排序</el-button>
-							<el-button class="light_btn" size="mini" @click="newsList">刷新</el-button>
+							<el-button class="light_btn" size="mini" @click="newsList()">刷新</el-button>
 						</div>
 						<el-table key="tableData4" :row-class-name="miniTable" :header-row-class-name="miniTable" ref="multipleTable" :data="tableData" tooltip-effect="dark" style="width: 100%" border @selection-change="handleSelectionChange">
 							<el-table-column type="selection" width="55" align="center">
 							</el-table-column>
 							<el-table-column type="index" label="序号" width="50">
 							</el-table-column>
-							<el-table-column prop="title" label="标题">
+							<el-table-column prop="title" label="标题"  min-width='264'>
 							</el-table-column>
 							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
 							<el-table-column prop="createUser" label="创建人" width="100">
@@ -315,7 +321,7 @@
         </span>
 			</el-dialog>
 			<el-dialog center
-					width="30%"
+					width="30%" :before-close="cancelToban"
 					:visible.sync="bannerDialog"
 					append-to-body>
 					<el-form :model="bannerForm" :rules="bannerRules" ref="bannerForm" label-width="110px" class="bannerForm">
@@ -328,7 +334,7 @@
 						<el-form-item label="banner图片" label-width="110px" required>
 							<el-upload 
 								action="" :data="uploadData" :multiple="false" :limit='1'
-								ref="upload" name="file"
+								ref="upload" name="file" :file-list="fileList"
 								list-type="picture-card"
 								:auto-upload="false" :on-exceed="handleExceed"
 								:on-preview="handlePictureCardPreview"
@@ -336,7 +342,7 @@
 								:on-remove="handleRemove">
 								<i class="el-icon-plus"></i>
 							</el-upload>
-							<el-dialog :visible.sync="dialogVisible2">
+							<el-dialog :visible.sync="dialogVisible2" :modal="false">
 								<img width="100%" :src="dialogImageUrl" alt="">
 							</el-dialog>
 						</el-form-item>
@@ -348,7 +354,7 @@
 						</el-form-item>
 					</el-form>
 					<span slot="footer" class="dialog-footer">
-						<el-button @click="bannerDialog = false;recommendRadio=''" class="light_btn">取 消</el-button>
+						<el-button @click="cancelToban" class="light_btn">取 消</el-button>
 						<el-button type="primary" @click="toBanner" class="light_btn" :loading="toBannerBtn" :disabled="toBannerBtn">保 存</el-button>
 					</span>
 				</el-dialog>
@@ -371,6 +377,7 @@
         }
       };
 			return {
+        fileList:[],
         toBannerBtn:false,
 				bannerForm:{
           loading:false,
@@ -649,7 +656,15 @@
 				// console.log(this.params)
 				this.newsList(val);
       },
-     
+     cancelToban(){
+        this.bannerDialog = false;
+        this.fileList=[];
+        this.recommendRadio='';
+        this.bannerForm={};
+        this.dialogImageUrl='';
+        console.log(this.bannerForm);
+        this.$refs['bannerForm'].resetFields();
+      },
      // 推荐到banner的确定按钮事件
 			toBanner(){
         this.$refs.bannerForm.validate((valid) => {
@@ -671,9 +686,15 @@
                   message: res.msg
                 });
                 setTimeout(() => {
-                  this.newsList();
+                  this.newsList(this.currentPage1);
                 }, 1000);
+                this.bannerForm={};
+                this.fileList=[];
+                this.recommendRadio='';
                 this.bannerDialog = false;
+                this.dialogImageUrl='';
+                // console.log(this.bannerForm);
+                 this.$refs['bannerForm'].resetFields();
               }else{
                 this.$message({
                   type: 'warning',
@@ -779,22 +800,22 @@
             topData:'1',
             topType:'1'
 					}
-					handleUp(params);
+					this.handleUp(params);
         }else if (this.recommendRadio == '2'){ // 栏目置顶
           var params = {
 						tokenId:this.$store.state.user.tokenId,
             columnId:this.tableData[this.recoIndex].column_id
           }
           this.$post('/news/columnTopped',params).then(res => {
-            if(res.code == 0){
+            if(res.code == 0&&res.count==0){
               var params = {
                 tokenId:this.$store.state.user.tokenId,
                 id: this.tableData[this.recoIndex].id,
                 topData:'1',
                 topType:'2'
               }
-              handleUp(params);
-            }else if(res.code == '1'){
+              this.handleUp(params);
+            }else if(res.code == '0'&&res.count==1){
               this.$confirm('此栏目下已有置顶文章,是否替换?', '提示', {
                 confirmButtonText: '确定',
                 cancelButtonText: '取消',
@@ -806,7 +827,7 @@
                   topData:'1',
                   topType:'2'
                 }
-                handleUp(params);
+                this.handleUp(params);
               }).catch(() => {
                 this.$message({
                   type: 'info',

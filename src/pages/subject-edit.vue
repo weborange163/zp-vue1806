@@ -56,8 +56,8 @@
         </el-form-item>
         <el-form-item>
           <el-table :data="artData" border :row-class-name="miniTable" :header-row-class-name="miniTable">
-            <el-table-column prop="title" label="标题"></el-table-column>
-            <el-table-column prop="articleId" label="文章ID" width="150"></el-table-column>
+            <el-table-column prop="title" label="标题" min-width="390"></el-table-column>
+            <el-table-column prop="articleId" label="文章ID" width="100"></el-table-column>
             <el-table-column  label="操作" width="150">
               <template slot-scope="scope">
                 <el-button @click="handleClick(scope.$index,artData,0)" type="text" size="small">取消关联</el-button>
@@ -72,9 +72,9 @@
           <el-button class="light_btn" @click="searchMore" size="mini">搜索</el-button>
         </div>
         <el-table :data="searchLinkArt" border :row-class-name="miniTable" :header-row-class-name="miniTable">
-          <el-table-column prop="title" label="标题" width="150"></el-table-column>
-          <el-table-column prop="articleId" label="文章ID" width="200"></el-table-column>
-          <el-table-column  label="操作">
+          <el-table-column prop="title" label="标题" min-width="390"></el-table-column>
+          <el-table-column prop="articleId" label="文章ID" width="100"></el-table-column>
+          <el-table-column  label="操作" width="150">
             <template slot-scope="scope">
               <el-button v-if="!scope.row.flag" @click="handleClick1(scope.row,artData,0)" type="text" size="small">取消关联</el-button>
               <el-button v-else @click="handleClick1(scope.row,artData,1)" type="text" size="small">关联</el-button>

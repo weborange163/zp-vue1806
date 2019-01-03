@@ -49,8 +49,8 @@
         </el-col>
         <el-col :span="6" :offset="5">
             <el-input v-model="search_pra" placeholder="请输入内容" style="width:70%" size="mini"></el-input>
-            <el-button class="light_btn" v-if="status" @click.native.prevent="getTabList" size="mini">搜索</el-button>
-            <el-button class="light_btn" v-else @click.native.prevent="getAuditlist" size="mini">搜索</el-button>
+            <el-button class="light_btn" v-if="status" @click.native.prevent="getTabList()" size="mini">搜索</el-button>
+            <el-button class="light_btn" v-else @click.native.prevent="getAuditlist()" size="mini">搜索</el-button>
         </el-col>
       </el-row>
     </div>
@@ -58,17 +58,13 @@
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="全部" name="first">
           <div class="text-right marBo4">
-							<el-button class="light_btn" @click="getAuditlist">刷新</el-button>
+							<el-button class="light_btn" @click="getAuditlist()">刷新</el-button>
 						</div>
           <div>
             <el-table :data="audit_all" border stripe v-loading="loading" :row-class-name="btnTable" :header-row-class-name="btnTable" >
               <el-table-column label="序号" type="index" width='50'></el-table-column>
-              <el-table-column label="标题" prop="title"></el-table-column>
-              <el-table-column label="发布到"  width="80">
-                <template slot-scope="scope">
-                  新闻
-                </template>
-              </el-table-column>
+              <el-table-column label="标题" prop="title"  min-width='264'></el-table-column>
+              <el-table-column label="栏目" prop="column_name" width="80"></el-table-column>
               <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="120">
                 <template slot-scope="scope">
@@ -79,6 +75,7 @@
                   <p v-if="scope.row.status=='5'" >下线</p>
                 </template>
               </el-table-column>
+              <el-table-column label="审核人" prop="checkPerson" width="120"></el-table-column>
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                     <p v-if="scope.row.publish_source=='1'" >PC后台</p>
@@ -110,17 +107,13 @@
           <div>
             <div class="text-right marBo4">
 							<el-button class="light_btn" @click="toAudited">批量审核</el-button>
-							<el-button class="light_btn" @click="getTabList">刷新</el-button>
+							<el-button class="light_btn" @click="getTabList()">刷新</el-button>
 						</div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
               <el-table-column label="序号" type="index" width='50'></el-table-column>
-              <el-table-column label="标题" prop="title"></el-table-column>
-              <el-table-column label="发布到" prop="type" width="80">
-                <template slot-scope="scope">
-                  新闻
-                </template>
-              </el-table-column>
+              <el-table-column label="标题" prop="title"  min-width='264'></el-table-column>
+              <el-table-column label="栏目" prop="column_name" width="80"></el-table-column>
               <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
@@ -153,18 +146,14 @@
         </el-tab-pane>
         <el-tab-pane label="审核中" name="third">
           <div class="text-right marBo4">
-            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+            <el-button class="light_btn" @click="getTabList()">刷新</el-button>
           </div>
         	<div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
               <el-table-column label="序号" type="index" width='50'></el-table-column>
-              <el-table-column label="标题" prop="title"></el-table-column>
-              <el-table-column label="发布到" prop="type" width="80">
-                <template slot-scope="scope">
-                  新闻
-                </template>
-              </el-table-column>
+              <el-table-column label="标题" prop="title"  min-width='264'></el-table-column>
+              <el-table-column label="栏目" prop="column_name" width="80"></el-table-column>
               <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
@@ -197,18 +186,14 @@
         </el-tab-pane>
         <el-tab-pane label="审核通过" name="fourth">
           <div class="text-right marBo4">
-            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+            <el-button class="light_btn" @click="getTabList()">刷新</el-button>
           </div>
         	<div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column type="selection" width="55" align="center"></el-table-column>
               <el-table-column label="序号" type="index" width='50'></el-table-column>
-              <el-table-column label="标题" prop="title"></el-table-column>
-              <el-table-column label="发布到" prop="type" width="80">
-                <template slot-scope="scope">
-                  新闻
-                </template>
-              </el-table-column>
+              <el-table-column label="标题" prop="title" min-width='264'></el-table-column>
+              <el-table-column label="栏目" prop="column_name" width="80"></el-table-column>
               <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
@@ -241,17 +226,13 @@
         </el-tab-pane>
         <el-tab-pane label="审核未通过" name="fifth">
           <div class="text-right marBo4">
-            <el-button class="light_btn" @click="getTabList">刷新</el-button>
+            <el-button class="light_btn" @click="getTabList()">刷新</el-button>
           </div>
         	<div>
             <el-table :data="audit_no" border stripe :row-class-name="btnTable" :header-row-class-name="btnTable" @selection-change="handleSelectionChange">
               <el-table-column label="序号" type="index" width='50'></el-table-column>
-              <el-table-column label="标题" prop="title"></el-table-column>
-              <el-table-column label="发布到" prop="type" width="80">
-                <template slot-scope="scope">
-                  新闻
-                </template>
-              </el-table-column>
+              <el-table-column label="标题" prop="title"  min-width='264'></el-table-column>
+              <el-table-column label="栏目" prop="column_name" width="80"></el-table-column>
               <el-table-column label="创建人" prop="createUser" width="120"></el-table-column>
               <el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">

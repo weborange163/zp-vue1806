@@ -99,7 +99,9 @@
             </li>
 					</el-form-item>
           <el-form-item label="视频地址:" v-if="form1.videoId">
-						<a :href="form1.videoUrl">{{form1.videoUrl}}</a>
+						<video :src="form1.videoUrl" width="320" height="240" controls style="background:rgba(0,0,0,0.7)">
+               <source :src="form1.videoUrl" type="video/mp4">
+            </video>
 					</el-form-item>
           <el-form-item label="视频名称:" v-if="form1.videoId">
             <p v-text="form1.videoName"></p>
@@ -107,9 +109,15 @@
 					<el-form-item label="Tag标签:">
 						<el-input  v-model="form1.tagLabels" :disabled="true"></el-input>
 					</el-form-item>
-					<!-- <el-form-item label="关键词:">
-						<el-input  v-model="form1.keyWords" :disabled="true"></el-input>
-					</el-form-item> -->
+					<el-form-item label="推荐到:" v-if="form1.topFlag==1">
+						<el-input value="新闻主页置顶" :disabled="true"></el-input>
+					</el-form-item>
+          <el-form-item label="推荐到:" v-if="form1.recommend==1">
+						<el-input value="新闻主页banner" :disabled="true"></el-input>
+					</el-form-item>
+          <el-form-item label="推荐到:" v-if="form1.columnTopFlag==1">
+						<el-input value="栏目置顶" :disabled="true"></el-input>
+					</el-form-item>
           <div class="tableOverstyle">
           <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
             <colgroup>

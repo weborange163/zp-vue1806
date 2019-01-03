@@ -61,7 +61,7 @@
           </el-col>
           <el-col :span="10">
             <el-form-item v-if="form1.sourceType == 2" prop="source">
-              <el-select filterable v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+              <el-select filterable allow-create v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
                 <el-option
                   v-for="item in cities"
                   :key="item.id"
@@ -114,18 +114,24 @@
           <el-form-item label="上传视频:">
 						<el-upload
               class="upload-demo" :limit='1'
-              ref="uploadVideo" name="newsVideo"
-              :action="videoUrl" accept='video/mp4'
+              ref="uploadVideo1" name="newsVideo"
+              action="" accept='video/mp4'
               :on-remove="handleRemove2"
               :file-list="fileListVideo"
               :on-success="handleSuccess"
               :before-remove="beforeRemove"
+              :http-request="uploadVideo"
               :auto-upload="false">
-              <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
-              <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload">上传到服务器</el-button>
-              <!-- <div slot="tip" class="el-upload__tip">只能上传mp4文件</div> -->
-              <div class="el-upload__tip" v-html="showUrl"></div>
+              <el-button slot="trigger" size="small" type="primary">选取视频</el-button>
+              <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload" :loading="uploadVideoing1" :disabled="uploadVideoing2">点击上传视频</el-button>
+              <div slot="tip" class="el-upload__tip">请选择mp4文件进行上传</div>
+              <!-- <div class="el-upload__tip" v-html="showUrl"></div> -->
             </el-upload>
+					</el-form-item>
+          <el-form-item label="视频预览:" v-if="videoId">
+						<video width="320" height="240" controls style="background:rgba(0,0,0,0.7)">
+               <source :src="showUrl" type="video/mp4">
+            </video>
 					</el-form-item>
 					<el-form-item label="Tag标签:" prop="tagLabels">
 						<el-input placeholder="用'，'隔开，单个标签小于12字节"  v-model="form1.tagLabels" ></el-input>
@@ -244,6 +250,8 @@ import axios from 'axios'
         }
       };
 			return{
+        uploadVideoing1:false,
+        uploadVideoing2:false,
         editStatus:'2',
         formDatas:'',
         columnIds:'',
@@ -368,6 +376,7 @@ import axios from 'axios'
 		},
 		methods:{
       radioChange(val){
+        this.$refs['icon'].clearValidate();
         // console.log(val)
         if(val == '2'){
           this.hasFmt = true;
@@ -375,7 +384,6 @@ import axios from 'axios'
           if(!this.fileList){
             this.hasFmt=false;
           }
-          // 
         }
       },
 			//图片的验证
@@ -413,6 +421,33 @@ import axios from 'axios'
 				if(fileList.length == 0){
 					this.hasFmt =false;
 				}
+      },
+      uploadVideo(file){
+        let formDatas = new FormData();
+        formDatas.append('newsVideo', file.file);
+        this.uploadVideoing1=true;
+        this.uploadVideoing2=true;
+        // formDatas.append('tokenId',this.$store.state.user.tokenId);
+        this.$post('/news/addVideo',formDatas).then(res =>{
+          if(res.code == 0){
+            this.uploadVideoing1=false;
+            this.showUrl = res.data[1];
+            this.videoId = res.data[0];
+            // console.log(this.showUrl,this.videoId);
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+
+          }else{
+            this.$message({
+              message: res.msg?res.msg:'操作失败',
+              type: 'error'
+            });
+            this.uploadVideoing1=false;
+            this.uploadVideoing2=false;
+          }
+        })
       },
 			// 编辑新闻
 			editNews(formName,status){
@@ -519,7 +554,7 @@ import axios from 'axios'
 					this.form1 = res.data[0];
           // console.log(this.form1);
           
-          this.showUrl = this.form1.videoUrl;
+          // this.showUrl = this.form1.videoUrl;
           if(this.form1.videoId){
             this.videoId=this.form1.videoId;
             this.showUrl=this.form1.videoUrl;
@@ -594,11 +629,16 @@ import axios from 'axios'
         this.dialogVisible = true;
       },
       submitUpload() {
-        this.$refs.uploadVideo.submit();
+        this.$refs.uploadVideo1.submit();
       },
       handleRemove2(file, fileList) {
         this.showUrl ='';
         this.videoId='';
+        this.uploadVideoing2=false;
+        this.$message({
+          message: '如果需要,请重新选择视频',
+          type: 'info'
+        });
       },
       handleSuccess(res,file){
         console.log(res.data[1]);
@@ -607,7 +647,18 @@ import axios from 'axios'
         console.log(file);
       },
       beforeRemove(file, fileList) {
-        return this.$confirm(`确定移除 ${ file.name }？`);
+        this.$confirm(`确定移除 ${ file.name }？`, '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+          this.videoId='';
+          this.fileListVideo=[];
+
+        }).catch(() => {
+                  
+        });
+        return false;
       },
       fanhui(){
         this.$confirm('返回已编辑内容将重置是否继续？')

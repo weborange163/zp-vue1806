@@ -36,7 +36,7 @@ export default new Router({
         {path:'/audit-news',name:'新闻审核',name:'audit-news',component: page('audit-news'),meta:{keepAlive:true}},
         {path:'/audit-market',name:'audit-market',component: page('audit-market'),meta:{keepAlive:true}},
         {path:'/market/second/id=:id',name:'market-second',component: page('market-second')},
-        {path:'/banner',name:'banner',component: page('banner'),meta:{keepAlive:true}},
+        {path:'/banner',name:'banner',component: page('banner')/* ,meta:{keepAlive:true} */},
         {path:'/subject',name:'subject',component: page('subject'),meta:{keepAlive:true}},
         {path:'/subject/add',name:'subject-add',component: page('subject-add')},
         {path:'/subject/edit/id=:id',name:'subject-edit',component: page('subject-edit')},

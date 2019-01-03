@@ -70,7 +70,7 @@
               <el-input size="mini" v-model="value6" placeholder="请输入用户名/用户ID/手机号"></el-input>
             </el-col>
             <el-col :span='3'>
-              <el-button class="light_btn" size="mini" @click="showList">搜索</el-button>
+              <el-button class="light_btn" size="mini" @click="showList()">搜索</el-button>
             </el-col>
           </el-row>
         </el-col>
@@ -90,62 +90,36 @@
           :file-list="fileList">
           <el-button size="mini" type="primary">批量上传内部号</el-button>
         </el-upload>
-        <el-button class="light_btn" @click="innerMemDia = true" size="mini">创建内部号</el-button>
+        <el-button class="light_btn" @click="innerMemDia = true;isEdit=false;" size="mini">创建内部号</el-button>
         <el-button class="light_btn" size="mini" @click="showList()">刷新</el-button>
       </div>
       <el-table :row-class-name="miniTable" :header-row-class-name="miniTable"
           :data="tableData" v-loading="loading" border  stripe  style="width: 100%">
           <el-table-column label="序号" type="index" width='50'></el-table-column>
-          <el-table-column
-            prop="nickName"
-            label="用户名"
-           >
+          <el-table-column prop="nickName" label="用户名"></el-table-column>
+          <el-table-column prop="identity" label="身份" width="100">
+             <template slot-scope="scope">
+              <p v-if="scope.row.identity_code=='100001'&& scope.row.rank_code=='1001'">普通会员</p>
+              <p v-if="scope.row.identity_code=='100001'&& scope.row.rank_code=='1002'">认证会员</p>
+              <p v-if="scope.row.identity_code=='100002'">内部小号</p>
+              <p v-if="scope.row.identity_code=='100003'">内部大号</p>
+            </template>
           </el-table-column>
-          <el-table-column
-            prop="identity"
-            label="身份"
-            width="100">
-          </el-table-column>
-          <el-table-column
-            prop="phone"
-            label="手机号" width="120">
-          </el-table-column>
-          <el-table-column
-            prop="sex"
-            label="性别" width="80">
-          </el-table-column>
-          <el-table-column
-            prop="age" width="50"
-            label="年龄">
-          </el-table-column>
-          <el-table-column
-            prop="addr"
-            label="城市" width="150">
-          </el-table-column>
-          <el-table-column
-            prop="createTime"
-            label="注册时间" width="180">
-          </el-table-column>
-          <el-table-column
-            prop="userCode"
-            label="会员ID" width="110">
-          </el-table-column>
-          <el-table-column
-            prop="loginTime"
-            label="最后登录时间" width="180">
-          </el-table-column>
+          <el-table-column prop="phone" label="手机号" width="120"></el-table-column>
+          <el-table-column prop="sex" label="性别" width="80"></el-table-column>
+          <el-table-column prop="age" width="50" label="年龄"></el-table-column>
+          <el-table-column prop="addr" label="城市" width="150"></el-table-column>
+          <el-table-column prop="createTime" label="注册时间" width="180"></el-table-column>
+          <el-table-column prop="userCode" label="会员ID" width="110"></el-table-column>
+          <el-table-column prop="loginTime" label="最后登录时间" width="180"></el-table-column>
           <el-table-column label="操作" fixed="right" width="124">
           <template slot-scope="scope">
-            <div v-if="scope.row.identity != '内部小号'">
+            <div v-if="scope.row.identity_code == '100001'">
               <router-link :to="{name:'member-info',params:{id:scope.row.userId}}"><el-button type="text"  size="mini"
                 >详情</el-button>
               </router-link>
-              <el-button type="text"
-                size="mini" class="marL10"
-                @click="setPower(scope.$index, scope.row)">权限</el-button>
-              <el-button type="text"
-                size="mini"
-                @click="setIdentity(scope.$index, scope.row)">身份</el-button>
+              <el-button type="text" size="mini" class="marL10" @click="setPower(scope.$index, scope.row)">权限</el-button>
+              <el-button type="text" size="mini" @click="setIdentity(scope.$index, scope.row)">身份</el-button>
             </div>
             <div v-else>
               <router-link :to="{name:'member-info',params:{id:scope.row.userId}}"><el-button type="text"  size="mini" 
@@ -153,7 +127,7 @@
                 </router-link>
                 <el-button type="text"
                   size="mini" class="marL10" disabled>权限</el-button>
-                <el-button type="text" disabled size="mini">身份</el-button>
+                <el-button type="text" @click="editInner(scope.row.userId)" size="mini">编辑</el-button>
             </div>
           </template>
         </el-table-column>
@@ -165,17 +139,6 @@
 				</el-pagination>
       </div>
     </div>
-    <el-dialog
-      title="提示"
-      :visible.sync="dialogVisible"
-      width="30%"
-      >
-      <span>确定要导入吗?</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button @click="dialogVisible = false" size="mini">取 消</el-button>
-        <el-button type="primary" @click="sureUpload" size="mini">确 定</el-button>
-      </span>
-    </el-dialog>
     <!-- 创建小号的弹窗 -->
     <el-dialog title="创建内部账号" :visible.sync="innerMemDia" width="600px" center>
       <el-form :model="form" ref="form" :rules="rules" label-width="84px">
@@ -187,14 +150,14 @@
                 <el-option value="100003" label="内部大号"></el-option>
               </el-select>
             </el-form-item>
-            <el-form-item label="手机号:" prop="tel">
-              <el-input v-model="form.tel" auto-complete="off" size="mini" placeholder="请输入4-12位数字"></el-input>
+            <el-form-item label="手机号:" prop="phone">
+              <el-input v-model="form.phone" auto-complete="off" size="mini" placeholder="请输入4-12位数字"></el-input>
             </el-form-item>
-            <el-form-item label="用户名:" prop="name">
-              <el-input v-model="form.name" size="mini" placeholder="请输入4-15个字"></el-input>
+            <el-form-item label="用户名:" prop="nickName">
+              <el-input v-model.trim="form.nickName" size="mini" placeholder="请输入4-15个字"></el-input>
             </el-form-item>
-            <el-form-item label="简介:" prop="shortDes">
-              <el-input v-model="form.shortDes" type="textarea" size="mini" placeholder="请输入简介"></el-input>
+            <el-form-item label="简介:" prop="userDesc">
+              <el-input v-model="form.userDesc" type="textarea" size="mini" placeholder="请输入简介"></el-input>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -203,8 +166,8 @@
               <el-radio v-model="form.rankCode" label="1001">否</el-radio>
             </el-form-item>
             <el-form-item label="性别:" prop="sex">
-              <el-radio v-model="form.sex" label="2">女</el-radio>
-              <el-radio v-model="form.sex" label="1">男</el-radio>
+              <el-radio v-model="form.sex" :label="2">女</el-radio>
+              <el-radio v-model="form.sex" :label="1">男</el-radio>
             </el-form-item>
             <el-form-item label="生日:" prop="birthday">
               <el-date-picker size="mini" style="width:100%"
@@ -214,14 +177,14 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item label="城市:" prop="add">
-             <el-select size="mini" placeholder="选择省" v-model="form.province" style="width:45%;margin-right:2%;" @change="provinceChange2">
+             <el-select size="mini" placeholder="选择省" v-model="form.provinceId" style="width:45%;margin-right:2%;" @change="provinceChange2">
               <el-option
                 v-for="item in provinceArr"
                 :key="item.areaNo" :label="item.areaName"
                 :value="item.areaNo">
               </el-option>
             </el-select>
-            <el-select size="mini" placeholder="选择市" v-model="form.city" style="width:45%">
+            <el-select size="mini" placeholder="选择市" v-model="form.cityId" style="width:45%">
                 <el-option
                 v-for="item in cityArr"
                 :key="item.areaNo" :label="item.areaName"
@@ -233,18 +196,18 @@
         
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="innerMemDia = false" size="mini">取 消</el-button>
-        <el-button type="primary" @click="createInner" size="mini">添 加</el-button>
+        <el-button @click="innerMemDia = false;form={};$refs['form'].resetFields();" size="mini">取 消</el-button>
+        <el-button type="primary" @click="createInner" size="mini">确 定</el-button>
       </div>
     </el-dialog>
     <!-- 身份弹窗 -->
     <el-dialog title="选择会员身份" :visible.sync="identityDia" width="30%" center>
       <div class="text-center">
-        <el-radio v-model="radio" label="100001">普通会员</el-radio>
-        <el-radio v-model="radio" label="100003">认证会员(带V身份标识）</el-radio>
+        <el-radio v-model="radio" label="1001">普通会员</el-radio>
+        <el-radio v-model="radio" label="1002">认证会员(带V身份标识）</el-radio>
       </div>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="identityDia = false" class="light_btn">取 消</el-button>
+        <el-button @click="identityDia = false;form={sex:1,rankCode:'1001'}" class="light_btn">取 消</el-button>
         <el-button type="primary" @click="changeIdentity" class="light_btn">确 定</el-button>
       </div>
     </el-dialog>
@@ -266,7 +229,7 @@
 export default {
   data() {
       return {
-        dialogVisible:false,
+        isEdit:false,
         newsFile:'',
         formDatas:'',
         fileList:[],
@@ -274,15 +237,15 @@ export default {
         checkOp:[],
         checkList: [],
         form:{
-          tel:'',
-          name:'',
-          shortDes:'',
+          phone:'',
+          nickName:'',
+          userDesc:'',
           identityCode:'',
           rankCode:'1001',
-          sex:'1',
+          sex:1,
           birthday:'',
-          province:'',
-          city:''
+          provinceId:'',
+          cityId:''
         },
         provinceArr:[],
         cityArr:[],
@@ -306,19 +269,19 @@ export default {
           }
         ],
         rules:{
-          tel: [
+          phone: [
             { required: true, message: '请输入手机号', trigger: 'blur' },
             {pattern: /^[0-9]*$/,message:'手机号只能输入数字', trigger: 'blur'},
             { min: 4, max: 12, message: '长度在 4 到 12 个字符', trigger: 'blur' },
           ],
           name:[
             { required: true, message: '请输入用户名', trigger: 'blur' },
-            { min: 2, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' },
+            { min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' },
           ],
           identityCode:[
              { required: true, message: '请选择账号类型', trigger: 'blur' },
           ],
-          shortDes:[
+          userDesc:[
             // { required: true, message: '请输入简介', trigger: 'blur' },
             { min: 1, max: 25, message: '长度在 1 到 25 个字符', trigger: 'blur' }
           ],
@@ -370,11 +333,30 @@ export default {
     created() {
       this.showList();
       this.$post('/area/findProvince',{tokenId:this.$store.state.user.tokenId}).then(res => {
-        console.log(res)
+        // console.log(res)
         this.provinceArr=res.data;
       });
     },
     methods: {
+      editInner(userId){
+        this.isEdit=true;
+        var params={
+          tokenId:this.$store.state.user.tokenId,
+          userId:userId
+        }
+        this.$post('/members/getBaseInfo',params).then(res => {
+          console.log(res.data[0]);
+          this.form = res.data[0];
+          this.innerMemDia = true;
+          if(this.form.provinceId){
+            this.$post('/area/findCityByProvinceNo',{tokenId:this.$store.state.user.tokenId,areaNo:this.form.provinceId}).then(res => {
+              this.cityArr = res.data;
+              // console.log(this.cityArr)
+            });
+          }
+        })
+       
+      },
       sureUpload(){
         const loading = this.$loading({
               lock: true,
@@ -386,13 +368,13 @@ export default {
         this.formDatas.append('usersFile', this.newsFile);
         this.formDatas.append('tokenId',this.$store.state.user.tokenId);
         this.$post('/members/toExportInt',this.formDatas).then(res =>{
-          this.dialogVisible=false;
           if(res.code == 0){
             loading.close();
             this.$message({
               message: res.msg,
               type: 'success'
             });
+            this.showList();
           }else{
             loading.close();
             this.$message({
@@ -406,7 +388,18 @@ export default {
         // console.log(file, fileList);
         this.newsFile = file.raw;
         this.fileList = fileList;
-        this.dialogVisible=true;
+        this.$confirm('确定要上传吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+          this.sureUpload();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });          
+        });
       },
       handleRemove(file, fileList) {
         console.log(file, fileList);
@@ -427,7 +420,7 @@ export default {
           tokenId: this.$store.state.user.tokenId,
           limit: this.per_page,
           offset: this.currentPage,
-          status:this.value,
+          // status:this.value,
           queryType:this.value,
           sex:this.value3==0?'':this.value3,
           ageStart:this.value4,
@@ -453,11 +446,8 @@ export default {
           //  console.log(res.data[0].rows);
             var data = res.data[0].rows;
             data.map(item=>{
-              if(item.province == '未填写'){
-                item.addr = '未填写'
-              }else{
-                item.addr = item.province + item.city + item.area;
-              }
+              // console.log(item.province)
+              item.addr = (item.province=="未填写"?'未填写':item.province) + (item.city=="未填写"?'':item.city) + (item.area=="未填写"?'':item.area);
             })
             // console.log(data);
             this.tableData = data;
@@ -479,7 +469,7 @@ export default {
       },
       provinceChange2(val){
         console.log(val);
-        this.form.city='';
+        this.form.cityId='';
         if(val){
           this.$post('/area/findCityByProvinceNo',{tokenId:this.$store.state.user.tokenId,areaNo:val}).then(res => {
             this.cityArr = res.data;
@@ -491,10 +481,10 @@ export default {
       setIdentity(index,row){
         this.identityDia = true;
         console.log(index,row)
-        if(row.identity == '认证会员'){
-          this.radio = '100003';
+        if(row.rank_code == '1002'){
+          this.radio = '1002';
         }else{
-          this.radio = '100001';
+          this.radio = '1001';
         }
         this.userId = row.userId;
       },
@@ -502,7 +492,7 @@ export default {
       changeIdentity(){
         var params = {
           tokenId:this.$store.state.user.tokenId,
-          levelCode:this.radio,
+          rankCode:this.radio,
           userId:this.userId,
         };
         this.$post('members/updateLevel',params).then(res => {
@@ -570,17 +560,22 @@ export default {
           if (valid) {
             var params = {
               tokenId:this.$store.state.user.tokenId,
-              phone:this.form.tel,
-              nickName:this.form.name,
-              userDesc:this.form.shortDes,
+              phone:this.form.phone,
+              nickName:this.form.nickName,
+              userDesc:this.form.userDesc,
               identityCode:this.form.identityCode,
               rankCode:this.form.rankCode,
               sex:this.form.sex,
               birthday:this.form.birthday,
-              provinceId:this.form.province,
+              provinceId:this.form.provinceId,
               cityId:this.form.cityId
             };
-            this.$post('members/addInnerMember',params).then(res=>{
+            var url='/members/addInnerMember';
+            if(this.isEdit){
+              params.userId = this.form.userId;
+              url='/members/updateInnerMember';
+            }
+            this.$post(url,params).then(res=>{
               if(res.code == 0){
                 this.innerMemDia = false;
                 this.$message({
@@ -588,6 +583,7 @@ export default {
                   type: 'success'
                 });
                 this.showList();
+                this.form={};
               }else{
                 this.$message({
                   message: '添加失败请重试!',
@@ -625,9 +621,9 @@ export default {
   .member .member_table{
     padding: 15px;
   }
-  .member .el-input__icon{
+  /* .member .el-input__icon{
     line-height: 26px;
-  }
+  } */
   .member .el-checkbox{
     width: 50%;
     text-align: left;
@@ -635,7 +631,7 @@ export default {
   .member .el-checkbox+.el-checkbox{
     margin-left:0; 
   }
-  .el-upload-list.el-upload-list--text{
+  .member .el-upload-list.el-upload-list--text{
     display: none;
   }
 </style>

@@ -9,14 +9,14 @@
       </div>
       <div class="page-header">
         <el-input size="mini" v-model="columnName" placeholder="请输入栏目名称" style="width:200px;"></el-input>
-        <el-button class="light_btn" @click="getList">搜索</el-button>
+        <el-button class="light_btn" @click="getList()">搜索</el-button>
       </div>
       <div class="box">
         <div class="text-right marBo4">
 				  <el-button size="mini"  @click="$router.back()" class="light_btn">返回</el-button>
           <el-button size="mini"  @click="publishWaitTop" class="light_btn">栏目排序</el-button>
           <el-button size="mini" class="light_btn" @click="newDialog = true;classForm.title='';classForm.radio='1';isEdit=false;hasChangeFile=true;"><i class="el-icon-plus" style="font-weight:600;"></i> 栏目</el-button>
-          <el-button size="mini"  @click="getList" class="light_btn">刷新</el-button>
+          <el-button size="mini"  @click="getList()" class="light_btn">刷新</el-button>
         </div>
         <el-table :row-class-name="miniTable()" :header-row-class-name="miniTable()" v-loading="loading"
           :data="tableData"
@@ -66,11 +66,11 @@
         width="30%" :close-on-click-modal="false"
         :visible.sync="newDialog" append-to-body>
         <el-form :model="classForm" :rules="classRules" ref="classForm" label-width="110px" class="classForm">
-          <el-form-item label="栏目标题" prop="title" size="mini">
-            <el-input v-model="classForm.title" style="width:70%;"></el-input>
+          <el-form-item label="栏目标题" prop="name" size="mini">
+            <el-input v-model="classForm.name" style="width:70%;"></el-input>
           </el-form-item>
           <el-form-item label="上传icon" label-width="110px" ref="icon" prop="icon">
-            <el-upload action=""
+            <el-upload action="" accept="image/jpeg,image/gif,image/png,image/bmp"
               :multiple="false" :limit='1'
               ref="upload" name="file"
               list-type="picture-card"
@@ -81,7 +81,7 @@
               :on-remove="handleRemove">
               <i class="el-icon-plus"></i>
             </el-upload>
-            <el-dialog :visible.sync="imgDialog">
+            <el-dialog :visible.sync="imgDialog" :modal='false'>
               <img width="100%" :src="dialogImageUrl" alt="">
             </el-dialog>
           </el-form-item>
@@ -96,7 +96,7 @@
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="beforeClose()" class="light_btn">取 消</el-button>
-          <el-button type="primary" @click="createClass" class="light_btn">保 存</el-button>
+          <el-button type="primary" @click="createClass" class="light_btn" >保 存</el-button>
         </span>
       </el-dialog>
       <el-dialog center title="设置推荐栏目排序" :visible.sync="dialogVisible" width="30%">
@@ -140,6 +140,7 @@ export default {
       };
     return{
       dialogVisible:false,
+      pictureId:'',
       upData:[],
       columnName:'',
       hasChangeFile:false,
@@ -160,12 +161,12 @@ export default {
       tableData:[],
       input:'',
       classForm:{
-        title:'',
+        name:'',
         enabled:'1',
         navigation_bar:'0'
       },
       classRules:{
-        title: [
+        name: [
             { required: true, message: '请输入标题', trigger: 'blur' },
             { min: 2, max: 4, message: '长度在 2 到 4 个字', trigger: 'blur' }
           ],
@@ -186,9 +187,11 @@ export default {
 				this.dialogVisible = true;
 				this.loading2 = true;
 				this.$get('column/findColumnList',{tokenId:this.$store.state.user.tokenId,navigationBar:'1'}).then(res =>{
-					this.loading2 = false;
-					console.log(res)
-					this.upData = res.data;
+					if(res.code==0){
+            this.loading2 = false;
+					// console.log(res)
+				  	this.upData = res.data;
+          }
 				})
 			},
     changeIndex(index, rows, dir) {
@@ -216,12 +219,14 @@ export default {
         // newsInfos:JSON.stringify(newsInfos)
         ids:newsInfos.join(',')
       }
-      console.log(params);
+      // console.log(params);
       this.$post('/column/updateByBarAndOrder',params).then(res => {
-        this.$message({
-          message: res.msg,
-          type: 'success'
-        });
+        if(res.code==0){
+          this.$message({
+            message: res.msg,
+            type: 'success'
+          });
+        }
       })
       this.dialogVisible = false
     },
@@ -249,7 +254,7 @@ export default {
             type: 'success',
             message: res.msg
           });
-          this.getList();
+          this.getList(this.currentPage);
         }else{
 
         }
@@ -257,31 +262,38 @@ export default {
     },
     //编辑
     editClass(row){
-      console.log(row);
+      // console.log(row);
       this.newDialog = true;
       this.hasChangeFile = false;
-      this.classForm.title = row.name;
-      this.classForm.enabled = row.enabled;
-      this.classForm.navigation_bar = row.navigation_bar;
+      this.classForm=JSON.parse(JSON.stringify(row));
       if(row.picture_url){
         this.fileList.push({url:row.picture_url});
       }
       this.hasFmt = true;
       this.editId = row.id;
+      this.pictureId=row.picture_id;
       this.isEdit=true;
+      // console.log(this.classForm);
     },
     // 新建分类
     createClass(){
       //this.newDialog=true;
       this.$refs.classForm.validate((valid) => {
         if(valid){
+          const loading = this.$loading({
+            lock: true,
+            text: 'Loading',
+            spinner: 'el-icon-loading',
+            background: 'rgba(0, 0, 0, 0.7)'
+          });
           let param = new FormData();
           param.append('tokenId',this.$store.state.user.tokenId);
-          param.append('name',this.classForm.title);
+          param.append('name',this.classForm.name);
           param.append('enabled',this.classForm.enabled);
           param.append('navigationBar',this.classForm.navigation_bar);
           if(this.isEdit){
             param.append('id',this.editId);
+            param.append('pictureId',this.pictureId);
           }
           if(this.hasChangeFile){         // 如果编辑时更换了图片或者是新建时候上传了图片
             param.append('newsFile',this.classForm.file,this.classForm.filename);
@@ -289,8 +301,9 @@ export default {
              param.append('newsFile','');
           }
           this.$post('column/save',param).then(res =>{
-            console.log(res)
+            // console.log(res)
             this.newDialog = false;
+            loading.close();
             this.$refs['upload'].clearFiles();  // 清空图片
             this.$refs['classForm'].resetFields();  // 清空表单
             this.classForm.navigation_bar = '0';
@@ -302,7 +315,7 @@ export default {
                 message: res.msg
               });
               setTimeout(() => {
-                this.getList();
+                this.getList(this.currentPage);
               }, 500);
             }else{
               this.$message({
@@ -355,7 +368,6 @@ export default {
       });
     },
     getList(val){
-      this.loading=true;
       this.currentPage=val?val:1;
       var params = {
         tokenId: this.$store.state.user.tokenId,
@@ -375,11 +387,14 @@ export default {
     beforeClose(){
       this.newDialog = false;
       this.fileList=[];
+      this.$refs['classForm'].resetFields();
       this.isEdit=false;
       this.classForm={
         title:'',
-        radio:'1'
+        enabled:'1',
+        navigation_bar:'0'
       }
+      // console.log(this.classForm);
     },
     handleCurrentChange(val) {
       // this.currentPage = val;
@@ -404,6 +419,7 @@ export default {
       this.$message.warning('当前限制选择 1 个文件');
     },
     handleRemove(file, fileList) {
+      this.pictureId='';
       this.hasChangeFile=true;
       // console.log(file, fileList);
       if(fileList.length == 0){

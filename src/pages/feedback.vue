@@ -1,12 +1,12 @@
 <template>
     <div class="page-body feedback">
       <div class="page-header">
-        <el-date-picker size="mini" style="width:400px;" v-model="timeRange" type="daterange" 
-           value-format="yyyy-MM-dd HH:mm:ss"
-           start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
-					</el-date-picker>
-        <el-button class="light_btn" size="mini" @click="getFeedList">搜索</el-button>
-        <el-button class="light_btn" size="mini" @click="getExcel">导出</el-button>
+        <el-date-picker size="mini" style="width:400px;" v-model="timeRange" type="datetimerange" 
+          value-format="yyyy-MM-dd HH-mm-ss" 
+          start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
+        </el-date-picker>
+        <el-button class="light_btn" size="mini" @click="getFeedList()">搜索</el-button>
+        <el-button class="light_btn" size="mini" @click="getExcel()">导出</el-button>
       </div>
       <div class="box">
           <el-table :row-class-name="miniTable()" :header-row-class-name="miniTable()" v-loading="loading"
@@ -60,7 +60,7 @@ export default {
         params.timeStart=this.timeRange[0];
         params.timeEnd=this.timeRange[1];
       }
-      console.log(this.timeRange[0],this.timeRange[1])
+      // console.log(this.timeRange[0],this.timeRange[1])
       this.$post('feedBackInfo/list',params).then(res => {
         // console.log(res)
         this.tableData = res.data[0].rows;

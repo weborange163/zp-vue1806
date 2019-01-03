@@ -103,7 +103,7 @@
         <el-table-column prop="status" label="提现结果" width="80">
           <template slot-scope="scope">
             <p v-if="scope.row.status=='1'" class="yshx">打款成功</p>
-            <p v-else-if="scope.row.status=='2'||scope.row.audit_status!='2'" >打款失败</p>
+            <p v-else-if="scope.row.status=='2'||scope.row.audit_status=='2'" >打款失败</p>
             <p v-else class="dshx">待打款</p>
           </template>
         </el-table-column>

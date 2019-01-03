@@ -96,7 +96,7 @@
              <p v-if="scope.row.withdraw_type ==2">支付宝</p>
           </template>
         </el-table-column>
-        <el-table-column label="提现账户"></el-table-column>
+        <el-table-column label="提现账户" prop="withdraw_account"></el-table-column>
         <el-table-column prop="audit_status" label="审核状态" width="80">
           <template slot-scope="scope">
             <p v-if="scope.row.audit_status ==0" class="dshx">待审核</p>
@@ -111,7 +111,7 @@
             <p v-if="(scope.row.audit_status ==1 && scope.row.status ==2) || scope.row.audit_status ==2 " class="yxx">失败</p>
           </template>
         </el-table-column>
-        <el-table-column prop="audit_user_name" label="审核人" width="180"></el-table-column>
+        <el-table-column prop="audit_user_name" label="审核人" width="100"></el-table-column>
         <el-table-column prop="audit_time" label="审核时间" width="140"></el-table-column>
         <el-table-column
           fixed="right"
@@ -133,7 +133,7 @@
         </el-pagination>
       </div>
     </div>
-    <el-dialog title="提现审核" :visible.sync="dialog" width="350px">
+    <el-dialog title="提现审核" :visible.sync="dialog" width="400px">
         <el-form :model="dialogForm" ref="dialogForm" label-width="40px" :rules="dialogRules">
           <el-form-item label="">
             <el-radio-group v-model="dialogForm.auditStatus">
@@ -153,7 +153,7 @@
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button size="mini" @click="dialog = false;dialogForm={};">取 消</el-button>
-          <el-button size="mini" type="primary" @click="sureAudit('form12')">确 认</el-button>
+          <el-button size="mini" type="primary" :loading="auditing" :disabled="auditing" @click="sureAudit()">确 认</el-button>
         </div>
       </el-dialog>
   </div>
@@ -164,6 +164,7 @@ import travelCoinVue from './travel-coin.vue';
 export default {
   data(){
     return{
+      auditing:false,
       auditId:'',
       dialog:false,
       dialogForm:{auditStatus:'1'},
@@ -232,6 +233,7 @@ export default {
     sureAudit(){
       this.$refs['dialogForm'].validate((valid) => {
           if (valid) {
+            this.auditing = true;
             let param = {
               tokenId: this.$store.state.user.tokenId,
               id:this.auditId,
@@ -248,6 +250,7 @@ export default {
                 this.dialog =false;
                 this.getList();
               }
+              this.auditing=false;
             });
           }
       })

@@ -3,8 +3,8 @@
     <div class="page-header">
       <div class="text-right">
         <el-button size="mini" class="light_btn" @click="$router.back()">返回</el-button>
-        <el-button size="small" @click="setIdentity" class="light_btn" v-if="data1.identity!='内部小号'">身份设置</el-button>
-        <el-button size="small" @click="setPower" class="light_btn" v-if="data1.identity!='内部小号'">权限设置</el-button>
+        <el-button size="small" @click="setIdentity" class="light_btn" v-if="data1.identityCode=='100001'">身份设置</el-button>
+        <el-button size="small" @click="setPower" class="light_btn" v-if="data1.identityCode=='100001'">权限设置</el-button>
       </div>
       <el-tabs v-model="activeName" @tab-click="handleClick">
         <el-tab-pane label="基本信息" name="first">
@@ -13,7 +13,7 @@
             <el-row>
               <el-col :span="4">
                 <div class="avatar" style="height:217px;">
-                  <img :src="data1.headImgUrl" style="width:100%;height:100%">
+                  <img :src="data1.headImgUrl" style="width:100%;height:100%" alt="暂无头像">
                 </div>
               </el-col>
               <el-col :span="20">
@@ -46,7 +46,7 @@
                       </tr>
                       <tr class="el-table__row">
                         <td><div class="cell">身份</div></td>
-                        <td><div class="cell">{{data1.identity}}</div></td>
+                        <td><div class="cell">{{data1.identityTrans}}</div></td>
                         <td><div class="cell">简介</div></td>
                         <td><div class="cell">{{data1.userDesc}}</div></td>
                       </tr>
@@ -232,8 +232,8 @@
     <!-- 身份弹窗 -->
     <el-dialog title="选择会员身份" :visible.sync="identityDia" width="30%" center>
       <div class="text-center">
-        <el-radio v-model="radio" label="100001">普通会员</el-radio>
-        <el-radio v-model="radio" label="100003">认证会员(带V身份标识）</el-radio>
+        <el-radio v-model="radio" label="1001">普通会员</el-radio>
+        <el-radio v-model="radio" label="1002">认证会员(带V身份标识）</el-radio>
       </div>
       <div slot="footer" class="dialog-footer">
         <el-button @click="identityDia = false" class="light_btn">取 消</el-button>
@@ -285,13 +285,27 @@ export default {
           // console.log(res.data);
           if(res.data){
             this.data1 = res.data[0];
-            if(this.data1.sex==''){
-              this.data1.sex1='未设置'
+            this.radio = this.data1.rankCode;
+            // console.log(this.data1.rankCode)
+            if(this.data1.sex=='2'){
+              this.data1.sex1='女'
             }else if(this.data1.sex==1){
               this.data1.sex1='男'
             }else{
-              this.data1.sex1='女'
+              this.data1.sex1='未设置'
             }
+            if(this.data1.identityCode=='100002'){
+              this.data1.identityTrans='内部小号'
+            }else if(this.data1.identityCode=='100003'){
+              this.data1.identityTrans='内部大号'
+            }else if(this.data1.identityCode=='100001'){
+              if(this.data1.rankCode=='1001'){
+                this.data1.identityTrans='普通会员';
+              }else{
+                this.data1.identityTrans='认证会员';
+              }
+            }
+
             // this.data1.fullUrl = this.baceUrl + res.data[0].headImg
           }
           // console.log(this.data1)
@@ -307,11 +321,7 @@ export default {
       //设置身份
       setIdentity(){
         this.identityDia = true;
-        if(this.data1.identity == '认证会员'){
-          this.radio = '100003';
-        }else{
-          this.radio = '100001';
-        }
+        // console.log(this.radio)
       },
       // 设置权限
       setPower(){
@@ -336,14 +346,14 @@ export default {
       changeIdentity(){
         var params = {
           tokenId:this.$store.state.user.tokenId,
-          levelCode:this.radio,
+          rankCode:this.radio,
           userId:this.idDetail,
         };
-        this.$post('members/updateLevel',params).then(res => {
+        this.$post('/members/updateLevel',params).then(res => {
           if(res.code == 0){
             this.identityDia = false;
             this.userId='';
-            this.showList();
+            this.baseInfo();
             this.$message({
               message: res.msg,
               type: 'success'

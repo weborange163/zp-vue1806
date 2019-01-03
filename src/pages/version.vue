@@ -253,6 +253,8 @@ export default {
       this.bagForm.desc = row.upgrade_content;
       this.bagForm.radio = row.upgrade_mode;
       this.hasFmt = true;
+      this.bagForm.file='';
+      this.bagForm.filename='';
       this.editId = row.id;
       this.isEdit=true;
     },
@@ -462,6 +464,8 @@ export default {
       this.$message.warning('当前限制选择 1 个文件');
     },
     handleRemove(file, fileList) {
+      this.bagForm.filename = '';
+      this.bagForm.file = '';
       console.log(file, fileList);
       if(fileList.length == 0){
         this.hasFmt =false;
