@@ -5,10 +5,12 @@ const menus = [
     icon: 'iconfont icon-menu',
     label: '内容管理',
     submenu: [
-      {id: 'a1', name: 'news', label: '新闻资讯管理'},
-      {id: 'a2', name: 'market', label: '行业信息管理'},
+      {id: 'a1', name: 'news', label: '新闻管理'},
+      // {id: 'a2', name: 'market', label: '行业信息管理'},
+      {id: 'a2', name: 'video', label: '视频管理'},
       {id: 'a3', name: 'audit-news', label: '新闻审核'},
-      {id: 'a4', name: 'audit-market', label: '行情审核'}
+      {id: 'a4', name: 'audit-video', label: '视频审核'},
+      // {id: 'a4', name: 'audit-market', label: '行情审核'}
     ]
   },
   {

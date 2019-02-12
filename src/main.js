@@ -4,13 +4,14 @@ import Vue from 'vue'
 import 'babel-polyfill'
 import ElementUI from 'element-ui'
 import Axios from '@/utils/http'
+import has from '@/utils/btnPermissions.js'
 import { post, get } from '@/api/index' //引入封装的ajax请求
 import NProgress from 'nprogress'
 import MQuillEditor from 'vue-m-quill-editor'
 
 
 import axios from 'axios'
-Vue.prototype.$ajax = axios 
+Vue.prototype.myaxios = axios 
 //import VueAxios from 'vue-axios'
 
 import App from './App'
@@ -43,7 +44,7 @@ import MBox from '@/m/box'
 import MBackTop from '@/m/back-top'
 import MLoader from '@/m/loader'
 import MContainer from '@/m/container'
-
+import $ from 'jquery'
 // Vue.use(VueAxios, axios)
 // Axios.defaults.baseURL = process.env.API_ROOT  需要结合webpack.dev.conf.js去配置
 console.log(process.env)
@@ -81,6 +82,7 @@ router.beforeEach((to, from, next) => {
   }
   return next()
 })
+
 
 router.afterEach(transition => {
   setTimeout(() => {

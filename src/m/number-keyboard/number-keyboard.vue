@@ -81,9 +81,7 @@ export default {
 }
 </script>
 <style>
-  .m-number-keyboard{
-
-  }
+  
   .m-number-keyboard .m-nkb-item{
     display: flex;
     text-align: center;

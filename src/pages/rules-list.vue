@@ -78,9 +78,10 @@ export default {
       miniTable:miniTable,
       input:'',
       tableData:[
-        {dict_type_name:'内容管理',dict_name:"栏目管理",ruleParam:'',id:'1'},
+        {dict_type_name:'内容管理',dict_name:"首页栏目管理",ruleParam:'',id:'1'},
         {dict_type_name:'内容管理',dict_name:"转载来源设置",ruleParam:'',id:'2'},
         {dict_type_name:'系统设置',dict_name:"区域管理",ruleParam:'',id:'3'},
+        {dict_type_name:'内容管理',dict_name:"视频栏目管理",ruleParam:'',id:'4'},
         ],
       per_page: 10,
       total: 1,
@@ -122,7 +123,7 @@ export default {
         }
       this.$post('/jtbRule/otherList',param).then(res=>{
         console.log(res);
-        this.tableData.splice(3,1,res.data[0].rows[0]);
+        this.tableData.splice(4,1,res.data[0].rows[0]);
        // this.tableData.push(res.data[0].rows[0]);
         if(res.code==0){
           this.$message({
@@ -154,6 +155,11 @@ export default {
           case '3':
             this.$router.push({
               name: 'rules3',
+            });
+            break;
+           case '4':
+            this.$router.push({
+              name: 'rules4',
             });
             break;
           }

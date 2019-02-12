@@ -2,12 +2,12 @@
     <div class="page-body travel_coin">
       <div class="page-header">
         <el-input size="mini" v-model="role_nik" placeholder="规则名称" style="width:200px;"></el-input>
-        <el-button class="light_btn" @click="getList">搜索</el-button>
+        <el-button class="light_btn" @click="getList()">搜索</el-button>
       </div>
       <div class="box">
          <div class="text-right marBo4">
-           <el-button class="light_btn" @click="sortRules">排序</el-button>
-          <el-button class="light_btn" @click="getList">刷新</el-button>
+           <el-button class="light_btn" @click="sortRules">任务排序</el-button>
+          <el-button class="light_btn" @click="getList()">刷新</el-button>
         </div>
         <el-table :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading"
           :data="tableData"
@@ -466,7 +466,7 @@
         </div>
       </el-dialog>
       <!-- 规则排序 -->
-      <el-dialog center title="规则排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+      <el-dialog center title="设置交通币任务排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
         任务分类
         <el-select size="mini" v-model="sortCategory" placeholder="请选择任务类型" class="marBo4" @change="sortTypeChange">
           <el-option label="日常任务" value="1"></el-option>
@@ -474,20 +474,32 @@
         </el-select>
 				<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading1">
 					<el-table-column prop="dictName" label="规则名称"></el-table-column>
-					<el-table-column label="操作" width="80" class="text-center">
+					<el-table-column label="操作" width="140" class="text-center">
 						<template slot-scope="scope">
-							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
-								<i class="iconfont icon-up"></i>
+							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'toTop')">
+								<i class="iconfont icon-Gototop"></i>
 							</el-button>
-							<el-button type="text" v-else disabled>
-								<i class="iconfont icon-up unclick"></i>
+              <el-button type="text" v-else disabled>
+								<i class="iconfont icon-Gototop unclick"></i>
 							</el-button>
-							<el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'isDown')">
-								<i class="iconfont icon-down"></i>
+              <el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
+                <i class="iconfont icon-up"></i>
+              </el-button>
+              <el-button type="text" v-else disabled>
+                <i class="iconfont icon-up unclick"></i>
+              </el-button>
+              <el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'isDown')">
+                <i class="iconfont icon-down"></i>
+              </el-button>
+              <el-button type="text" v-else disabled>
+                <i class="iconfont icon-down" style="cursor:not-allowed"></i>
+              </el-button>
+              <el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'toBottom')">
+								<i class="iconfont icon-Gotobottom"></i>
 							</el-button>
-							<el-button type="text" v-else disabled>
-								<i class="iconfont icon-down" style="cursor:not-allowed"></i>
-							</el-button>
+              <el-button type="text" v-else disabled>
+              <i class="iconfont icon-Gotobottom" style="cursor:not-allowed"></i>
+            </el-button>
 						</template>
 					</el-table-column>
 				</el-table>
@@ -626,7 +638,34 @@ export default {
   created() {
     this.getList();
   },
+  computed: {
+    upDataLength: function() {
+      return this.upData.length - 1;
+    }
+  },
   methods:{
+    changeIndex(index, rows, dir) {
+        console.log(index);
+				if(dir == 'isUp') {
+					var a = rows[index]
+					var b = rows[index - 1]
+					rows.splice(index - 1, 1, a)
+					rows.splice(index, 1, b)
+				} else if(dir == 'isDown') {
+					var a = rows[index]
+					var b = rows[index + 1]
+					rows.splice(index + 1, 1, a)
+					rows.splice(index, 1, b)
+				}else if(dir == 'toTop'){
+          var a = rows[index];
+          rows.splice(index,1);
+          rows.unshift(a);
+        }else{
+          var a=rows[index];
+          rows.splice(index,1);
+          rows.push(a);
+        }
+			},
     setRule(formName){
       this.$refs[formName].validate((valid) => {
           if (valid) {
@@ -879,19 +918,6 @@ export default {
         this.upData = res.data[0];
       });
     },
-    changeIndex(index, rows, dir) {
-				if(dir == 'isUp') {
-					var a = rows[index]
-					var b = rows[index - 1]
-					rows.splice(index - 1, 1, a)
-					rows.splice(index, 1, b)
-				} else {
-					var a = rows[index]
-					var b = rows[index + 1]
-					rows.splice(index + 1, 1, a)
-					rows.splice(index, 1, b)
-				}
-			},
     dateChange0(val){
       var op=this.options;
       op.map((item,index) =>{

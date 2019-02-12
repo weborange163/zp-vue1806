@@ -1,9 +1,26 @@
 <template>
 	<div class="page-body news-add" style="min-width:980px;">
-    <el-dialog center width="375px"  :visible.sync="showNews" append-to-body id='div1'>
-			<el-form :data="form1"  ref="form1" label-width="110px" class="form1">
-				<p id="p1" >{{form1.title }}</p>
-				<p id="p2" v-html="form1.content"></p>
+    <el-dialog center width="375px"  :visible.sync="showNews" append-to-body>
+			<el-form :data="form2"  ref="form2" label-width="110px" class="form1 u_editor">
+				<div class="zhuan" v-if="form1.sourceType==2">
+          <p class="title">{{form1.title }}</p>
+					<div class="pubMsg">
+            <div class="reprint">转载</div>
+            <p v-html="form1.author"></p>
+            <p>转自：<span v-html="form1.sourceName"></span></p>
+            <p v-html="form1.updateTime"></p>
+          </div>
+				</div>
+        <div class="yuan" v-else>
+          <div class="pubMsg">
+            <img id="img1" src="@/assets/img/yuanchuang.png"> 
+            <p class="title">{{form1.title }}</p>
+            <p v-html="form1.author"></p>
+            <p v-html="form1.updateTime"></p>
+          </div>
+				</div>
+				<article class="content" v-html="form1.content"></article>
+			
 			</el-form>
 		</el-dialog>
 		<div class="breadcrumb" style="padding:8px;">
@@ -17,7 +34,7 @@
 		<div class="box" >
 			<div class="text-right marR100">
 				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
-        <el-button size="small" class="light_btn" @click="showNews = true;" >预览</el-button>
+        <el-button size="small" class="light_btn" @click="showPre" >预览</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1',0)">仅保存</el-button>
 				<el-button size="small" class="light_btn"  @click="creatNews('form1','1')">保存并提交审核</el-button>
 			</div>
@@ -26,8 +43,8 @@
 					<el-form-item label="文章标题" prop="title" >
 						<el-input type="textarea" autosize v-model="form1.title" placeholder="请输入标题" style="width:420px;"></el-input>
 					</el-form-item>
-					<el-form-item label="文章内容" prop="content" class="editor">
-						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
+					<el-form-item label="文章内容" class="editor">
+						<!-- <m-quill-editor ref="myQuillEditor" v-model="form1.content"
 						:width="quill.width" :getContent="onEditorChange" :toolbar="quill.toolbar"
 						:has-border="quill.border" :zIndex="quill.zIndex"
 						:sync-output="quill.syncOutput" 
@@ -35,7 +52,10 @@
 						:disabled="quill.disabled"
 						:fullscreen="quill.full"
 						@upload="uploadImg" @blur="onEditorBlur($event)"
-						></m-quill-editor>
+						></m-quill-editor> -->
+            <div style="width:420px;heigt:200px;">
+              <UEditor :config=config ref="ueditor"></UEditor>
+            </div>
 					</el-form-item>
 				</div>
 				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
@@ -53,7 +73,7 @@
             </el-select>
           </el-form-item>
           <el-row>
-            <el-col :span="16">
+            <el-col :span="14">
               <el-form-item label="来源:" prop="sourceType">
                 <el-radio-group v-model="form1.sourceType">
                   <el-radio label="1" >原创</el-radio>
@@ -61,9 +81,9 @@
                 </el-radio-group>
               </el-form-item>
             </el-col>
-            <el-col :span="8">
+            <el-col :span="10">
               <el-form-item v-if="form1.sourceType == 2" prop="source" class="source_style">
-                <el-select filterable allow-create v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+                <el-select filterable allow-create v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-96px;width:150px;">
                   <el-option
                     v-for="item in cities"
                     :key="item.id"
@@ -103,7 +123,7 @@
           </el-form-item>
 					<el-form-item label="封面图:" prop="icon" ref="icon" v-show="form1.coverNum != '0'&&form1.imgType == '1'">
 						<el-upload 
-							action="" :multiple="false" :limit=form1.coverNum
+							action="" :multiple="true" :limit=form1.coverNum
 							ref="upload" name="newsFile" :file-list="fileList"
 							list-type="picture-card" :auto-upload="false"
               :http-request="uploadFile"
@@ -116,8 +136,8 @@
 							<img width="100%" :src="dialogImageUrl" alt="">
 						</el-dialog>
 					</el-form-item>
-          <!-- accept='video/mp4' -->
-          <el-form-item label="上传视频:">
+          <!-- accept='video/mp4' 此方法进度条没了 -->
+          <!-- <el-form-item label="上传视频:">
 						<el-upload
               class="upload-demo" :limit='1'
               ref="uploadVideo1" name="newsVideo"
@@ -132,18 +152,31 @@
               :auto-upload="false">
               <el-button slot="trigger" size="small" type="primary">选取视频</el-button>
               <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload" :loading="uploadVideoing1" :disabled="uploadVideoing2">点击上传视频</el-button>
+              <el-progress class="el-upload-list__item el-progress" :stroke-width="2" :percentage="percentage" v-if="videoProgress"></el-progress>
               <div slot="tip" class="el-upload__tip">请选择mp4文件进行上传</div>
-              <!-- <div class="el-upload__tip" v-html="showUrl"></div> -->
             </el-upload>
 					</el-form-item>
           <el-form-item label="视频预览:" v-if="videoId">
 						<video width="320" height="240" controls style="background:rgba(0,0,0,0.7)">
                <source :src="showUrl" type="video/mp4">
             </video>
-					</el-form-item>
+					</el-form-item> -->
+          <!-- 此方法上传 会有进度条(不准的),但是,无法获取response来进行提示信息展示 -->
+          <!-- <el-form-item label="视频:" >
+            <el-upload
+              class="upload-demo"
+              ref="upload2" name="newsVideo"
+              action="http://192.168.1.17:8080/news/addVideo"
+              :file-list="fileList3"
+              :auto-upload="false">
+              <el-button slot="trigger" size="small" type="primary">选取文件</el-button>
+              <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload2">上传到服务器</el-button>
+              <div slot="tip" class="el-upload__tip">只能上传jpg/png文件，且不超过500kb</div>
+            </el-upload>
+					</el-form-item>-->
 					<el-form-item label="Tag标签:" prop="tagLabels">
 						<el-input placeholder="用'，'隔开，单个标签小于12字节" v-model="form1.tagLabels"></el-input>
-					</el-form-item>
+					</el-form-item> 
 					<!-- <el-form-item label="关键词:">
 						<el-input placeholder="用英文 “ , ” 隔开" v-model="form1.keyWords"></el-input>
 					</el-form-item> -->
@@ -155,10 +188,12 @@
 <script>
 //import MQuillEditor from 'm-quill-editor'
 import { getBaceUrl } from '@/utils/auth'
+import UEditor from '@/utils/ueditor/ueditor.vue'
 import myVali from '@/utils/myVali'
 import axios from 'axios'
 	export default{
 		components: {
+      UEditor
 		//	MQuillEditor
     },
 		data(){
@@ -186,6 +221,31 @@ import axios from 'axios'
         }
       };
 			return{
+        fileList3:[],
+        videoProgress:true,
+        percentage:30,
+        config: {
+            //可以在此处定义工具栏的内容
+           toolbars: [
+             ['fullscreen', 'undo', 'redo','|','bold', 'italic', 'underline','fontborder','strikethrough', 
+             '|','superscript','subscript','|', 'insertorderedlist', 'insertunorderedlist','|','removeformat','formatmatch','link','unlink',
+             '|','fontfamily','fontsize','justifyleft','justifyright','justifycenter','justifyjustify','indent','pasteplain','blockquote','searchreplace',
+             '|','forecolor','backcolor','autotypeset',
+             '|','simpleupload','insertimage','emotion','|','lineheight','rowspacingtop','rowspacingbottom',
+             '|','edittip ','map','horizontal',
+             '|','inserttable','deletetable','insertparagraphbeforetable','insertrow','insertcol','mergeright','mergedown', 'deleterow','deletecol','splittorows','splittocols','splittocells','deletecaption','inserttitle','mergecells', 
+             '|',]
+            ],
+            autoHeightEnabled: false,
+            autoFloatEnabled: true,
+            initialContent:'请输入内容',   //初始化编辑器的内容,也可以通过textarea/script给值，看官网例子
+            autoClearinitialContent:true, //是否自动清除编辑器初始内容，注意：如果focus属性设置为true,这个也为真，那么编辑器一上来就会触发导致初始化的内容看不到了
+            initialFrameWidth: null,
+            initialFrameHeight: 450,
+            BaseUrl: '',
+            UEDITOR_HOME_URL: 'static/ueditor/'
+          },
+          form2:'',
         uploadVideoing1:false,
         uploadVideoing2:false,
         formDatas:'',
@@ -309,6 +369,38 @@ import axios from 'axios'
       })
 		},
 		methods:{
+      showPre(){
+        // console.log(this.form1.source);
+        this.form1.content = this.$refs.ueditor.getUEContent();
+         this.$refs['form1'].validate((valid) => {
+            if(valid){
+              if(!this.form1.content){
+                this.$message({
+                    message: '正文内容不可为空!',
+                    type: 'error'
+                  });
+                  return;
+              }
+              if(this.form1.sourceType==2){
+                this.cities.map(item => {
+                  if(item.id == this.form1.source){
+                    this.form1.sourceName= item.name;
+                    console.log( this.form1.sourceName);
+                  }
+                });
+              }
+              this.showNews=true;
+             }
+
+         });
+        
+
+      },
+      getUContent: function(){
+        let content = this.$refs.ueditor.getUEContent();
+        console.log(content);
+        this.form1.content = content;
+      },
       beforeUpload(file){
         console.log(file);
       },
@@ -394,6 +486,10 @@ import axios from 'axios'
 					console.log(res);
 				})
       },
+      submitUpload2() {  // 执行的方法是uploadVideo
+        console.log(this.fileListVideo);
+        this.$refs.upload2.submit();
+      },
       submitUpload() {  // 执行的方法是uploadVideo
         console.log(this.fileListVideo);
         this.$refs.uploadVideo1.submit();
@@ -424,6 +520,7 @@ import axios from 'axios'
       },
       creatNews(formName,status){
         console.log(this.hasFmt);
+        // console.log(this.$refs.ueditor.getUEContent())
         this.$refs[formName].validate((valid) => {
           console.log(valid);
           if(valid){
@@ -431,7 +528,7 @@ import axios from 'axios'
             if(this.form1.imgType == '1'){
               this.$refs.upload.submit();
             }
-            if(this.form1.coverNum == 3){
+            if(this.form1.coverNum == 3 && this.form1.imgType == '1'){
               if(this.fileList.length !=3){
                 this.$message({
                   message: '必须满足上传三张图片!',
@@ -439,6 +536,14 @@ import axios from 'axios'
                 });
                 return;
               }
+            }
+            this.form1.content = this.$refs.ueditor.getUEContent();
+            if(!this.form1.content){
+              this.$message({
+                  message: '正文内容不可为空!',
+                  type: 'error'
+                });
+                return;
             }
             this.formDatas.append('tokenId',this.$store.state.user.tokenId);
             this.formDatas.append('title',this.form1.title);  
@@ -464,8 +569,9 @@ import axios from 'axios'
             const loading = this.$loading({
               lock: true,
               text: '上传中...',
+              target: document.querySelector('.loadingArea'),
               spinner: 'el-icon-loading',
-              background: 'rgba(0, 0, 0, 0.5)'
+              background: 'rgba(0, 0, 0, 0.7)'
             });
             this.$post('news/add',this.formDatas).then(res =>{
                 console.log(res);
@@ -660,7 +766,9 @@ import axios from 'axios'
   .source_style .el-form-item__error{
     left: -50px;
   }
-  /* .news-add .el-progress--line{
-    display: none !important;
-  } */
+  
+  .edui-default{
+    position: relative
+  }
+  
 </style>

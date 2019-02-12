@@ -65,8 +65,21 @@ export default {
       return {}
     },
     aa(item) {
-      console.log(item);
-      
+      // console.log(item);
+      let arr=sessionStorage.getItem('tabNames');
+      if(!arr){
+        arr=[];
+        arr.push(item.label);
+        sessionStorage.setItem('tabNames',JSON.stringify(arr));
+      }else{
+        arr=JSON.parse(arr);
+        // console.log(typeof arr);
+        if(arr.indexOf(item.label)<0){
+          arr.push(item.label);
+        }
+        sessionStorage.setItem('tabNames',JSON.stringify(arr));
+      }
+      console.log(arr);
     }
   }
 }

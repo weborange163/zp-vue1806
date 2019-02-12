@@ -83,33 +83,40 @@
                 <tbody>
                   <tr class="el-table__row">
                     <td><div class="cell">发布文章</div></td>
-                    <td><div class="cell">{{num1}}</div></td>
-                    <td><div class="cell">粉丝</div></td>
-                    <td><div class="cell">{{num4}}</div></td>
+                    <td><div class="cell">{{nums.news?nums.news:0}}</div></td>
+                    <td><div class="cell">获赞</div></td>
+                    <td><div class="cell">{{nums.obtainGoods?nums.obtainGoods:0}}</div></td>
                   </tr>
                   <tr class="el-table__row">
-                    <td><div class="cell">发布行情</div></td>
-                    <td><div class="cell">{{num2}}</div></td>
-                    <td><div class="cell">关注</div></td>
-                    <td><div class="cell">{{num5}}</div></td>
+                    <td><div class="cell">发布视频</div></td>
+                    <td><div class="cell">{{nums.videoNews?nums.videoNews:0}}</div></td>
+                    <td><div class="cell">收藏</div></td>
+                    <td><div class="cell">{{nums.likes?nums.likes:0}}</div></td>
+                    
                   </tr>
                   <tr class="el-table__row">
                     <td><div class="cell">发布广播</div></td>
                     <td><div class="cell">0</div></td>
-                    <td><div class="cell">获赞</div></td>
-                    <td><div class="cell">{{num8}}</div></td>
+                    <td><div class="cell">跟踪的专题</div></td>
+                    <td><div class="cell">{{nums.num7?nums.num7:0}}</div></td>
                   </tr>
                   <tr class="el-table__row">
                     <td><div class="cell">发布评论</div></td>
-                    <td><div class="cell">{{num3}}</div></td>
-                    <td><div class="cell">喜欢收藏</div></td>
-                    <td><div class="cell">{{num6}}</div></td>
+                    <td><div class="cell">{{nums.comment?nums.comment:0}}</div></td>
+                    <td><div class="cell">点赞</div></td>
+                    <td><div class="cell">{{nums.goods?nums.goods:0}}</div></td>
                   </tr>
                   <tr class="el-table__row">
-                    <td><div class="cell">跟踪</div></td>
-                    <td><div class="cell">{{num7}}</div></td>
-                    <td><div class="cell"></div></td>
-                    <td><div class="cell"></div></td>
+                    <td><div class="cell">粉丝</div></td>
+                    <td><div class="cell">{{nums.fans?nums.fans:0}}</div></td>
+                    <td><div class="cell">系统粉丝</div></td>
+                    <td><div class="cell">{{nums.fansImport?nums.fansImport:0}}</div></td>
+                  </tr>
+                   <tr class="el-table__row">
+                    <td><div class="cell">关注</div></td>
+                    <td><div class="cell">{{nums.attentions?nums.attentions:0}}</div></td>
+                    <td><div class="cell">系统关注</div></td>
+                    <td><div class="cell">{{nums.attentionsImport?nums.attentionsImport:0}}</div></td>
                   </tr>
                 </tbody>
               </table>
@@ -253,7 +260,7 @@ export default {
         checkOp:[],
         checkList: [],
         idDetail:'',
-        num1:0,num2:0,num3:0,num4:0,num5:0,num6:0,num7:0,num8:0,
+        nums:{},
         flag1:true,
         flag2:true,
         flag3:true,
@@ -273,6 +280,7 @@ export default {
       this.baceUrl = getBaceUrl();
       this.getParams();
       this.baseInfo();
+      this.userData();
     },
     methods: {
       //基本信息
@@ -407,21 +415,27 @@ export default {
           // console.log(res.data);
           (res.data).map(item => {
             if(item.title == 'news'){
-              this.num1= item.num
-            }else if(item.title == 'industry'){
-              this.num2= item.num
+              this.nums.news= item.num
+            }else if(item.title == 'videoNews'){
+              this.nums.videoNews= item.num
             }else if(item.title == 'comment'){
-              this.num3= item.num
+              this.nums.comment= item.num
             }else if(item.title == 'fans'){
-              this.num4= item.num
+              this.nums.fans= item.num
             }else if(item.title == 'attentions'){
-              this.num5= item.num
+              this.nums.attentions= item.num
             }else if(item.title == 'goods'){
-              this.num6= item.num
+              this.nums.goods= item.num
+            }else if(item.title == 'obtainGoods'){
+              this.nums.obtainGoods= item.num
             }else if(item.title == 'follows'){
-              this.num7= item.num
-            }else if(item.title == 'wonGoods'){
-               this.num8 = item.num
+              this.nums.follows= item.num
+            }else if(item.title == 'fansImport'){
+               this.nums.fansImport = item.num
+            }else if(item.title == 'attentionsImport'){
+              this.nums.attentionsImport = item.num
+            }else if(item.title == 'likes'){
+              this.nums.likes = item.num
             }
           })
           this.flag1 = false;

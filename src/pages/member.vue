@@ -15,10 +15,13 @@
               </el-select>
             </el-col>
             <el-col :span='12'>
-              <el-date-picker size="mini"  v-model="value2" type="datetimerange" 
-                value-format="yyyy-MM-dd HH-mm-ss" style="width:100%" 
-                start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
-              </el-date-picker>
+              <el-date-picker size="mini" style="width:95%;"
+              v-model="value2"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
             </el-col>
           </el-row>
           <el-row :gutter="6">
@@ -79,18 +82,23 @@
     </div>
     <div class="member_table">
       <div class="text-right marBo4">
+        <el-upload style="display:inline-block;"
+          class="upload-demo" name="usersFile"
+          action=""
+          :on-change="handleChange1"
+          :auto-upload="false"
+          :file-list="fileList1">
+          <el-button size="mini" type="primary">导入活跃数据</el-button>
+        </el-upload>
         <el-upload style="display:inline;"
           class="upload-demo" name="usersFile"
           action=""
-          :on-preview="handlePreview"
           :on-change="handleChange"
-          :on-remove="handleRemove"
           :auto-upload="false"
-          :on-exceed="handleExceed"
           :file-list="fileList">
           <el-button size="mini" type="primary">批量上传内部号</el-button>
         </el-upload>
-        <el-button class="light_btn" @click="innerMemDia = true;isEdit=false;" size="mini">创建内部号</el-button>
+        <el-button class="light_btn" @click="openCreate()" size="mini">创建内部号</el-button>
         <el-button class="light_btn" size="mini" @click="showList()">刷新</el-button>
       </div>
       <el-table :row-class-name="miniTable" :header-row-class-name="miniTable"
@@ -127,7 +135,7 @@
                 </router-link>
                 <el-button type="text"
                   size="mini" class="marL10" disabled>权限</el-button>
-                <el-button type="text" @click="editInner(scope.row.userId)" size="mini">编辑</el-button>
+                <el-button type="text" @click="editInner(scope.row)" size="mini">编辑</el-button>
             </div>
           </template>
         </el-table-column>
@@ -156,8 +164,21 @@
             <el-form-item label="用户名:" prop="nickName">
               <el-input v-model.trim="form.nickName" size="mini" placeholder="请输入4-15个字"></el-input>
             </el-form-item>
-            <el-form-item label="简介:" prop="userDesc">
-              <el-input v-model="form.userDesc" type="textarea" size="mini" placeholder="请输入简介"></el-input>
+            <el-form-item label="上传头像:" ref="icon" prop="icon">
+              <el-upload action="" accept="image/jpeg,image/gif,image/png,image/bmp"
+                :multiple="false" :limit='1'
+                ref="upload" name="file"
+                list-type="picture-card"
+                :file-list="fileList2"
+                :auto-upload="false" :on-exceed="handleExceed2"
+                :on-preview="handlePictureCardPreview2"
+                :on-change="fileChange2"
+                :on-remove="handleRemove2">
+                <i class="el-icon-plus"></i>
+              </el-upload>
+              <el-dialog :visible.sync="imgDialog" :modal='false'>
+                <img width="100%" :src="dialogImageUrl" alt="">
+              </el-dialog>
             </el-form-item>
           </el-col>
           <el-col :span="12">
@@ -177,20 +198,24 @@
               </el-date-picker>
             </el-form-item>
             <el-form-item label="城市:" prop="add">
-             <el-select size="mini" placeholder="选择省" v-model="form.provinceId" style="width:45%;margin-right:2%;" @change="provinceChange2">
-              <el-option
-                v-for="item in provinceArr"
-                :key="item.areaNo" :label="item.areaName"
-                :value="item.areaNo">
-              </el-option>
-            </el-select>
-            <el-select size="mini" placeholder="选择市" v-model="form.cityId" style="width:45%">
+              <el-select size="mini" placeholder="选择省" v-model="form.provinceId" style="width:45%;margin-right:2%;" @change="provinceChange2">
                 <el-option
-                v-for="item in cityArr"
-                :key="item.areaNo" :label="item.areaName"
-                :value="item.areaNo">
-              </el-option>
-            </el-select></el-form-item>
+                  v-for="item in provinceArr"
+                  :key="item.areaNo" :label="item.areaName"
+                  :value="item.areaNo">
+                </el-option>
+              </el-select>
+              <el-select size="mini" placeholder="选择市" v-model="form.cityId" style="width:45%">
+                  <el-option
+                  v-for="item in cityArr"
+                  :key="item.areaNo" :label="item.areaName"
+                  :value="item.areaNo">
+                </el-option>
+              </el-select>
+            </el-form-item>
+            <el-form-item label="简介:" prop="userDesc">
+              <el-input v-model="form.userDesc" type="textarea" size="mini" placeholder="请输入简介"></el-input>
+            </el-form-item>
           </el-col>
         </el-row>
         
@@ -231,8 +256,15 @@ export default {
       return {
         isEdit:false,
         newsFile:'',
+        newsFile1:'',
         formDatas:'',
         fileList:[],
+        fileList1:[],
+        fileList2:[],
+        hasFmt:false,
+        hasChangeFile:false,
+        dialogImageUrl:'',
+        imgDialog:false,
         radio:'100001',
         checkOp:[],
         checkList: [],
@@ -274,9 +306,9 @@ export default {
             {pattern: /^[0-9]*$/,message:'手机号只能输入数字', trigger: 'blur'},
             { min: 4, max: 12, message: '长度在 4 到 12 个字符', trigger: 'blur' },
           ],
-          name:[
+          nickName:[
             { required: true, message: '请输入用户名', trigger: 'blur' },
-            { min: 4, max: 15, message: '长度在 4 到 15 个字符', trigger: 'blur' },
+            { min: 4, max: 30, message: '长度在 4 到 30 个字符', trigger: 'blur' },
           ],
           identityCode:[
              { required: true, message: '请选择账号类型', trigger: 'blur' },
@@ -338,16 +370,35 @@ export default {
       });
     },
     methods: {
-      editInner(userId){
+      openCreate(){
+        this.innerMemDia = true;
+        this.isEdit=false;
+        this.hasChangeFile=true;
+        this.form={sex:1,rankCode:'1001',};
+        this.fileList2=[];
+         if(this.$refs['form']){
+          this.$refs['form'].resetFields();
+         }
+      },
+      editInner(row){
+        if(this.$refs['form']){
+          this.$refs['form'].resetFields();
+        }
         this.isEdit=true;
+        this.hasChangeFile = false;
         var params={
           tokenId:this.$store.state.user.tokenId,
-          userId:userId
+          userId:row.userId
         }
         this.$post('/members/getBaseInfo',params).then(res => {
           console.log(res.data[0]);
           this.form = res.data[0];
           this.innerMemDia = true;
+          if(this.form.headImgUrl){
+            this.fileList2.push({url:this.form.headImgUrl});
+          }else{
+            this.fileList2=[];
+          }
           if(this.form.provinceId){
             this.$post('/area/findCityByProvinceNo',{tokenId:this.$store.state.user.tokenId,areaNo:this.form.provinceId}).then(res => {
               this.cityArr = res.data;
@@ -361,6 +412,7 @@ export default {
         const loading = this.$loading({
               lock: true,
               text: '上传中...',
+              target:document.querySelector('.app-container'),
               spinner: 'el-icon-loading',
               background: 'rgba(0, 0, 0, 0.5)'
             });
@@ -375,6 +427,19 @@ export default {
               type: 'success'
             });
             this.showList();
+          }else if(res.code == 3){
+            loading.close();
+            let str = '';
+            res.data.map(item => {
+              str+='<p>'+item+'<p/>';
+            })
+            const h = this.$createElement;
+            this.$notify.error({
+              title: '错误',
+              dangerouslyUseHTMLString: true,
+              message: str,
+              duration: 0
+            });
           }else{
             loading.close();
             this.$message({
@@ -382,7 +447,67 @@ export default {
               type: 'error'
             });
           }
+          this.newsFile='';
         })
+      },
+      sureUpload1(){
+        const loading = this.$loading({
+              lock: true,
+              text: '上传中...',
+              target:document.querySelector('.app-container'),
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.5)'
+            });
+        this.formDatas = new FormData();
+        this.formDatas.append('usersConutFile', this.newsFile1);
+        this.formDatas.append('tokenId',this.$store.state.user.tokenId);
+        this.$post('/members/toConutExportInt',this.formDatas).then(res =>{
+          if(res.code == 0){
+            loading.close();
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+            this.showList();
+          }else if(res.code == 3){
+            loading.close();
+            let str = '';
+            res.data.map(item => {
+              str+='<p>'+item+'<p/>';
+            })
+            const h = this.$createElement;
+            this.$notify.error({
+              title: '错误',
+              dangerouslyUseHTMLString: true,
+              message: str,
+              duration: 0
+            });
+          }else{
+            loading.close();
+            this.$message({
+              message: res.msg?res.msg:'操作失败',
+              type: 'error'
+            });
+          }
+          this.newsFile='';
+        })
+      },
+      handleChange1(file, fileList){
+        // console.log(file, fileList);
+        this.newsFile1 = file.raw;
+        this.fileList1 = fileList;
+        this.$confirm('确定要上传吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+          this.sureUpload1();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });          
+        });
       },
       handleChange(file, fileList){
         // console.log(file, fileList);
@@ -400,15 +525,6 @@ export default {
             message: '操作已取消'
           });          
         });
-      },
-      handleRemove(file, fileList) {
-        console.log(file, fileList);
-      },
-      handlePreview(file) {
-        console.log(file);
-      },
-      handleExceed(files, fileList) {
-        this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`);
       },
       testVal(val){
         console.log(val);
@@ -556,26 +672,33 @@ export default {
       // 创建小号
       createInner(){
         console.log(this.form.birthday);
+        console.log(this.form);
         this.$refs['form'].validate((valid) => {
           if (valid) {
-            var params = {
-              tokenId:this.$store.state.user.tokenId,
-              phone:this.form.phone,
-              nickName:this.form.nickName,
-              userDesc:this.form.userDesc,
-              identityCode:this.form.identityCode,
-              rankCode:this.form.rankCode,
-              sex:this.form.sex,
-              birthday:this.form.birthday,
-              provinceId:this.form.provinceId,
-              cityId:this.form.cityId
-            };
+            let param = new FormData();
+            param.append('tokenId',this.$store.state.user.tokenId);
+            param.append('phone',this.form.phone);
+            param.append('nickName',this.form.nickName);
+            param.append('userDesc',this.form.userDesc?this.form.userDesc:'');
+            param.append('identityCode',this.form.identityCode);
+            param.append('rankCode',this.form.rankCode);
+            param.append('sex',this.form.sex);
+            param.append('birthday',this.form.birthday?this.form.birthday:'');
+            param.append('provinceId',this.form.provinceId?this.form.provinceId:'');
+            param.append('cityId',this.form.cityId?this.form.cityId:'');
+            // param.append('headImgFile',this.form.file,this.form.filename);
             var url='/members/addInnerMember';
             if(this.isEdit){
-              params.userId = this.form.userId;
+              param.append('userId',this.form.userId);
               url='/members/updateInnerMember';
+              param.append('headImg',this.form.headImg);
             }
-            this.$post(url,params).then(res=>{
+            if(this.hasChangeFile){         // 如果编辑时更换了图片或者是新建时候上传了图片
+              param.append('headImgFile',this.form.file,this.form.filename);
+            }else{
+              param.append('headImgFile','');
+            }
+            this.$post(url,param).then(res=>{
               if(res.code == 0){
                 this.innerMemDia = false;
                 this.$message({
@@ -584,6 +707,8 @@ export default {
                 });
                 this.showList();
                 this.form={};
+                this.dialogImageUrl='';
+                // console.log(this.form)
               }else{
                 this.$message({
                   message: '添加失败请重试!',
@@ -613,7 +738,35 @@ export default {
       },
       miniTable(row){
         return 'miniTable'
+      },
+    handlePictureCardPreview2(file) {
+      console.log(file)
+      this.dialogImageUrl = file.url;
+      this.imgDialog = true;
+    },
+    fileChange2(file,fileList){
+      this.$refs['icon'].clearValidate(); // 图片验证
+      this.form.filename = file.name;
+      this.hasChangeFile=true;
+      this.form.file = file.raw;
+      console.log(file.raw)
+      if(fileList.length>0){
+        // this.hasFmt = true;
       }
+    },
+    handleExceed2(files, fileList){
+      this.$message.warning('当前限制选择 1 个文件');
+    },
+    handleRemove2(file, fileList) {
+      this.pictureId='';
+      this.hasChangeFile=true;
+      // console.log(file, fileList);
+      if(fileList.length == 0){
+        // this.hasFmt =false;
+        this.form.file='';
+        this.form.filename='';
+      }
+    },
     }
 }
 </script>

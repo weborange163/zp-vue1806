@@ -1,5 +1,5 @@
 import axios from 'axios'
-import { Message, MessageBox } from 'element-ui'
+import { Message, MessageBox ,Loading} from 'element-ui'
 import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css'// progress bar style
 //import store from '@/store'
@@ -7,17 +7,45 @@ import 'nprogress/nprogress.css'// progress bar style
 import { getToken } from '@/utils/auth'
 import qs from 'qs'
 // 创建axios实例
-const service = axios.create({
+const request = axios.create({
   baseURL: process.env.BASE_API, // api的base_url
-  timeout: 1000*60*5, // 请求超时时间
+  timeout: 1000*60*10, // 请求超时时间
   // withCredentials: true
   /* headers: {
     "Content-Type": "application/x-www-form-urlencoded"
   } */
 })
+
+var uploadPhoto =  function(url,data,callback1,callback2){
+  axios({
+      url:url,
+      method:'post',
+      onUploadProgress:function(progressEvent){ //原生获取上传进度的事件
+          if(progressEvent.lengthComputable){
+              //属性lengthComputable主要表明总共需要完成的工作量和已经完成的工作是否可以被测量
+              //如果lengthComputable为false，就获取不到progressEvent.total和progressEvent.loaded
+              callback1(progressEvent);
+          }
+      },
+      data:data
+  }).then(res =>{
+      callback2(res.data);
+  }).then(error =>{
+      console.log(error)
+  })
+}
+
+let loading;
 // request interceptor 请求拦截
-service.interceptors.request.use(config => {
-  NProgress.start()
+request.interceptors.request.use(config => {
+  NProgress.start();
+  /* loading = Loading.request({
+    lock: true,
+    text: '努力加载中...',
+    target: document.querySelector('.loadingArea'),
+    spinner: 'el-icon-loading',
+    background: 'rgba(0, 0, 0, 0.3)'
+  }); */
   // POST传参序列化
   if(config.method  === 'post'&& config.data.constructor !== FormData) {
     config.data = qs.stringify(config.data)
@@ -34,7 +62,7 @@ service.interceptors.request.use(config => {
   Promise.reject(error)
 })
 // respone interceptor 响应拦截
-service.interceptors.response.use(
+request.interceptors.response.use(
   /**
    * 下面的注释为通过在response里，自定义code来标示请求状态
    * 当code返回如下情况则说明权限有问题，登出并返回到登录页
@@ -42,7 +70,10 @@ service.interceptors.response.use(
    * 以下代码均为样例，请结合自生需求加以修改，若不需要，则可删除
    */
   response => { // Status Code:200
-//     const res = response.data
+    // loading.close();
+    console.log(response);
+    const res = response.data;
+
 //     if (res.code !== 200) { // code != 200
 //       Message({
 //         message: res.message,
@@ -79,4 +110,4 @@ service.interceptors.response.use(
     NProgress.done()
     return Promise.reject(error)
 })
-export default service
+export  {request,uploadPhoto}

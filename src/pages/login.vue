@@ -67,8 +67,11 @@ export default {
           menus.unshift({id: '0', label: '首页', name:'home', icon: 'iconfont icon-index'});
           sessionStorage.setItem('menus',JSON.stringify(menus));
           this.$store.dispatch('saveUserInfo', res.data[0]).then(res => {
-            this.$message.success('登录成功')
-            this.isLoging = false
+            this.$message.success('登录成功');
+            this.isLoging = false;  
+            // 这里要进行权限的储存
+            // let perm = 'a,b,c,d';
+            // sessionStorage.setItem('btnPermissions',perm);
           //  this.$router.push({name: '首页'})
           this.$router.push({name: 'home'});
           //  this.$router.replace('/')

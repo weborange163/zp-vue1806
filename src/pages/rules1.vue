@@ -4,10 +4,18 @@
         <el-breadcrumb separator-class="el-icon-arrow-right">
           <el-breadcrumb-item :to="{ path: '/' }">系统设置</el-breadcrumb-item>
           <el-breadcrumb-item :to="{ path: '/rules-list' }">规则管理</el-breadcrumb-item>
-          <el-breadcrumb-item>栏目管理</el-breadcrumb-item>
+          <el-breadcrumb-item>首页栏目管理</el-breadcrumb-item>
         </el-breadcrumb>
       </div>
       <div class="page-header">
+        <el-select v-model="navigationBar" placeholder="栏目推荐位置" style="width:200px;" size="mini">
+          <el-option clearable
+          v-for="item in options"
+          :key="item.value"
+          :label="item.label"
+          :value="item.value">
+          </el-option>
+        </el-select>
         <el-input size="mini" v-model="columnName" placeholder="请输入栏目名称" style="width:200px;"></el-input>
         <el-button class="light_btn" @click="getList()">搜索</el-button>
       </div>
@@ -23,7 +31,7 @@
           stripe border
           style="width: 100%">
           <el-table-column label="序号" type="index" width='50'></el-table-column>
-          <el-table-column prop="name"  label="分类名称"></el-table-column>
+          <el-table-column prop="name"  label="栏目名称"></el-table-column>
           <el-table-column  label="icon" width='100'>
             <template slot-scope="scope">
 							<img v-if="scope.row.picture_url" :src="scope.row.picture_url" alt="">
@@ -46,10 +54,12 @@
           <el-table-column prop="update_time"  label="修改时间" width="180"></el-table-column>
           <el-table-column label="操作" width="160" fixed="right">
             <template slot-scope="scope">
+							<el-button type="text" @click="order(scope.$index,scope.row.id,3)"><i class="iconfont icon-Gototop"></i></el-button>
 							<el-button type="text" v-if="scope.$index == '0'" disabled><i class="iconfont icon-up"></i></el-button>
 							<el-button type="text" v-else @click="order(scope.$index,scope.row.id,1)"><i class="iconfont icon-up"></i></el-button>
               <el-button type="text" v-if="scope.$index != tableLength" @click="order(scope.$index,scope.row.id, 2)"><i class="iconfont icon-down"></i></el-button>
               <el-button type="text" v-else disabled ><i class="iconfont icon-down"></i></el-button>
+							<el-button type="text" @click="order(scope.$index,scope.row.id, 4)"><i class="iconfont icon-Gotobottom"></i></el-button>
 							<el-button type="text" @click="editClass(scope.row)"><i class="iconfont icon-edit"></i></el-button>
 							<el-button type="text"><i class="iconfont icon-delete" @click="deleteClass(scope.row.id)"></i></el-button>
             </template>
@@ -101,9 +111,15 @@
       </el-dialog>
       <el-dialog center title="设置推荐栏目排序" :visible.sync="dialogVisible" width="30%">
 				<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading2">
-					<el-table-column prop="name" label="分类名称"></el-table-column>
-					<el-table-column prop="name" label="操作" width="70" class="text-center">
+					<el-table-column prop="name" label="栏目名称"></el-table-column>
+					<el-table-column prop="name" label="操作" width="140" class="text-center">
 						<template slot-scope="scope">
+							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'toTop')">
+								<i class="iconfont icon-Gototop"></i>
+							</el-button>
+              <el-button type="text" v-else disabled>
+								<i class="iconfont icon-Gototop unclick"></i>
+							</el-button>
 							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
 								<i class="iconfont icon-up"></i>
 							</el-button>
@@ -115,6 +131,12 @@
 							</el-button>
 							<el-button type="text" v-else disabled>
 								<i class="iconfont icon-down" style="cursor:not-allowed"></i>
+							</el-button>
+              <el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'toBottom')">
+								<i class="iconfont icon-Gotobottom"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-Gotobottom" style="cursor:not-allowed"></i>
 							</el-button>
 						</template>
 					</el-table-column>
@@ -139,6 +161,17 @@ export default {
         }
       };
     return{
+      navigationBar:'',
+      options:[{
+      value: '2',
+      label: '全部'
+    },{
+      value: '0',
+      label: '推荐栏目'
+    }, {
+      value: '1',
+      label: '我的栏目'
+    }],
       dialogVisible:false,
       pictureId:'',
       upData:[],
@@ -181,7 +214,6 @@ export default {
     this.baceUrl = getBaceUrl();
     this.getList();
   },
-  
   methods:{
     publishWaitTop(){
 				this.dialogVisible = true;
@@ -195,18 +227,27 @@ export default {
 				})
 			},
     changeIndex(index, rows, dir) {
-      if(dir == 'isUp') {
-        var a = rows[index]
-        var b = rows[index - 1]
-        rows.splice(index - 1, 1, a)
-        rows.splice(index, 1, b)
-      } else {
-        var a = rows[index]
-        var b = rows[index + 1]
-        rows.splice(index + 1, 1, a)
-        rows.splice(index, 1, b)
-      }
-    },
+        // console.log(index);
+				if(dir == 'isUp') {
+					var a = rows[index]
+					var b = rows[index - 1]
+					rows.splice(index - 1, 1, a)
+					rows.splice(index, 1, b)
+				} else if(dir == 'isDown') {
+					var a = rows[index]
+					var b = rows[index + 1]
+					rows.splice(index + 1, 1, a)
+					rows.splice(index, 1, b)
+				}else if(dir == 'toTop'){
+          var a = rows[index];
+          rows.splice(index,1);
+          rows.unshift(a);
+        }else{
+          var a=rows[index];
+          rows.splice(index,1);
+          rows.push(a);
+        }
+			},
     toPublish(){
       // console.log(this.upData)
       var newsInfos =[];
@@ -230,8 +271,57 @@ export default {
       })
       this.dialogVisible = false
     },
-    // 排序
     order(index,id,f){
+      var params={};
+      var url='';
+      if(f==1){   // 1 是向上交换
+        params={
+          tokenId: this.$store.state.user.tokenId,
+          firstId:this.tableData[index-1].id,
+          lastId:id
+        }
+        url='/column/updateByOrder';
+      }else if(f==2){ //2是下移
+        params={
+          tokenId: this.$store.state.user.tokenId,
+          firstId:id,
+          lastId:this.tableData[index+1].id
+        }
+        url='/column/updateByOrder';
+      }else if(f==3){ // 3是去顶部
+        params={
+          tokenId: this.$store.state.user.tokenId,
+          operType:'0',
+          id:this.tableData[index].id
+         }
+        url='/column/stickOrBottom';
+      }else{  // 4是去底部
+        params={
+          tokenId: this.$store.state.user.tokenId,
+          operType:'1',
+          id:this.tableData[index].id
+        }
+        url='/column/stickOrBottom';
+      }
+      // console.log(params);
+      this.$post(url,params).then(res => {
+        // console.log(res);
+        if(res.code == 0){
+          this.$message({
+            type: 'success',
+            message: res.msg
+          });
+          this.getList(this.currentPage);
+        }else{
+          this.$message({
+            type: 'warning',
+            message: res.msg?res.msg:'操作失败'
+          });
+        }
+      });
+    },
+    // 排序
+    /* order(index,id,f){
       var params={};
       if(f==1){   // 1 是向上交换
         params={
@@ -259,7 +349,7 @@ export default {
 
         }
       });
-    },
+    }, */
     //编辑
     editClass(row){
       // console.log(row);
@@ -282,6 +372,7 @@ export default {
         if(valid){
           const loading = this.$loading({
             lock: true,
+            target:document.querySelector('.app-container'),
             text: 'Loading',
             spinner: 'el-icon-loading',
             background: 'rgba(0, 0, 0, 0.7)'
@@ -373,7 +464,8 @@ export default {
         tokenId: this.$store.state.user.tokenId,
         limit: this.per_page,
         offset: this.currentPage,
-        queryField:this.columnName
+        queryField:this.columnName,
+        navigationBar:this.navigationBar==2?'':this.navigationBar
       }
       this.$get('column/list',params).then(res => {
         // console.log(res)

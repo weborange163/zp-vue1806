@@ -10,7 +10,7 @@
         </el-option>
       </el-select>
       <el-input style="width:120px" size="mini" v-model="filterCode" placeholder="请输入code版本"></el-input>
-      <el-button class="light_btn" size="mini" @click="getList">搜 索</el-button>
+      <el-button class="light_btn" size="mini" @click="getList()">搜 索</el-button>
     </div>
     <div class="box">
       <el-row class="marBo4">

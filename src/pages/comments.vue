@@ -13,10 +13,13 @@
           </el-select>
         </el-col>
         <el-col :span="9">
-          <el-date-picker style="width:90%;" size="mini" v-model="value2" type="datetimerange" 
-          start-placeholder="开始日期" end-placeholder="结束日期" value-format="yyyy-MM-dd HH-mm-ss"
-           :default-time="['00:00:00', '00:00:00']">
-          </el-date-picker>
+          <el-date-picker size="mini" style="width:95%;"
+              v-model="value2"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
         </el-col>
         <el-col :span="2">
           <el-select v-model="value3" placeholder="分类" style="width:90%" size="mini">

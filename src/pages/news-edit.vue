@@ -1,9 +1,26 @@
 <template>
 	<div class="page-body news_edit" style="min-width:980px;">
-		<el-dialog center width="30%"  :visible.sync="bannerDialog" id='div1' append-to-body>
-			<el-form :data="form1" ref="form1" label-width="110px" class="form1">
-				<p id="p1" v-html="form1.title"></p>
-				<p id="p2" v-html="form1.content"></p>
+		<el-dialog center width="446px"  :visible.sync="bannerDialog"  append-to-body>
+			<el-form :data="form2" ref="form2" label-width="110px" class="form1 u_editor">
+				<div class="zhuan" v-if="form1.sourceType==2">
+          <p class="title">{{form1.title }}</p>
+					<div class="pubMsg">
+            <div class="reprint">转载</div>
+            <p v-html="form1.author"></p>
+            <p>转自：<span v-html="form1.sourceName"></span></p>
+            <p v-html="form1.updateTime"></p>
+          </div>
+				</div>
+        <div class="yuan" v-else>
+          <div class="pubMsg">
+            <img id="img1" src="@/assets/img/yuanchuang.png"> 
+            <p class="title">{{form1.title }}</p>
+            <p v-html="form1.author"></p>
+            <p v-html="form1.updateTime"></p>
+          </div>
+				</div>
+				<article class="content" v-html="form1.content"></article>
+			
 			</el-form>
 		</el-dialog>
 		
@@ -18,212 +35,171 @@
 		<div class="box" >
 			<div class="text-right marR100">
 				<el-button size="small" @click="fanhui" class="light_btn">返回</el-button>
-				<el-button size="small" class="light_btn" @click="bannerDialog = true;" >预览</el-button>
+				<el-button size="small" class="light_btn" @click="showPre()" >预览</el-button>
 				<el-button size="small" class="light_btn" @click="editNews('form1','0')">保存</el-button>
 				<el-button size="small" class="light_btn"  @click="editNews('form1','1')">保存并提交审核</el-button>
 			</div>
-			<el-form ref="form1" :model="form1" label-width="96px" :rules="rules1" class="up_form clearfix">
-				<div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
-					<el-form-item label="文章标题" prop="title" >
-						<el-input v-model="form1.title" type="textarea" autosize style="width:420px;"  placeholder="请输入标题"></el-input>
-					</el-form-item>
-					<el-form-item label="文章内容" prop="content" class="editor">
-						<m-quill-editor ref="myQuillEditor" v-model="form1.content"
-						:width="quill.width" :getContent="onEditorChange" :toolbar="quill.toolbar"
-						:has-border="quill.border" :zIndex="quill.zIndex"
-						:sync-output="quill.syncOutput" 
-						:theme="quill.theme"
-						:disabled="quill.disabled"
-						:fullscreen="quill.full"
-						@upload="uploadImg" @blur="onEditorBlur($event)"
-						></m-quill-editor>
-					</el-form-item>
-				</div>
-				<div style="width: 35%;float:left;padding:15px;min-width:420px;">
-					<!-- <el-form-item label="发布到:">
-						<el-input v-model="fabudao"  disabled></el-input>
-					</el-form-item> -->
-          <el-form-item label="发布到:" prop="columnId">
-            <el-select v-model="form1.columnId" name="columnId" placeholder="暂无分类"  style='padding-left: 6px;'>
-              <el-option 
-              v-for="item in columnIds" :key="item.id" :label="item.name" :value="item.id">
-              </el-option>
-            </el-select>
-					</el-form-item>
-          <el-row>
-          <el-col :span="14">
-            <el-form-item label="来源:" prop="sourceType">
-              <el-radio-group v-model="form1.sourceType" @change="test()">
-                <el-radio label="1">原创</el-radio>
-                <el-radio label="2">转载</el-radio>
-              </el-radio-group>
-            </el-form-item>
-          </el-col>
-          <el-col :span="10">
-            <el-form-item v-if="form1.sourceType == 2" prop="source">
-              <el-select filterable allow-create v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
-                <el-option
-                  v-for="item in cities"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id">
-                </el-option>
-              </el-select>
-            </el-form-item>
-          </el-col>
-        </el-row>
-					<el-form-item label="作者:">
-						<el-input v-model="form1.author"></el-input>
-					</el-form-item>
-					<el-form-item label="发布账号:" prop="userId">
-						<el-select filterable v-model="form1.userId">
-							<el-option 
-                v-for="item in accounts"
-                :key="item.userId"
-                :label="item.nickName"
-                :value="item.userId"
-              ></el-option>
-						</el-select>
-					</el-form-item>
-          <el-form-item label="封面图样式:" prop="coverNum">
-							<el-radio-group v-model="form1.coverNum" @change="coverNumChange">
-								<el-radio :label="0">无图</el-radio>
-								<el-radio :label="1">单图</el-radio>
-								<el-radio :label="3">三图</el-radio>
-							</el-radio-group>
-					</el-form-item>
-          <el-form-item label="封面图类型:" prop="icon" ref="icon" v-show="form1.coverNum != '0'">
-            	<el-radio-group v-model="form1.imgType" @change="radioChange">
-                <el-radio label="1">上传封面图</el-radio>
-								<el-radio label="2">提取正文图为封面图</el-radio>
-							</el-radio-group>
-						<el-upload v-if="form1.coverNum != 0 && form1.imgType == '1'"
-							action="" :multiple="false" :limit=form1.coverNum
-							ref="upload" name="newsFile" :file-list="fileList"
-							list-type="picture-card" :auto-upload="false"
-              :http-request="uploadFile"
-							:on-change="fileChange" :on-exceed="handleExceed"
-							:on-preview="handlePictureCardPreview"
-							:on-remove="handleRemove">
-							<i class="el-icon-plus"></i>
-						</el-upload>
-						<el-dialog :visible.sync="dialogVisible" width="30%">
-							<img width="100%" :src="dialogImageUrl" alt="">
-						</el-dialog>
-					</el-form-item>
-          <el-form-item label="上传视频:">
-						<el-upload
-              class="upload-demo" :limit='1'
-              ref="uploadVideo1" name="newsVideo"
-              action="" accept='video/mp4'
-              :on-remove="handleRemove2"
-              :file-list="fileListVideo"
-              :on-success="handleSuccess"
-              :before-remove="beforeRemove"
-              :http-request="uploadVideo"
-              :auto-upload="false">
-              <el-button slot="trigger" size="small" type="primary">选取视频</el-button>
-              <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload" :loading="uploadVideoing1" :disabled="uploadVideoing2">点击上传视频</el-button>
-              <div slot="tip" class="el-upload__tip">请选择mp4文件进行上传</div>
-              <!-- <div class="el-upload__tip" v-html="showUrl"></div> -->
-            </el-upload>
-					</el-form-item>
-          <el-form-item label="视频预览:" v-if="videoId">
-						<video width="320" height="240" controls style="background:rgba(0,0,0,0.7)">
-               <source :src="showUrl" type="video/mp4">
-            </video>
-					</el-form-item>
-					<el-form-item label="Tag标签:" prop="tagLabels">
-						<el-input placeholder="用'，'隔开，单个标签小于12字节"  v-model="form1.tagLabels" ></el-input>
-					</el-form-item>
-					<!-- <el-form-item label="关键词:">
-						<el-input  v-model="form1.tagLabels" ></el-input>
-					</el-form-item> -->
-          <div class="tableOverstyle">
-          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border">
-            <colgroup>
-              <col name="el-table_1_column_1" width="25%">
-              <col name="el-table_1_column_2" width="75%">
-            </colgroup>
-            <tbody>
-              <tr class="el-table__row">
-                <td><div class="cell">发布来源</div></td>
-                <td><div class="cell">
-                  <span v-if="form1.publishSource == '1'">PC后台</span><span v-if="form1.publishSource == '2'">数据爬取</span><span v-if="form1.publishSource == '3'">APP端</span>
-                  </div></td>
-              </tr>
-              <tr class="el-table__row">
-                <td><div class="cell">文章ID</div></td>
-                <td><div class="cell">{{form1.articleId}}</div></td>
-              </tr>
-              <tr class="el-table__row">
-                <td><div class="cell">状态</div></td>
-                <td><div class="cell">
-                  <span v-if="form1.status == '0'">新建</span><span v-if="form1.status == '1'">待审核</span><span v-if="form1.status == '3'">审核中</span>
-                  <span v-if="form1.status == '4'">已上线</span><span v-if="form1.status == '5'">已下线</span>
-                  </div></td>
-              </tr>
-            </tbody>
-          </table>
-          <table cellspacing="0" cellpadding="0" border="0" class="el-table el-table__body el-table--border marT20">
-            <colgroup>
-              <col name="el-table_1_column_1">
-              <col name="el-table_1_column_1" >
-              <col name="el-table_1_column_1" >
-              <col name="el-table_1_column_2" >
-            </colgroup>
-            <tbody>
-              <tr class="el-table__row">
-                <td><div class="cell"></div></td>
-                <td><div class="cell">时间</div></td>
-                <td><div class="cell">操作账号</div></td>
-                <td><div class="cell">备注</div></td>
-              </tr>
-              <tr class="el-table__row">
-                <td><div class="cell">创建时间</div></td>
-                <td><div class="cell">{{form1.createTime}}</div></td>
-                <td><div class="cell">{{form1.createUser}}</div></td>
-                <td><div class="cell"></div></td>
-              </tr>
-              <tr class="el-table__row">
-                <td><div class="cell">上线时间</div></td>
-                <td><div class="cell">{{form1.onlineTime}}</div></td>
-                <td><div class="cell">{{form1.onlineUser}}</div></td>
-                <td><div class="cell"></div></td>
-              </tr>
-              <tr class="el-table__row">
-                <td><div class="cell">下线时间</div></td>
-                <td><div class="cell">{{form1.offlineTime}}</div></td>
-                <td><div class="cell">{{form1.offlineUser}}</div></td>
-                <td><div class="cell"></div></td>
-              </tr>
-              <tr class="el-table__row">
-                <td><div class="cell">修改时间</div></td>
-                <td><div class="cell">{{form1.updateTime}}</div></td>
-                <td><div class="cell">{{form1.updateUser}}</div></td>
-                <td><div class="cell"></div></td>
-              </tr>
-              <tr class="el-table__row">
-                <td><div class="cell">审核时间</div></td>
-                <td><div class="cell">{{form1.checkTime}}</div></td>
-                <td><div class="cell">{{form1.checkReason=='涉及敏感词'?'机审':form1.checkPerson}}</div></td>
-                <td><div class="cell">{{form1.checkReason}}</div></td>
-              </tr>
-            </tbody>
-          </table>
+			<el-tabs v-model="activeName" @tab-click="tabClick">
+        <el-tab-pane label="基本信息" name="first">
+          <el-form ref="form1" :model="form1" label-width="96px" :rules="rules1" class="up_form clearfix">
+            <div style="width: 48%;float: left;padding:15px;margin-left:2%;margin-right:5%;">
+              <el-form-item label="文章标题" prop="title" >
+                <el-input v-model="form1.title" type="textarea" autosize style="width:420px;"  placeholder="请输入标题"></el-input>
+              </el-form-item>
+              <el-form-item label="文章内容" class="editor">
+                <!-- <m-quill-editor ref="myQuillEditor" v-model="form1.content"
+                :width="quill.width" :getContent="onEditorChange" :toolbar="quill.toolbar"
+                :has-border="quill.border" :zIndex="quill.zIndex"
+                :sync-output="quill.syncOutput" 
+                :theme="quill.theme"
+                :disabled="quill.disabled"
+                :fullscreen="quill.full"
+                @upload="uploadImg" @blur="onEditorBlur($event)"
+                ></m-quill-editor> -->
+                <div style="width:420px;heigt:200px;">
+                  <UEditor :config=config ref="ueditor"></UEditor>
+                </div>
+              </el-form-item>
+            </div>
+            <div style="width: 35%;float:left;padding:15px;min-width:420px;">
+              <!-- <el-form-item label="发布到:">
+                <el-input v-model="fabudao"  disabled></el-input>
+              </el-form-item> -->
+              <el-form-item label="发布到:" prop="columnId">
+                <el-select v-model="form1.columnId" name="columnId" placeholder="暂无分类"  style='padding-left: 6px;'>
+                  <el-option 
+                  v-for="item in columnIds" :key="item.id" :label="item.name" :value="item.id">
+                  </el-option>
+                </el-select>
+              </el-form-item>
+              <el-row>
+              <el-col :span="14">
+                <el-form-item label="来源:" prop="sourceType">
+                  <el-radio-group v-model="form1.sourceType" @change="test()">
+                    <el-radio label="1">原创</el-radio>
+                    <el-radio label="2">转载</el-radio>
+                  </el-radio-group>
+                </el-form-item>
+              </el-col>
+              <el-col :span="10">
+                <el-form-item v-if="form1.sourceType == 2" prop="source">
+                  <el-select filterable allow-create v-model="form1.source" placeholder="请选择转载来源" style="margin-left:-68px;width:150px;">
+                    <el-option
+                      v-for="item in cities"
+                      :key="item.id"
+                      :label="item.name"
+                      :value="item.id">
+                    </el-option>
+                  </el-select>
+                </el-form-item>
+              </el-col>
+            </el-row>
+              <el-form-item label="作者:">
+                <el-input v-model="form1.author"></el-input>
+              </el-form-item>
+              <el-form-item label="发布账号:" prop="userId">
+                <el-select disabled filterable v-model="form1.userId">
+                  <el-option 
+                    v-for="item in accounts"
+                    :key="item.userId"
+                    :label="item.nickName"
+                    :value="item.userId"
+                  ></el-option>
+                </el-select>
+              </el-form-item>
+              <el-form-item label="封面图样式:" prop="coverNum">
+                  <el-radio-group v-model="form1.coverNum" @change="coverNumChange">
+                    <el-radio :label="0">无图</el-radio>
+                    <el-radio :label="1">单图</el-radio>
+                    <el-radio :label="3">三图</el-radio>
+                  </el-radio-group>
+              </el-form-item>
+              <el-form-item label="封面图类型:" prop="icon" ref="icon" v-show="form1.coverNum != '0'">
+                  <el-radio-group v-model="form1.imgType" @change="radioChange">
+                    <el-radio label="1">上传封面图</el-radio>
+                    <el-radio label="2">提取正文图为封面图</el-radio>
+                  </el-radio-group>
+                <el-upload v-if="form1.coverNum != 0 && form1.imgType == '1'"
+                  action="" :multiple="true" :limit=form1.coverNum
+                  ref="upload" name="newsFile" :file-list="fileList"
+                  list-type="picture-card" :auto-upload="false"
+                  :http-request="uploadFile"
+                  :on-change="fileChange" :on-exceed="handleExceed"
+                  :on-preview="handlePictureCardPreview"
+                  :on-remove="handleRemove">
+                  <i class="el-icon-plus"></i>
+                </el-upload>
+                <el-dialog :visible.sync="dialogVisible" width="30%">
+                  <img width="100%" :src="dialogImageUrl" alt="">
+                </el-dialog>
+              </el-form-item>
+              <!-- <el-form-item label="上传视频:">
+                <el-upload
+                  class="upload-demo" :limit='1'
+                  ref="uploadVideo1" name="newsVideo"
+                  action="" accept='video/mp4'
+                  :on-remove="handleRemove2"
+                  :file-list="fileListVideo"
+                  :on-success="handleSuccess"
+                  :before-remove="beforeRemove"
+                  :http-request="uploadVideo"
+                  :auto-upload="false">
+                  <el-button slot="trigger" size="small" type="primary">选取视频</el-button>
+                  <el-button style="margin-left: 10px;" size="small" type="success" @click="submitUpload" :loading="uploadVideoing1" :disabled="uploadVideoing2">点击上传视频</el-button>
+                  <div slot="tip" class="el-upload__tip">请选择mp4文件进行上传</div>
+                  <!-- <div class="el-upload__tip" v-html="showUrl"></div>
+                </el-upload>
+              </el-form-item>
+              <el-form-item label="视频预览:" v-if="videoId">
+                <video width="320" height="240" controls style="background:rgba(0,0,0,0.7)">
+                  <source :src="showUrl" type="video/mp4">
+                </video>
+              </el-form-item> -->
+              <el-form-item label="Tag标签:" prop="tagLabels">
+                <el-input placeholder="用'，'隔开，单个标签小于12字节"  v-model="form1.tagLabels" ></el-input>
+              </el-form-item>
+              <el-form-item label="文章ID:">
+                <el-input disabled  v-model="form1.articleId" ></el-input>
+              </el-form-item>
+              <!-- <el-form-item label="关键词:">
+                <el-input  v-model="form1.tagLabels" ></el-input>
+              </el-form-item> -->
+              
+            </div>
+          </el-form>
+        </el-tab-pane>
+        <el-tab-pane label="系统信息" name="second">
+          <div class="tableOverstyle" style="width: 1000px;margin: auto;">
+            <el-table :data="tableData"  class="marT20" border>
+							<el-table-column label="序号" type="index" align="center" width='50'></el-table-column>
+              <el-table-column prop="content" label="评论内容" ></el-table-column>
+              <el-table-column prop="nick_name" label="账号"></el-table-column>
+              <el-table-column prop="create_time" label="评论时间" ></el-table-column>
+              <el-table-column prop="date" label="操作" >
+                <template  slot-scope="scope">
+                  <el-button class="marR10" type="text" @click="delCom(scope.row)">删除</el-button>
+                </template>
+              </el-table-column>
+            </el-table>
+            <el-pagination class="text-right marT20" background @current-change="handleCurrentChange" :current-page="currentPage" 
+              :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange" :total="this.total_pages">
+            </el-pagination>
           </div>
-				</div>
-			</el-form>
+        </el-tab-pane>
+      </el-tabs>
 		</div>
 	</div>
 </template>
 <script>
 //import MQuillEditor from 'm-quill-editor'
+import UEditor from '@/utils/ueditor/ueditor.vue'
 import { getBaceUrl } from '@/utils/auth'
 import myVali from '@/utils/myVali'
 import axios from 'axios'
 	export default{
 		components: {
+      UEditor
 		//	MQuillEditor
 		},
 		data(){
@@ -250,6 +226,32 @@ import axios from 'axios'
         }
       };
 			return{
+        tableData:[],
+        currentPage:1,
+        per_page:10,
+        total_pages:1,
+        activeName:'first',
+        config: {
+            //可以在此处定义工具栏的内容
+            toolbars: [
+             ['fullscreen', 'undo', 'redo','|','bold', 'italic', 'underline','fontborder','strikethrough', 
+             '|','superscript','subscript','|', 'insertorderedlist', 'insertunorderedlist','|','removeformat','formatmatch','link','unlink',
+             '|','fontfamily','fontsize','justifyleft','justifyright','justifycenter','justifyjustify','indent','pasteplain','blockquote','searchreplace',
+             '|','forecolor','backcolor','autotypeset',
+             '|','simpleupload','insertimage','emotion','|','lineheight','rowspacingtop','rowspacingbottom',
+             '|','edittip ','map','horizontal',
+             '|','inserttable','deletetable','insertparagraphbeforetable','insertrow','insertcol','mergeright','mergedown', 'deleterow','deletecol','splittorows','splittocols','splittocells','deletecaption','inserttitle','mergecells', 
+             '|',]
+            ],
+            autoHeightEnabled: false,
+            autoFloatEnabled: true,
+            initialContent:'请输入内容',   //初始化编辑器的内容,也可以通过textarea/script给值，看官网例子
+            autoClearinitialContent:true, //是否自动清除编辑器初始内容，注意：如果focus属性设置为true,这个也为真，那么编辑器一上来就会触发导致初始化的内容看不到了
+            initialFrameWidth: null,
+            initialFrameHeight: 450,
+            BaseUrl: '',
+            UEDITOR_HOME_URL: 'static/ueditor/'
+          },
         uploadVideoing1:false,
         uploadVideoing2:false,
         editStatus:'2',
@@ -305,6 +307,7 @@ import axios from 'axios'
         idDetail:'',
         hasFmt:true,
         uploadData:{},
+        form2:'',
         baceUrl:'',
         accounts:[],
 				// content:'111',
@@ -373,8 +376,81 @@ import axios from 'axios'
         this.accounts = res.data;
       });
       this.showNews();
+      this.getComment();
 		},
 		methods:{
+      
+      delCom(row){
+        this.$confirm('确定要删除这条评论吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'warning'
+        }).then(() => {
+           this.$post('/comment/delete',{tokenId:this.$store.state.user.tokenId,id:row.id}).then(res => {
+            // console.log(res)
+            if(res.code==0){
+              this.$message({
+                type: 'success',
+                message: '删除成功!'
+              });
+            }
+            this.getComment();
+          });
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '已取消删除'
+          });          
+        });
+      },
+      getComment(){
+        let params={
+          tokenId:this.$store.state.user.tokenId,
+          linkId:this.idDetail,
+          limit:this.per_page,
+          offset:this.currentPage
+        }
+        this.$post('/comment/importList',params).then(res => {
+          if(res.code==0){
+            this.tableData=res.data[0].rows;
+            this.total_pages=res.data[0].total;
+          }
+        });
+      },
+      handleSizeChange(val) {
+        this.per_page=val;
+        this.getComment();
+      },
+      handleCurrentChange(val) {
+        this.currentPage=val;
+        this.getComment();
+      },
+      tabClick(tab, event) {
+        console.log(tab, event);
+      },
+      showPre(){
+        this.form1.content = this.$refs.ueditor.getUEContent();
+         this.$refs['form1'].validate((valid) => {
+            if(valid){
+              if(!this.form1.content){
+                this.$message({
+                    message: '正文内容不可为空!',
+                    type: 'error'
+                  });
+                  return;
+              }
+              if(this.form1.sourceType==2){
+                this.cities.map(item => {
+                  if(item.id == this.form1.source){
+                    this.form1.sourceName= item.name;
+                    console.log( this.form1.sourceName);
+                  }
+                });
+              }
+              this.bannerDialog=true;
+             }
+         });
+      },
       radioChange(val){
         this.$refs['icon'].clearValidate();
         // console.log(val)
@@ -453,18 +529,26 @@ import axios from 'axios'
 			editNews(formName,status){
 				this.$refs[formName].validate((valid) => {
           if (valid) {
-						console.log(valid)
-						if(this.form1.sourceType == '2' && !this.form1.source){ // 选择转载时候,需要选择转载来源 (待)
+						console.log(valid);
+						/* if(this.form1.sourceType == '2' && !this.form1.source){ // 选择转载时候,需要选择转载来源 (待)
 							this.$message.error('请选择转载来源!');
 							return;
-						}
+						} */
 						if(this.form1.imgType == 2){	// 封面图的类型 
 							var reg = /src=/ig;
 							if(!this.form1.content.match(reg)){
 								 this.$message.error('内容里没有图片!');
                  return;
 							}
-						}
+            }
+            this.form1.content = this.$refs.ueditor.getUEContent();
+            if(!this.form1.content){
+              this.$message({
+                  message: '正文内容不可为空!',
+                  type: 'error'
+                });
+                return;
+            }
             this.formDatas = new FormData();
             this.formDatas.append('tokenId',this.$store.state.user.tokenId);
             this.formDatas.append('editStatus',this.editStatus);
@@ -483,8 +567,8 @@ import axios from 'axios'
             // param.append('keyWords',this.form1.keyWords.replace(/，/ig,','));
             this.formDatas.append('publishSource','1');
             this.formDatas.append('status',status);
-            if(this.editStatus == 1){
-              let imgIds = [];
+            let imgIds = [];
+            if(this.editStatus == 1){ // 修改了封面图
               console.log(this.fileList);
               this.fileList.map(item => {
                 if(item.coverImgId){imgIds.push(item.coverImgId);}
@@ -492,11 +576,14 @@ import axios from 'axios'
               if(this.form1.imgType == '1'&& this.hasChangeFile){
                 this.$refs.upload.submit();
               }
-              console.log(imgIds);
+              // console.log(imgIds);
               this.formDatas.append('imgIds',imgIds);
-
               // return;
-              
+            }else{  // 未修改
+              this.fileList.map(item => {
+                if(item.coverImgId){imgIds.push(item.coverImgId);}
+              });
+              this.formDatas.append('imgIds',imgIds);
             }
             if(this.videoId){
               this.formDatas.append('videoId',this.videoId);
@@ -508,6 +595,7 @@ import axios from 'axios'
             const loading = this.$loading({
               lock: true,
               text: '上传中...',
+              target: document.querySelector('.loadingArea'),
               spinner: 'el-icon-loading',
               background: 'rgba(0, 0, 0, 0.5)'
             });
@@ -518,7 +606,6 @@ import axios from 'axios'
                   message: res.msg,
                   type: 'success'
                 });
-              
                 setTimeout(() => {
                   this.$router.push({
                     name: 'news',
@@ -550,24 +637,30 @@ import axios from 'axios'
 					id:this.idDetail
 				}
 				this.$get('news/show',params).then(res => {
-          // console.log(res.data[0]);
-					this.form1 = res.data[0];
-          // console.log(this.form1);
-          
-          // this.showUrl = this.form1.videoUrl;
-          if(this.form1.videoId){
-            this.videoId=this.form1.videoId;
-            this.showUrl=this.form1.videoUrl;
-            this.fileListVideo.push({name:this.form1.videoName,url:this.form1.videoUrl});
+          if(res.code == 0){
+            // console.log(res.data[0]);
+            this.form1 = res.data[0];
+            // console.log(this.form1);
+            
+            // this.showUrl = this.form1.videoUrl;
+            if(this.form1.videoId){
+              this.videoId=this.form1.videoId;
+              this.showUrl=this.form1.videoUrl;
+              this.fileListVideo.push({name:this.form1.videoName,url:this.form1.videoUrl});
+            }
+            setTimeout(() => {
+              this.$refs.ueditor.setContent(this.form1.content,'isAppendTo');    
+            }, 1000);
+            
+            this.imgSrc = this.form1.coverImgId;
+            this.status = this.form1.status;
+            this.imgFullSrc = this.form1.coverImgUrl;
+            // console.log(this.imgFullSrc)
+            // this.fileList.push({url:this.imgFullSrc});
+            this.form1.newsImgList.map(item => {
+              this.fileList.push({url:item.coverImgUrl,coverImgId:item.coverImgId});
+            })
           }
-					this.imgSrc = this.form1.coverImgId;
-					this.status = this.form1.status;
-					this.imgFullSrc = this.form1.coverImgUrl;
-					// console.log(this.imgFullSrc)
-          // this.fileList.push({url:this.imgFullSrc});
-          this.form1.newsImgList.map(item => {
-            this.fileList.push({url:item.coverImgUrl,coverImgId:item.coverImgId});
-          })
 
 				});
 			},
@@ -710,4 +803,8 @@ import axios from 'axios'
 	.news_edit .el-dialog--center .el-dialog__body{
 		padding: 0;
 	}
+  /* .tableOverstyle .el-table td{
+    padding: 4px 0;
+  } */
+  
 </style>

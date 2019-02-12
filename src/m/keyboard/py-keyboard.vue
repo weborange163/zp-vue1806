@@ -211,10 +211,7 @@ export default {
 }
 </script>
 <style>
-  .m-py-keyboard{
-    /*width: inherit;
-    height: inherit;*/
-  }
+  
   .m-input-pinyin{
     padding: 1px 8px;
     font-size: 13px;
@@ -276,8 +273,4 @@ export default {
     opacity: 0.5;
   }
   
-  .m-candidate-word-page .up{
-
-  }
-  .m-candidate-word-page .down{}
 </style>

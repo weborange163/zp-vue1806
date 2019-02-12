@@ -3,8 +3,14 @@
   		<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
 				<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 					<el-table-column prop="title" label="标题"></el-table-column>
-					<el-table-column prop="name" label="操作" width="70" class="text-center">
+					<el-table-column prop="name" label="选择" width="140" class="text-center">
 						<template slot-scope="scope">
+              <el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'toTop')">
+								<i class="iconfont icon-Gototop"></i>
+							</el-button>
+              <el-button type="text" v-else disabled>
+								<i class="iconfont icon-Gototop unclick"></i>
+							</el-button>
 							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
 								<i class="iconfont icon-up"></i>
 							</el-button>
@@ -17,6 +23,12 @@
 							<el-button type="text" v-else disabled>
 								<i class="iconfont icon-down" style="cursor:not-allowed"></i>
 							</el-button>
+              <el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'toBottom')">
+								<i class="iconfont icon-Gotobottom"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-Gotobottom" style="cursor:not-allowed"></i>
+							</el-button>
 						</template>
 					</el-table-column>
 				</el-table>
@@ -25,12 +37,12 @@
           <el-button size="small" type="primary" @click="toPublish()">发 布</el-button>
         </span>
 			</el-dialog>
-			<el-dialog title="推荐到专题主页" :visible.sync="dialogVisible1" center width="30%" >
-				<el-radio v-model="recommendRadio" label="1" class="marBo4">置顶-专题推荐列表区</el-radio><br/>
-				<el-radio v-model="recommendRadio" label="2">推荐到banner</el-radio>
+			<el-dialog title="推荐到新闻主页" :visible.sync="dialogVisible1" center width="30%" >
+				<el-radio v-model="recommendRadio" label="1" class="marBo4">首页专题(最多可以推荐6条)</el-radio><br/>
+				<el-radio v-model="recommendRadio" label="2">banner</el-radio>
 				<span slot="footer" class="dialog-footer">
           <el-button @click="dialogVisible1 = false;recommendRadio=''" class="light_btn">取 消</el-button>
-          <el-button type="primary" @click="sureReco" class="light_btn">确 定</el-button>
+          <el-button type="primary" @click="sureReco" class="light_btn">推 荐</el-button>
         </span>
 			</el-dialog>
 			<el-dialog center
@@ -85,11 +97,13 @@
         </el-col>
        <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >上线时间</span></el-col>
         <el-col :span="9">
-          <!-- value-format="yyyy-MM-dd hh:mm:ss"  -->
-           <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" 
-           value-format="yyyy-MM-dd HH-mm-ss"
-           start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
-					</el-date-picker>
+           <el-date-picker size="mini" style="width:95%;"
+              v-model="value6"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
         </el-col>
         <el-col :span="6" :offset="4">
           <el-input v-model="inputs" style="width:70%" placeholder="标题、专题ID" size="mini"></el-input>
@@ -100,7 +114,7 @@
     <div class="box">
       <div class="text-right marBo4">
         <router-link :to="{name:'subject-add'}" ><el-button class="light_btn" size="mini">新建专题</el-button></router-link>
-        <el-button class="light_btn" @click="publishWaitTop()" size="mini">置顶排序</el-button>
+        <el-button class="light_btn" @click="publishWaitTop()" size="mini">首页排序</el-button>
         <el-button class="light_btn" @click.native.prevent="getSubjectList()" size="mini">刷新</el-button>
       </div>
       <el-table :data="subjectList" border stripe :row-class-name="btnTable()" :header-row-class-name="btnTable()" v-loading="loading2">
@@ -128,7 +142,12 @@
         </el-table-column>
         <el-table-column label="上线时间" prop="online_time" width="160"></el-table-column>
         <el-table-column label="创建时间" prop="create_time" width="180"></el-table-column>
-        <el-table-column label="专题ID" prop="article_id" width="100"></el-table-column>
+        <el-table-column label="专题ID" prop="article_id" width="180">
+          <template slot-scope="scope">
+            <span>{{scope.row.article_id}}</span>
+            <el-button class="light_btn f-right" @click="handleCopy(scope.row.article_id,$event)">复制</el-button>
+          </template>
+        </el-table-column>
         <el-table-column label="操作" width="220" fixed="right">
 					<template slot-scope="scope">
 						<el-button type="text" v-if="scope.row.top_flag=='1'" style="margin-right:8px;vertical-align:middle;" @click.native.prevent="cancelUp(scope.$index, scope.row)"> 取消置顶 </el-button>
@@ -156,7 +175,8 @@
 </template>
 <script>
 import {btnTable} from '@/utils/table-style.js'
-import { getBaceUrl } from '@/utils/auth'
+import { getBaceUrl } from '@/utils/auth';
+import clip from '@/utils/clipboard';
 export default {
   data(){
      var valiIcon = (rule, value, callback) => { // 图片验证
@@ -240,6 +260,10 @@ export default {
 		this.baceUrl = getBaceUrl();
   },
   methods:{
+    handleCopy(text, event) {
+        clip(text, event)
+        // console.log('clicp')
+      },
 		// 点击 推荐到banner 保存按钮
     toBanner(){
       this.$refs.bannerForm.validate((valid) => {
@@ -323,17 +347,26 @@ export default {
 			},
   			//实现置顶排序的方法
 			changeIndex(index, rows, dir) {
+        // console.log(index);
 				if(dir == 'isUp') {
 					var a = rows[index]
 					var b = rows[index - 1]
 					rows.splice(index - 1, 1, a)
 					rows.splice(index, 1, b)
-				} else {
+				} else if(dir == 'isDown') {
 					var a = rows[index]
 					var b = rows[index + 1]
 					rows.splice(index + 1, 1, a)
 					rows.splice(index, 1, b)
-				}
+				}else if(dir == 'toTop'){
+          var a = rows[index];
+          rows.splice(index,1);
+          rows.unshift(a);
+        }else{
+          var a=rows[index];
+          rows.splice(index,1);
+          rows.push(a);
+        }
 			},
 			handleClose(done) {
 				this.$confirm('确认关闭？')

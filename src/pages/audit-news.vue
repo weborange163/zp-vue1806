@@ -44,8 +44,13 @@
         </el-col>
        <el-col :span="2" class="text-right" style="padding-right:4px;"><span style="line-height:28px;" >创建时间:</span></el-col>
         <el-col :span="7">
-           <el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
-					</el-date-picker>
+           <el-date-picker size="mini" style="width:95%;"
+              v-model="value6"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
         </el-col>
         <el-col :span="6" :offset="5">
             <el-input v-model="search_pra" placeholder="请输入内容" style="width:70%" size="mini"></el-input>
@@ -122,6 +127,7 @@
                     <p v-if="scope.row.status=='3'" >审核不通过</p>
                 </template>
               </el-table-column>
+              <el-table-column label="审核人" prop="checkPerson" width="120"></el-table-column>
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                   <p v-if="scope.row.publish_source=='1'" >PC后台</p>
@@ -162,6 +168,7 @@
                     <p v-if="scope.row.status=='3'" >审核不通过</p>
                 </template>
               </el-table-column>
+              <el-table-column label="审核人" prop="checkPerson" width="120"></el-table-column>
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                   <p v-if="scope.row.publish_source=='1'" >PC后台</p>
@@ -202,6 +209,7 @@
                     <p v-if="scope.row.status=='3'" >审核不通过</p>
                 </template>
               </el-table-column>
+              <el-table-column label="审核人" prop="checkPerson" width="120"></el-table-column>
               <el-table-column label="发布来源" width="100">
                 <template slot-scope="scope">
                   <p v-if="scope.row.publish_source=='1'" >PC后台</p>

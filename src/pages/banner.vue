@@ -1,10 +1,16 @@
 <template>
 	<div class="page-body banner">
-		<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
+		<el-dialog center title="设置banner排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
 			<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 				<el-table-column prop="titleShort" label="标题"></el-table-column>
-				<el-table-column prop="name" label="操作" width="70" class="text-center">
+				<el-table-column prop="name" label="选择" width="140" class="text-center">
 					<template slot-scope="scope">
+            <el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'toTop')">
+								<i class="iconfont icon-Gototop"></i>
+							</el-button>
+              <el-button type="text" v-else disabled>
+								<i class="iconfont icon-Gototop unclick"></i>
+							</el-button>
 						<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
 							<i class="iconfont icon-up"></i>
 						</el-button>
@@ -17,6 +23,12 @@
 						<el-button type="text" v-else disabled>
 							<i class="iconfont icon-down" style="cursor:not-allowed"></i>
 						</el-button>
+            <el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'toBottom')">
+              <i class="iconfont icon-Gotobottom"></i>
+            </el-button>
+            <el-button type="text" v-else disabled>
+              <i class="iconfont icon-Gotobottom" style="cursor:not-allowed"></i>
+            </el-button>
 					</template>
 				</el-table-column>
 			</el-table>
@@ -31,7 +43,7 @@
 				<el-form-item label="原文标题">
 					<el-input size="mini" v-model="bannerForm.titleOriginal" :disabled="true"></el-input>
 				</el-form-item>
-				<el-form-item label="短标题" prop="titleShort">
+				<el-form-item label="推荐标题" prop="titleShort">
 					<el-input size="mini" v-model="bannerForm.titleShort"></el-input>
 				</el-form-item>
 				<el-form-item label="banner图片" label-width="110px" prop="icon" ref="icon">
@@ -41,6 +53,7 @@
           :on-change="fileChange" :on-exceed="handleExceed" 
           :on-preview="handlePictureCardPreview" :on-remove="handleRemove">
 						<i class="el-icon-plus"></i>
+            <div class="el-upload__tip" slot="tip">(规格：750x315)</div>
 					</el-upload>
 					<el-dialog :visible.sync="dialogVisible2" style="z-index:3000;" :modal-append-to-body="false">
 						<img width="100%" :src="dialogImageUrl" alt="" style="z-index:3000;">
@@ -69,11 +82,12 @@
 				<el-form-item label="原文标题">
 					<el-input size="mini" type="textarea" v-model="bannerForm1.titleOriginal" :disabled="true"></el-input>
 				</el-form-item>
-				<el-form-item label="短标题" prop="titleShort">
+				<el-form-item label="推荐标题" prop="titleShort">
 					<el-input size="mini" v-model="bannerForm1.titleShort" :disabled="true"></el-input>
 				</el-form-item>
 				<el-form-item label="banner图片">
 						<img class="imgs" :src="imgFullSrc" style="width:80px;max-height:80px" alt="封面图展示">
+            <div >(规格：750x315)</div>
 					</el-form-item>
 			
 				<el-form-item label="类型">
@@ -146,7 +160,7 @@
 							<p v-if="scope.row.banner_type=='2'" >{{scope.row.title_original1}}</p>
 						</template>
 					</el-table-column>
-					<el-table-column label="短标语" prop="title_short" width="150"></el-table-column>
+					<el-table-column label="推荐标题" prop="title_short" width="150"></el-table-column>
 					<el-table-column label="发布状态" prop="status" width="80">
 						<template slot-scope="scope">
 							<p v-if="scope.row.status=='1'" class="yshx">已上线</p>
@@ -232,7 +246,7 @@
         editStatus:'2',
 				bannerRules: {
 					titleShort: [
-            {required: true,message: '请输入短标题',trigger: 'blur'},
+            {required: true,message: '请输入推荐标题',trigger: 'blur'},
             { min: 1, max: 30, message: '长度在 1 到 30 个字', trigger: 'blur' }
           ],
           icon:[
@@ -241,7 +255,7 @@
         },
         bannerRules1: {
 					titleShort: [
-            {required: true,message: '请输入短标题',trigger: 'blur'}
+            {required: true,message: '请输入推荐标题',trigger: 'blur'}
           ],
           icon:[
             {required:true, validator: valiIcon, trigger: 'change' }  // 图片验证
@@ -602,17 +616,26 @@
 			},
 			//实现置顶排序的方法
 			changeIndex(index, rows, dir) {
+        // console.log(index);
 				if(dir == 'isUp') {
 					var a = rows[index]
 					var b = rows[index - 1]
 					rows.splice(index - 1, 1, a)
 					rows.splice(index, 1, b)
-				} else {
+				} else if(dir == 'isDown') {
 					var a = rows[index]
 					var b = rows[index + 1]
 					rows.splice(index + 1, 1, a)
 					rows.splice(index, 1, b)
-				}
+				}else if(dir == 'toTop'){
+          var a = rows[index];
+          rows.splice(index,1);
+          rows.unshift(a);
+        }else{
+          var a=rows[index];
+          rows.splice(index,1);
+          rows.push(a);
+        }
 			},
 			handleClose(done) {
 				this.$confirm('确认关闭？')

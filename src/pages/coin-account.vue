@@ -3,9 +3,12 @@
     <div class="page-header">
       <el-row>
         <el-col :span="9">
-          <el-date-picker style="width:90%;" size="mini" v-model="timeFilter" type="datetimerange" 
-          start-placeholder="开始时间" end-placeholder="结束时间" value-format="yyyy-MM-dd HH-mm-ss"
-          :default-time="['00:00:00', '00:00:00']">
+          <el-date-picker size="mini" style="width:95%;"
+            v-model="timeFilter"
+            type="datetimerange"
+            range-separator="至"
+            start-placeholder="开始日期"
+            end-placeholder="结束日期">
           </el-date-picker>
         </el-col>
         <el-col :span="8" :offset="7">

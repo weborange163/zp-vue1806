@@ -106,8 +106,9 @@ export default {
     close (index) {
       this.$emit('close', index)
     },
-    select (index) {
-      this.$emit('select', index)
+    select (key, keyPath) {
+      // this.$emit('select', index)
+      console.log(key, keyPath)
     }
   }
 }

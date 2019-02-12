@@ -2,7 +2,7 @@
   <div id="app">
       <div>
         <button size="primary" type="info" icon="plus" @click="getContent">获取内容</button>
-        <div style="width:400px;margin:50px auto;heigt:200px;">
+        <div style="width:800px;margin:50px auto;heigt:200px;">
           <UEditor :config=config ref="ueditor"></UEditor>
         </div>
         
@@ -11,20 +11,24 @@
 </template>
 
 <script>
-  // import UEditor from '@/utils/ueditor/ueditor.vue'
+  import UEditor from '@/utils/ueditor/ueditor.vue'
 
   export default{
-      /* name: 'hello',
+      name: 'hello',
       components: {UEditor},
       data(){
         return {
           config: {
             //可以在此处定义工具栏的内容
-            // toolbars: [
-            //  ['fullscreen', 'undo', 'redo','|','bold', 'italic', 'underline',
-            //  '|','superscript','subscript','|', 'insertorderedlist', 'insertunorderedlist',
-            //  '|','fontfamily','fontsize','justifyleft','justifyright','justifycenter','justifyjustify']
-            // ],
+            toolbars: [
+             ['fullscreen', 'undo', 'redo','|','bold', 'italic', 'underline','fontborder','strikethrough',
+             '|','superscript','subscript','|', 'insertorderedlist', 'insertunorderedlist','|','link','unlink',
+             '|','fontfamily','fontsize','justifyleft','justifyright','justifycenter','justifyjustify','indent',
+             '|','forecolor','backcolor','simpleupload',
+             '|','insertimage','insertvideo','emotion','|','lineheight','rowspacingtop','rowspacingbottom',
+             '|','insertorderedlist','insertunorderedlist','edittip ','map',
+             '|','inserttable','deletetable','insertrow','insertcol','mergeright','mergedown', 'deleterow','deletecol','splittorows','splittocols','splittocells','deletecaption','inserttitle','mergecells', ]
+            ],
             autoHeightEnabled: false,
             autoFloatEnabled: true,
             initialContent:'请输入内容',   //初始化编辑器的内容,也可以通过textarea/script给值，看官网例子
@@ -44,7 +48,7 @@
           console.log(content);
           alert(content);
         }
-      } */
+      }
   }
 
 </script>

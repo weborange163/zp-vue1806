@@ -1,9 +1,12 @@
 <template>
     <div class="page-body feedback">
       <div class="page-header">
-        <el-date-picker size="mini" style="width:400px;" v-model="timeRange" type="datetimerange" 
-          value-format="yyyy-MM-dd HH-mm-ss" 
-          start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
+        <el-date-picker size="mini" style="width:400px;"
+          v-model="timeRange"
+          type="datetimerange"
+          range-separator="至"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期">
         </el-date-picker>
         <el-button class="light_btn" size="mini" @click="getFeedList()">搜索</el-button>
         <el-button class="light_btn" size="mini" @click="getExcel()">导出</el-button>

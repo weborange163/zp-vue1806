@@ -2,25 +2,36 @@
 	<div class="page-body news">
 		<div class="page-header">
 			<el-row>
-				<el-col :span="4">
-					发布来源:
-					<el-select v-model="value1" placeholder="发布来源" style="width:60%" size="mini">
-						<el-option v-for="item in optionss" :key="item.value1" :label="item.label" :value="item.value1">
+        <el-col :span="3">
+          <el-select clearable style="width:80%" size="mini" v-model="columnid" placeholder="选择栏目">
+            <el-option v-for="item in columnIds" :key="item.id" :label="item.name" :value="item.id">
+            </el-option>
+          </el-select>
+        </el-col>
+				<el-col :span="3">
+					<el-select clearable v-model="value1" placeholder="发布来源" style="width:80%" size="mini">
+						<el-option v-for="item in optionss" :key="item.value" :label="item.label" :value="item.value">
 						</el-option>
 					</el-select>
 				</el-col>
 				<el-col :span="3">
-					<el-select v-model="value2" placeholder="时间类型" size="mini">
+					<el-select clearable v-model="value2" placeholder="时间类型" size="mini">
 						<el-option v-for="item in optionsss" :key="item.value2" :label="item.label" :value="item.value2">
 						</el-option>
 					</el-select>
 				</el-col>
 				<el-col :span="6" class="padLe4">
-					<el-date-picker size="mini" style="width:90%;" v-model="value6" type="datetimerange" value-format="yyyy-MM-dd hh:mm:ss" start-placeholder="开始日期" end-placeholder="结束日期" :default-time="['00:00:00', '00:00:00']">
-					</el-date-picker>
+					<el-date-picker size="mini" style="width:95%;"
+              v-model="value6"
+              type="datetimerange"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期">
+            </el-date-picker>
 				</el-col>
-				<el-col :span="6" :offset="4">
+				<el-col :span="6" :offset="2">
 					<el-input size="mini" v-model="inputs" placeholder="标题、创建人、文章ID" style="width:70%;margin-right:5%;"></el-input>
+					<!-- <el-button class="light_btn" style="width:20%;" size="mini" v-has='2' @click.native.prevent="newsList()">搜索</el-button> -->
 					<el-button class="light_btn" style="width:20%;" size="mini" @click.native.prevent="newsList()">搜索</el-button>
 				</el-col>
 			</el-row>
@@ -30,6 +41,22 @@
 				<el-tab-pane label="全部" name="first">
 					<div class="tab1">
 						<div class="text-right marBo4">
+              <el-upload style="display:inline-block;"
+                class="upload-demo" name="usersFile2"
+                action=""
+                :on-change="handleChange2"
+                :auto-upload="false"
+                :file-list="fileList2">
+                <el-button size="mini" type="primary">导入评论</el-button>
+              </el-upload>
+              <el-upload style="display:inline-block;"
+                class="upload-demo" name="usersFile1"
+                action=""
+                :on-change="handleChange1"
+                :auto-upload="false"
+                :file-list="fileList1">
+                <el-button size="mini" type="primary">导入活跃数据</el-button>
+              </el-upload>
 							<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
 								<el-button class="light_btn" size="mini">添加新闻</el-button>
 							</router-link>
@@ -57,7 +84,6 @@
 								</template>
 							</el-table-column>
 							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
-							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="发布状态" width="80">
 								<template slot-scope="scope">
 									<p v-if="scope.row.status=='0'" >新建</p>
@@ -74,9 +100,15 @@
 									<p v-if="scope.row.publish_source=='3'">APP端</p>
 								</template>
 							</el-table-column>
-              	<el-table-column label="创建时间" prop="create_time" width="140"></el-table-column>
+							<el-table-column label="文章ID" width="180">
+                <template slot-scope="scope">
+                  <span>{{scope.row.article_id}}</span>
+									<el-button class="light_btn f-right" @click="handleCopy(scope.row.article_id,$event)">复制</el-button>
+								</template>
+              </el-table-column>
+              <el-table-column label="创建时间" prop="create_time" width="140"></el-table-column>
 							<el-table-column label="上线时间" prop="online_time" width="140"></el-table-column>
-							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
+              <el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="操作" width="240" fixed="right">
 								<template slot-scope="scope">
 									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
@@ -100,7 +132,7 @@
 							</el-table-column>
 						</el-table>
 					</div>
-					<div style="margin-top:20px;">
+					<div class="marT20">
 						<el-pagination class="text-right" background @current-change="handleCurrentChange1" :current-page="this.currentPage1"
              :page-sizes="[10, 20, 30, 40]" :page-size="this.per_page1" layout="total, sizes, prev, pager, next, jumper"
               @size-change="handleSizeChange1" :total="this.total_pages1">
@@ -110,6 +142,22 @@
         <el-tab-pane label="已上线" name="second">
           <div class="tab2">
             <div class="text-right marBo4">
+              <el-upload style="display:inline-block;"
+                class="upload-demo" name="usersFile2"
+                action=""
+                :on-change="handleChange2"
+                :auto-upload="false"
+                :file-list="fileList2">
+                <el-button size="mini" type="primary">导入评论</el-button>
+              </el-upload>
+              <el-upload style="display:inline-block;"
+                class="upload-demo" name="usersFile1"
+                action=""
+                :on-change="handleChange1"
+                :auto-upload="false"
+                :file-list="fileList1">
+                <el-button size="mini" type="primary">导入活跃数据</el-button>
+              </el-upload>
 							<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
 								<el-button class="light_btn" size="mini">添加新闻</el-button>
 							</router-link>
@@ -130,7 +178,6 @@
                 </template>
 							</el-table-column>
 							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
-							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
 									<p class="yshx">已上线</p>
@@ -143,8 +190,14 @@
 									<p v-if="scope.row.publish_source=='3'">APP端</p>
 								</template>
 							</el-table-column>
+              <el-table-column label="文章ID" prop="article_id"  width="180">
+                <template slot-scope="scope">
+                  <span>{{scope.row.article_id}}</span>
+									<el-button class="light_btn f-right" @click="handleCopy(scope.row.article_id,$event)">复制</el-button>
+								</template>
+              </el-table-column>
 							<el-table-column label="上线时间" prop="online_time"  width="140"></el-table-column>
-              <el-table-column label="文章ID" prop="article_id"  width="80"></el-table-column>
+							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="操作" width="240" fixed="right">
 								<template slot-scope="scope">
 									<el-button class="marR10" type="text" style="margin-right:8px;vertical-align:middle;" v-if="scope.row.top_flag == '1'" @click.native.prevent="cancelUp(scope.row)">取消置顶</el-button>
@@ -172,6 +225,22 @@
         <el-tab-pane label="已下线" name="third">
           <div class="tab3">
             <div class="text-right marBo4">
+              <el-upload style="display:inline-block;"
+                class="upload-demo" name="usersFile2"
+                action=""
+                :on-change="handleChange2"
+                :auto-upload="false"
+                :file-list="fileList2">
+                <el-button size="mini" type="primary">导入评论</el-button>
+              </el-upload>
+              <el-upload style="display:inline-block;"
+                class="upload-demo" name="usersFile1"
+                action=""
+                :on-change="handleChange1"
+                :auto-upload="false"
+                :file-list="fileList1">
+                <el-button size="mini" type="primary">导入活跃数据</el-button>
+              </el-upload>
 							<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
 								<el-button class="light_btn" size="mini">添加新闻</el-button>
 							</router-link>
@@ -190,7 +259,6 @@
 								</template>
 							</el-table-column>
 							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
-							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="发布状态" width="80">
                 <template slot-scope="scope">
 									<p class="yxx">已下线</p>
@@ -203,8 +271,14 @@
 									<p v-if="scope.row.publish_source=='3'">APP端</p>
 								</template>
 							</el-table-column>
+							<el-table-column label="文章ID" prop="article_id" width="180">
+                <template slot-scope="scope">
+                  <span>{{scope.row.article_id}}</span>
+									<el-button class="light_btn f-right" @click="handleCopy(scope.row.article_id,$event)">复制</el-button>
+								</template>
+              </el-table-column>
 							<el-table-column label="下线时间" prop="offline_time" width="140"></el-table-column>
-							<el-table-column label="文章ID" prop="article_id" width="120"></el-table-column>
+							<el-table-column label="创建人" prop="createUser" width="100"></el-table-column>
 							<el-table-column label="操作" width="160" fixed="right">
 								<template slot-scope="scope">
 									<el-button type="text" class="marR10" style="margin-right:8px;vertical-align:middle;" @click="onOff(scope.row,'4','上线')">上线</el-button>
@@ -230,6 +304,22 @@
 				<el-tab-pane label="新建" name="fourth">
 					<div class="tab4">
 						<div class="text-right marBo4">
+              <el-upload style="display:inline-block;"
+                class="upload-demo" name="usersFile2"
+                action=""
+                :on-change="handleChange2"
+                :auto-upload="false"
+                :file-list="fileList2">
+                <el-button size="mini" type="primary">导入评论</el-button>
+              </el-upload>
+              <el-upload style="display:inline-block;"
+                class="upload-demo" name="usersFile1"
+                action=""
+                :on-change="handleChange1"
+                :auto-upload="false"
+                :file-list="fileList1">
+                <el-button size="mini" type="primary">导入活跃数据</el-button>
+              </el-upload>
 							<el-button class="light_btn" size="mini" @click="toAudits">批量提交审核</el-button>
               	<router-link :to="{name:'news-add',params:{argu:{a:value1,b:value2,c:value6,d:inputs,e:activeTab,f:per_page1,g:currentPage1}}}">
 								<el-button class="light_btn" size="mini">添加新闻</el-button>
@@ -245,8 +335,6 @@
 							<el-table-column prop="title" label="标题"  min-width='264'>
 							</el-table-column>
 							<el-table-column label="栏目" prop="column_name" width="100"></el-table-column>
-							<el-table-column prop="createUser" label="创建人" width="100">
-							</el-table-column>
 							<el-table-column label="状态" width="50">
 								<template slot-scope="scope">
 									<p v-if="scope.row.status=='0'">新建</p>
@@ -259,8 +347,14 @@
 									<p v-if="scope.row.publish_source=='3'">移动端</p>
 								</template>
 							</el-table-column>
+							<el-table-column label="文章ID" prop="article_id" width="180">
+                <template slot-scope="scope">
+                  <span>{{scope.row.article_id}}</span>
+									<el-button class="light_btn f-right" @click="handleCopy(scope.row.article_id,$event)">复制</el-button>
+								</template>
+              </el-table-column>
               <el-table-column label="创建时间" prop="create_time" width="140"></el-table-column>
-							<el-table-column label="文章ID" prop="article_id" width="80"></el-table-column>
+							<el-table-column prop="createUser" label="创建人" width="100"></el-table-column>
 							<el-table-column label="操作" width="200" fixed="right">
 								<template slot-scope="scope">
 									<!-- <el-button class="marR10" type="text" @click="newsShow(scope.row)"><i class="iconfont icon-see"></i></el-button> -->
@@ -289,8 +383,14 @@
 			<el-dialog center title="设置置顶内容排序" :visible.sync="dialogVisible" width="30%" :before-close="handleClose">
 				<el-table :data="upData" border style="width: 100%" :row-class-name="btnTable" :header-row-class-name="btnTable" v-loading="loading">
 					<el-table-column prop="title" label="标题"></el-table-column>
-					<el-table-column prop="name" label="操作" width="70" class="text-center">
+					<el-table-column prop="name" label="操作" width="140" class="text-center">
 						<template slot-scope="scope">
+              <el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'toTop')">
+								<i class="iconfont icon-Gototop"></i>
+							</el-button>
+              <el-button type="text" v-else disabled>
+								<i class="iconfont icon-Gototop unclick"></i>
+							</el-button>
 							<el-button type="text" v-if="scope.$index != 0" @click="changeIndex(scope.$index,upData,'isUp')">
 								<i class="iconfont icon-up"></i>
 							</el-button>
@@ -302,6 +402,12 @@
 							</el-button>
 							<el-button type="text" v-else disabled>
 								<i class="iconfont icon-down" style="cursor:not-allowed"></i>
+							</el-button>
+              <el-button type="text" v-if="scope.$index != upDataLength" @click="changeIndex(scope.$index,upData,'toBottom')">
+								<i class="iconfont icon-Gotobottom"></i>
+							</el-button>
+							<el-button type="text" v-else disabled>
+								<i class="iconfont icon-Gotobottom" style="cursor:not-allowed"></i>
 							</el-button>
 						</template>
 					</el-table-column>
@@ -341,6 +447,7 @@
 								:on-change="fileChange"
 								:on-remove="handleRemove">
 								<i class="el-icon-plus"></i>
+                <div class="el-upload__tip" slot="tip">(规格：750x315)</div>
 							</el-upload>
 							<el-dialog :visible.sync="dialogVisible2" :modal="false">
 								<img width="100%" :src="dialogImageUrl" alt="">
@@ -365,7 +472,7 @@
 </template>
 <script type="text/javascript">
 	import { HTMLDecode,getBaceUrl } from '@/utils/auth'
-
+  import clip from '@/utils/clipboard'
 	export default {
     name: 'home',
 		data() {
@@ -388,7 +495,12 @@
 					articleId:'',
 					type:'新闻',
 					link:''
-				},
+        },
+        columnid:'',
+        newsFile1:'',
+        newsFile2:'',
+        fileList1:[],
+        fileList2:[],
 				bannerRules: {
 					title_short: [
             { required: true, message: '请输入短标题', trigger: 'blur' },
@@ -416,16 +528,13 @@
         tableData: [],
 			optionss: [
         {
-					value1: '',
-					label: '全部'
-				},{
-					value1: '3',
+					value: '3',
 					label: 'APP'
 				}, {
-					value1: '1',
+					value: '1',
 					label: '后台发布'
 				}, {
-					value1: '2',
+					value: '2',
 					label: '数据爬取'
 				}],
 				optionsss: [{
@@ -453,11 +562,16 @@
         uploadData:{},
         hasFmt:false,
         fromparams:{},
-        argu:{}
+        argu:{},
+        columnIds:''
 			}
 		},
 		created(){
       this.baceUrl = getBaceUrl();
+      this.$get('/column/findColumnList',{tokenId:this.$store.state.user.tokenId,navigationBar:''}).then(res => {
+    		// console.log(res.data)
+    		this.columnIds = res.data
+    	});
       // console.log(this.$route.params);
       if(this.$route.params.argu){
         this.argu = this.$route.params.argu;
@@ -493,6 +607,128 @@
 			}
 		},
 		methods: {
+      handleChange1(file, fileList){
+        // console.log(file, fileList);
+        this.newsFile1 = file.raw;
+        this.fileList1 = fileList;
+        this.$confirm('确定要上传吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+          this.sureUpload();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });          
+        });
+      },
+      handleChange2(file, fileList){
+        // console.log(file, fileList);
+        this.newsFile2 = file.raw;
+        this.fileList2 = fileList;
+        this.$confirm('确定要上传吗?', '提示', {
+          confirmButtonText: '确定',
+          cancelButtonText: '取消',
+          type: 'info'
+        }).then(() => {
+          this.sureUpload2();
+        }).catch(() => {
+          this.$message({
+            type: 'info',
+            message: '操作已取消'
+          });          
+        });
+      },
+      sureUpload(){
+        const loading = this.$loading({
+              lock: true,
+              text: '上传中...',
+              target:document.querySelector('.app-container'),
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.5)'
+            });
+        let formDatas = new FormData();
+        formDatas.append('newsFile', this.newsFile1);
+        formDatas.append('tokenId',this.$store.state.user.tokenId);
+        this.$post('/newsCount/toNewsCountExceptInt',formDatas).then(res =>{
+          if(res.code == 0){
+            loading.close();
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+          }else if(res.code == 3){
+            loading.close();
+            let str = '';
+            res.data.map(item => {
+              str+='<p>'+item+'<p/>';
+            })
+            const h = this.$createElement;
+            this.$notify.error({
+              title: '错误',
+              dangerouslyUseHTMLString: true,
+              message: str,
+              duration: 0
+            });
+          }else{
+            loading.close();
+            this.$message({
+              message: res.msg?res.msg:'操作失败',
+              type: 'error'
+            });
+          }
+          this.newsFile1='';
+        })
+      },
+      sureUpload2(){
+        const loading = this.$loading({
+              lock: true,
+              text: '上传中...',
+              target:document.querySelector('.app-container'),
+              spinner: 'el-icon-loading',
+              background: 'rgba(0, 0, 0, 0.5)'
+            });
+        let formDatas = new FormData();
+        formDatas.append('commentFile', this.newsFile2);
+        formDatas.append('tokenId',this.$store.state.user.tokenId);
+        formDatas.append('articleType','1');
+        this.$post('/newsCount/toCommentExceptInt',formDatas).then(res =>{
+          if(res.code == 0){
+            loading.close();
+            this.$message({
+              message: res.msg,
+              type: 'success'
+            });
+          }else if(res.code == 3){
+            loading.close();
+            let str = '';
+            res.data.map(item => {
+              str+='<p>'+item+'<p/>';
+            })
+            const h = this.$createElement;
+            this.$notify.error({
+              title: '错误',
+              dangerouslyUseHTMLString: true,
+              message: str,
+              duration: 0
+            });
+          }else{
+            loading.close();
+            this.$message({
+              message: res.msg?res.msg:'操作失败',
+              type: 'error'
+            });
+          }
+          this.newsFile2='';
+        })
+      },
+      // copy 功能
+      handleCopy(text, event) {
+        clip(text, event)
+        // console.log('clicp')
+      },
 			//上下线操作
 			onOff(row,status,type){
 				this.$confirm(`确定要${type}该新闻吗?`, '提示', {
@@ -620,8 +856,9 @@
           publishSource:this.value1,
           timeType:this.value2,
           simpleParameter:this.inputs,
-          startTime:this.value6[0],
-          endTime:this.value6[1],
+          startTime:this.value6?this.value6[0]:'',
+          endTime:this.value6?this.value6[1]:'',
+          columnId:this.columnid
         }
         
       if(this.status==''){
@@ -934,17 +1171,26 @@
 			},
 			//实现置顶排序的方法
 			changeIndex(index, rows, dir) {
+        // console.log(index);
 				if(dir == 'isUp') {
 					var a = rows[index]
 					var b = rows[index - 1]
 					rows.splice(index - 1, 1, a)
 					rows.splice(index, 1, b)
-				} else {
+				} else if(dir == 'isDown') {
 					var a = rows[index]
 					var b = rows[index + 1]
 					rows.splice(index + 1, 1, a)
 					rows.splice(index, 1, b)
-				}
+				}else if(dir == 'toTop'){
+          var a = rows[index];
+          rows.splice(index,1);
+          rows.unshift(a);
+        }else{
+          var a=rows[index];
+          rows.splice(index,1);
+          rows.push(a);
+        }
 			},
 			handleClose(done) {
 				this.$confirm('确认关闭？')
@@ -1055,7 +1301,10 @@
 		font-size: 20px;
 		vertical-align: middle;
 		margin-right: 8px;
-	}
+  }
+  .news .el-table .cell{
+    line-height: 26px;
+  }
 	
 	.el-button.el-button--small {
 		line-height: 8px;
@@ -1064,5 +1313,8 @@
   }
   body .el-table th.gutter{
     display: table-cell !important;
+}
+.news .marBo4 .el-upload-list__item-name{
+   display: none;
 }
 </style>
